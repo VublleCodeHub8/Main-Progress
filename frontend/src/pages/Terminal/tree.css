@@ -1,0 +1,7 @@
+.filetree {
+    margin-left: 10px;
+    line-height: 24px;
+}
+.file-node {
+    cursor: pointer;
+}
