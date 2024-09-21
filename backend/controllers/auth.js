@@ -99,7 +99,10 @@ const logIn = async (req, res) => {
                 const result = await checkRecords(payload.email, token);
             }
             catch (err) {
+                // changed to get rid of the delete token from browser-error
                 console.log(err);
+                res.status(401);
+                return res.send();
             }
             res.status(200);
             res.send();

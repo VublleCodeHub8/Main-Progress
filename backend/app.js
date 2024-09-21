@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const { connectToDB } = require('./util/database');
 require('dotenv').config();
+const cors = require('cors')
 
 const { isAuth } = require('./middlewares/auth')
 
@@ -13,12 +14,7 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', '*');
-    res.setHeader('Access-Control-Allow-Methods', '*');
-    next();
-})
+app.use(cors());
 
 app.use('/auth', authRouter)
 

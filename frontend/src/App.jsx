@@ -40,7 +40,6 @@ function App() {
       if (userDetails && new Date(userDetails.expiry) > new Date()) {
         await logIn();
       } else if (userDetails && !(new Date(userDetails.expiry) > new Date())) {
-        console.log("wefwef");
         await logOut();
       }
       dispatch(miscActions.setFallback(false));

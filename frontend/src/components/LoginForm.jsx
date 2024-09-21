@@ -121,7 +121,12 @@ export function LoginForm() {
               <FormItem>
                 <FormLabel className="text-black">Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder={"Password"} {...field} />
+                  <Input
+                    type="password"
+                    autoComplete="current-password"
+                    placeholder={"Password"}
+                    {...field}
+                  />
                 </FormControl>
                 <FormDescription>Enter Password.</FormDescription>
                 <FormMessage />
