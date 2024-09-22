@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import { useDispatch, useSelector } from "react-redux";
 import { miscActions } from "./store/main";
+import Project from "./pages/Project";
 
 const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
       {
         path: "",
         element: <Home></Home>,
+      },
+      {
+        path: "project",
+        element: <Project />,
       },
     ],
   },

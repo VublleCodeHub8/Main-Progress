@@ -12,6 +12,15 @@
   backdrop-filter: blur(4px);
 }
 
+.fileBarScroll::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.fileBarScroll::-webkit-scrollbar-thumb {
+  background: #71717a;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
