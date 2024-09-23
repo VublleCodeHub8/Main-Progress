@@ -11,7 +11,7 @@ export default function Terminal() {
       convertEol: true, // Converts end-of-line characters
       cursorBlink: true, // Enables blinking cursor
       scrollback: 1000, // Sets scrollback buffer size
-      rows: 15,
+      rows: 10,
     });
     newTerminal.open(terminalRef.current);
 
@@ -31,5 +31,10 @@ export default function Terminal() {
     };
   }, []);
 
-  return <div className="w-full h-full" ref={terminalRef}></div>;
+  return (
+    <div
+      className="w-full h-full border-t border-zinc-600"
+      ref={terminalRef}
+    ></div>
+  );
 }

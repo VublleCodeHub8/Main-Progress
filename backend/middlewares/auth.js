@@ -6,6 +6,7 @@ const isAuthenticated = async (req, res, next) => {
         res.status(200);
         return res.send();
     }
+    return next();    // Bypass the Authentication step
     try {
         let token;
         token = req.headers.authorization?.split(' ')[1];

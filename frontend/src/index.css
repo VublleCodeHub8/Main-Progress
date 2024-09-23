@@ -21,6 +21,15 @@
   background: #71717a;
 }
 
+.ace_scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.ace_scrollbar::-webkit-scrollbar-thumb {
+  background: #71717a;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

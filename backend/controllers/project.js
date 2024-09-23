@@ -3,9 +3,23 @@ const path = require('path');
 
 
 const getFileStruct = async (req, res) => {
-    const fileTree = await getFileStructure('./');
+    const fileTree = await getFileStructure(process.env.FILE_ROOT);
     console.log("final")
     res.json(fileTree);
+}
+
+const getFile = (req, res) => {
+    const data = req.body;
+    console.log(data);
+    fs.readFile(data.fullPath).then((code) => {
+        const result = code.toString("utf8");
+        console.log(code, result);
+        res.json(result);
+    }).catch((err) => {
+        console.log(err);
+        res.status(501).send();
+    })
+
 }
 
 async function getFileStructure(dir) {
@@ -16,11 +30,12 @@ async function getFileStructure(dir) {
             const newPathname = path.join(curPathname, i);
             const stats = await fs.stat(newPathname);
             const fullPath = path.resolve(newPathname);
+            const extension = path.extname(newPathname);
             if (stats.isDirectory()) {
-                currArr.push({ name: i, fullPath: fullPath, sortName: 'a' + i, path: newPathname, children: [], level: level });
+                currArr.push({ name: i, extension: null, fullPath: fullPath, sortName: 'a' + i, path: newPathname, children: [], level: level });
                 await solver(newPathname, currArr[currArr.length - 1].children, level + 1);
             } else {
-                currArr.push({ name: i, fullPath: fullPath, sortName: 'z' + i, path: newPathname, children: null, level: level });
+                currArr.push({ name: i, extension: extension, fullPath: fullPath, sortName: 'z' + i, path: newPathname, children: null, level: level });
             }
         }
         const stats = await fs.stat(curPathname);
@@ -37,3 +52,4 @@ async function getFileStructure(dir) {
 }
 
 exports.getFileStruct = getFileStruct;
+exports.getFile = getFile;

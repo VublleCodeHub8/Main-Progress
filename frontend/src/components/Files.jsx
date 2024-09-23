@@ -14,6 +14,11 @@ export default function Files({ tree }) {
     }
   }
 
+  function fileClick(file) {
+    dispatch(filesAction.setSelected(file));
+    console.log(file);
+  }
+
   console.log(openedFiles);
 
   return (
@@ -28,6 +33,7 @@ export default function Files({ tree }) {
             {i.children === null ? (
               <div
                 style={{ paddingLeft: `${(i.level + 1) * 15 + 4}px` }}
+                onClick={(event) => fileClick(i)}
                 className="flex cursor-pointer hover:bg-zinc-700 text-nowrap flex-grow"
               >
                 {i.name.length > 20 - i.level * 2

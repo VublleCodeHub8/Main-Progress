@@ -1,5 +1,6 @@
 import Terminal from "@/components/Terminal";
 import FileSystem from "@/components/FileSystem";
+import CodeEditor from "@/components/CodeEditor";
 
 export default function Project() {
   return (
@@ -11,8 +12,10 @@ export default function Project() {
         <div className="flex flex-col flex-grow h-full">
           <div
             id="our-codeEditor"
-            className="w-full flex-grow bg-green-200"
-          ></div>
+            className="w-full flex-grow overflow-auto bg-green-200"
+          >
+            <CodeEditor></CodeEditor>
+          </div>
           <div id="our-terminal" className="w-full h-fit bg-blue-200">
             <Terminal></Terminal>
           </div>

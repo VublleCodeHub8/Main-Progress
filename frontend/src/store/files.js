@@ -1,7 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialFilesState = {
-    opened: []
+    opened: [],
+    selected: null,
 
 };
 
@@ -19,6 +20,11 @@ const filesSlice = createSlice({
             const ind = state.opened.findIndex((i) => i === action.payload);
             state.opened.splice(ind, 1);
 
+        },
+        setSelected(state, action) {
+            if (state.selected === null || state.selected.path != action.payload.path) {
+                state.selected = JSON.parse(JSON.stringify(action.payload));
+            }
         }
     },
 });

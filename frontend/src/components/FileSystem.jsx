@@ -29,12 +29,12 @@ export default function FileSystem() {
   }
 
   return (
-    <div className="flex h-full w-full font-mono text-white">
+    <div className="flex h-full w-full font-mono border-r border-zinc-600 text-white">
       {fileTree === null ? (
         <p className="flex-grow text-center mt-8">Loading...</p>
       ) : (
         <div className="w-full h-full flex flex-col  ">
-          <div className="flex font-semibold  border-b border-white justify-between">
+          <div className="flex font-semibold  border-b border-zinc-600 justify-between">
             <span className="pl-2 text-lg">FILES</span>
             <div className="flex ">
               <button
@@ -48,7 +48,7 @@ export default function FileSystem() {
           <div className=" pt-2 flex-grow overflow-y-auto fileBarScroll overflow-x-hidden">
             <Files tree={fileTree}></Files>
           </div>
-          <div className="w-full min-h-[30px] border-t border-white"></div>
+          <div className="w-full min-h-[30px] border-t border-zinc-600"></div>
         </div>
       )}
     </div>

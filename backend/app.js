@@ -27,7 +27,7 @@ app.use(cors());
 
 app.use('/auth', authRouter)
 
-// app.use(isAuth);
+app.use(isAuth);
 
 app.use('/project', projectRouter)
 
@@ -87,13 +87,28 @@ io.on('connection', (socket) => {
     //     console.log(`Disconnected: ${socket.id}`);
     //     console.log(`Total connections: ${io.sockets.sockets.size}`);
     // });
+
+    // File Save
+    socket.on('file:save', (data, filePath) => {
+        console.log(data, filePath);
+        const realPath = path.resolve(filePath);
+        fs.writeFile(realPath, data).then((res) => {
+            console.log(res);
+            socket.emit('file:saveStatus', "success");
+        }).catch((err) => {
+            console.log(err);
+            socket.emit('file:saveStatus', 'fail');
+        })
+    })
 })
 
 
 // File System Update
-chokidar.watch('./').on('all', (event, path) => {
+chokidar.watch(process.env.FILE_ROOT).on('all', (event, path) => {
     io.emit('file:refresh', path);
 })
+
+
 
 
 
