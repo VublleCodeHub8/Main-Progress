@@ -35,40 +35,8 @@ app.use('/project', projectRouter)
 // DOCKER SERVER LOGIC
 
 const shell = os.platform() === 'win32' ? 'powershell.exe' : 'bash';
-// console.log(shell, process.env.INIT_CWD + '\\servers');
 
-const ptyProcess = pty.spawn(shell, [], {
-    name: 'xterm-256color',
-    cols: 80,
-    rows: 30,
-    cwd: process.env.INIT_CWD,
-    env: process.env
-});
-
-ptyProcess.onData((data) => {
-    let newData = data;
-    // newData.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '')
-    //     .replace(/\x1b\[\?25[hl]/g, '') // Matches cursor visibility control
-    //     .replace(/\x1b=\x1b>/g, '');
-    // async function stripAnsi() {
-    //     try {
-    //         const module = (await import('strip-ansi')).default;
-    //         newData = module(data);
-    //     } catch (error) {
-    //         console.error("Error loading module:", error);
-    //     }
-    // }
-
-    // stripAnsi();
-    // if (newData === data) {
-    //     console.log("loda");
-    // } else {
-    //     console.log("chut");
-    // }
-    console.log(newData);
-
-    io.emit('terminal:data', newData);
-});
+const spawnPath=path.join(process.env.INIT_CWD,"servers");
 
 const io = new socketServer({
     cors: '*'
@@ -76,17 +44,22 @@ const io = new socketServer({
 
 io.attach(server);
 io.on('connection', (socket) => {
-    // console.log(socket);
     console.log('Socket Connected', socket.id, io.sockets.sockets.size);
-
+    const ptyProcess = pty.spawn(shell, [], {
+        name: 'xterm-256color',
+        cols: 80,
+        rows: 30,
+        cwd: spawnPath,
+        env: process.env
+    });
+    
+    ptyProcess.onData((data) => {
+        io.emit('terminal:data', data);
+    });
     socket.on('terminal:write', (data) => {
         console.log(data);
         ptyProcess.write(data);
     })
-    // socket.on('disconnect', () => {
-    //     console.log(`Disconnected: ${socket.id}`);
-    //     console.log(`Total connections: ${io.sockets.sockets.size}`);
-    // });
 
     // File Save
     socket.on('file:save', (data, filePath) => {
