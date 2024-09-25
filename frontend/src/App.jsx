@@ -23,7 +23,7 @@ const router = createBrowserRouter([
         element: <Home></Home>,
       },
       {
-        path: "project",
+        path: "project/:projectId",
         element: <Project />,
       },
     ],
@@ -34,6 +34,7 @@ let timer;
 
 function App() {
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(true);
   const token = useSelector((state) => state.misc.token);
 
   console.log(token);
@@ -48,6 +49,7 @@ function App() {
         await logOut();
       }
       dispatch(miscActions.setFallback(false));
+      setLoading(false);
     }
     checkForLogin();
   }, [token]);
@@ -102,8 +104,15 @@ function App() {
       logOut();
     }
   }
-
-  return <RouterProvider router={router} />;
+  if (loading === true) {
+    return (
+      <div className="flex h-screen w-screen  justify-center items-center">
+        Checking Authentication....
+      </div>
+    );
+  } else {
+    return <RouterProvider router={router} />;
+  }
 }
 
 export default App;

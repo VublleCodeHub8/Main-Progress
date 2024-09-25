@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import Files from "./Files";
 import closeAllImg from "../assets/close-all.png";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { filesAction } from "@/store/main";
-import socket from "../../socket";
 
-export default function FileSystem() {
+export default function FileSystem({ socket }) {
   const [fileTree, setFileTree] = useState(null);
   const dispatch = useDispatch();
+  const port = useSelector((state) => state.project.port);
 
   async function getFileTree() {
-    const res = await fetch("http://localhost:3000/project/files");
+    const res = await fetch(`http://localhost:${port}/project/files`);
     const data = await res.json();
     console.log(data);
     setFileTree(data);

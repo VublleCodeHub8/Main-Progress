@@ -1,10 +1,8 @@
 import { Terminal as Xterminal } from "@xterm/xterm";
 import { useEffect, useRef } from "react";
 import "@xterm/xterm/css/xterm.css";
-import socket from "../../socket";
 
-
-export default function Terminal() {
+export default function Terminal({ socket }) {
   const terminalRef = useRef();
 
   useEffect(() => {

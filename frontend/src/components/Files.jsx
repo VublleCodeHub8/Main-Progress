@@ -54,7 +54,7 @@ export default function Files({ tree }) {
                     <img
                       src={down}
                       style={{
-                        transform: `rotate(${opened ? "180" : "0"}deg)`,
+                        transform: `rotate(${opened ? "0" : "-90"}deg)`,
                       }}
                       className="w-[10px] h-[10px]"
                       alt=""
