@@ -1,18 +1,24 @@
 import { useState, useEffect } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import Wrapper from "./pages/Wrapper";
-import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import { useDispatch, useSelector } from "react-redux";
 import { miscActions } from "./store/main";
 import Project from "./pages/Project";
+import About from "./pages/dashboard/About";
+import Containers from "./pages/dashboard/Containers";
+import Templates from "./pages/dashboard/Templates";
+import Documentation from "./pages/dashboard/Documentation";
+import Sidebar from './components/dashboard/Sidnav';
+import Home from './pages/dashboard/Home';
+import Analytics from './pages/dashboard/Analytics';
+import DashboardLayout from "./pages/Dashboard";
+import { Avatar } from '@chakra-ui/react';
 
 const router = createBrowserRouter([
   {
     path: "auth",
-    element: <Auth></Auth>,
+    element: <Auth />,
   },
   {
     path: "",
@@ -20,7 +26,35 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <Home></Home>,
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <Home />,
+          },
+          {
+            path: "analytics",
+            element: <Analytics />,
+          },
+        
+          {
+            path: "about",
+            element: <About />,
+
+          },
+          {
+            path: "containers",
+            element: <Containers />,
+          },
+          {
+            path: "templates",
+            element: <Templates />,
+          },
+          {
+            path: "documentation",
+            element: <Documentation />, 
+          }
+        ],
       },
       {
         path: "project",
@@ -29,6 +63,7 @@ const router = createBrowserRouter([
     ],
   },
 ]);
+
 
 let timer;
 
