@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import AceEditor from "react-ace";
 import { useDispatch, useSelector } from "react-redux";
 import { filesAction } from "@/store/main";
-import socket from "../../socket";
 import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/mode-c_cpp";
 import "ace-builds/src-noconflict/mode-java";
@@ -34,14 +33,15 @@ const extentionMapping = {
   ".css": "css",
 };
 
-export default function CodeEditor() {
+export default function CodeEditor({ socket }) {
   const [val, setVal] = useState(null);
   const dispatch = useDispatch();
   const currFile = useSelector((state) => state.files.selected);
+  const port = useSelector((state) => state.project.port);
   const [save, setSave] = useState("saved");
 
   async function getFile() {
-    const res = await fetch("http://localhost:3000/project/file", {
+    const res = await fetch(`http://localhost:${port}/project/file`, {
       method: "POST",
       body: JSON.stringify(currFile),
       headers: {

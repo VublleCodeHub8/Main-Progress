@@ -1,28 +1,7 @@
 const fs = require('fs/promises');
-const path = require('path');
+const path = require('path')
 
-
-const getFileStruct = async (req, res) => {
-    const fileTree = await getFileStructure(process.env.FILE_ROOT);
-    console.log("final")
-    res.json(fileTree);
-}
-
-const getFile = (req, res) => {
-    const data = req.body;
-    console.log(data);
-    fs.readFile(data.fullPath).then((code) => {
-        const result = code.toString("utf8");
-        console.log(code, result);
-        res.json(result);
-    }).catch((err) => {
-        console.log(err);
-        res.status(501).send();
-    })
-
-}
-
-async function getFileStructure(dir) {
+const getFileStruct = async function getFileStructure(dir) {
     const ans = [];
     async function solver(curPathname, currArr, level) {
         const files = await fs.readdir(curPathname);
@@ -52,4 +31,3 @@ async function getFileStructure(dir) {
 }
 
 exports.getFileStruct = getFileStruct;
-exports.getFile = getFile;

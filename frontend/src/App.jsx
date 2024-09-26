@@ -2,18 +2,19 @@ import { useState, useEffect } from "react";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import Wrapper from "./pages/Wrapper";
 import Auth from "./pages/Auth";
-import { useDispatch, useSelector } from "react-redux";
-import { miscActions } from "./store/main";
-import Project from "./pages/Project";
 import About from "./pages/dashboard/About";
 import Containers from "./pages/dashboard/Containers";
 import Templates from "./pages/dashboard/Templates";
-import Documentation from "./pages/dashboard/Documentation";
-import Sidebar from './components/dashboard/Sidnav';
+import { useDispatch, useSelector } from "react-redux";
+import { miscActions } from "./store/main";
+import Project from "./pages/Project";
 import Home from './pages/dashboard/Home';
-import Analytics from './pages/dashboard/Analytics';
 import DashboardLayout from "./pages/Dashboard";
-import { Avatar } from '@chakra-ui/react';
+import Profile from "./pages/dashboard/Profile";
+
+
+
+
 
 const router = createBrowserRouter([
   {
@@ -32,10 +33,6 @@ const router = createBrowserRouter([
             index: true,
             element: <Home />,
           },
-          {
-            path: "analytics",
-            element: <Analytics />,
-          },
         
           {
             path: "about",
@@ -51,24 +48,25 @@ const router = createBrowserRouter([
             element: <Templates />,
           },
           {
-            path: "documentation",
-            element: <Documentation />, 
+            path: "profile",
+            element: <Profile />, 
           }
         ],
       },
       {
-        path: "project",
+        path: "project/projectId",
         element: <Project />,
       },
     ],
   },
 ]);
 
-
 let timer;
+
 
 function App() {
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(true);
   const token = useSelector((state) => state.misc.token);
 
   console.log(token);
@@ -83,6 +81,7 @@ function App() {
         await logOut();
       }
       dispatch(miscActions.setFallback(false));
+      setLoading(false);
     }
     checkForLogin();
   }, [token]);
@@ -137,8 +136,15 @@ function App() {
       logOut();
     }
   }
-
-  return <RouterProvider router={router} />;
+  if (loading === true) {
+    return (
+      <div className="flex h-screen w-screen  justify-center items-center">
+        Checking Authentication....
+      </div>
+    );
+  } else {
+    return <RouterProvider router={router} />;
+  }
 }
 
 export default App;
