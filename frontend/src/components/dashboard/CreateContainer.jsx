@@ -22,29 +22,106 @@ import { Label } from "@/components/ui/label"
 import { TailwindcssButtons } from "@/components/ui/tailwindcss-buttons";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { z } from "zod";
 
-
-function CreateContButton(){
+function CreateContButton(templateDefault = 1) {
     const token = useSelector((state) => state.misc.token);
     const navigate = useNavigate();
+    const [title, setTitle] = useState("");
+    const [template, setTemplate] = useState("");
+
+    // async function newProject() {
+    //     const res = await fetch("http://localhost:3000/container/createcontainer", {
+    //     method: "GET",
+    //     headers: {
+    //         "Content-Type": "application/json",
+    //         Authorization: "Bearer " + token?.token,
+    //     },
+    //     });
+    //     if (res.ok) {
+    //     const data = await res.json();
+    //     console.log(data);
+    //     navigate(`/project/${data.containerId}`);
+    //     } else if (res.status === 401) {
+    //     alert("Not Authenticated!!");
+    //     navigate("/login");
+    //     }
+    // }
+    const handleTemplateChange = (value) => {
+        setTemplate(value);
+    };
+
+    const handleTitleChange = (event) => {
+        setTitle(event.target.value);
+    };
+
+
+    const [templates, setTemplates] = useState([]);
+
+    useEffect(() => {
+        async function fetchTemplates() {
+            const res = await fetch("http://localhost:3000/dev/getAllTemplates", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + token?.token,
+                },
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const templates = data.map((template, index) => ({
+                    name: template.name,
+                    id: (template?.id === null) ? index : template.id,
+                    image: template.image
+                }));
+                console.log(" teok ", templates);
+                setTemplates(templates);
+            } else if (res.status === 401) {
+                alert("Not Authenticated!!");
+                navigate("/login");
+            }
+        }
+        fetchTemplates();
+    }, [token, navigate]);
 
     async function newProject() {
+     
+
+        const titleSchema = z.string().min(3).regex(/^[^\d]/, "Title should not start with a number");
+        const templateSchema = z.string().min(1, "Template should not be null");
+
+        
+        console.log(title, template);
+        try {
+            titleSchema.parse(title);
+            templateSchema.parse(template);
+        } catch (e) {
+            alert(e.errors[0].message);
+            return;
+        }
+
         const res = await fetch("http://localhost:3000/container/createcontainer", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token?.token,
-        },
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token?.token,
+                "title" : title,
+                "template" : template
+            },
         });
+
         if (res.ok) {
-        const data = await res.json();
-        console.log(data);
-        navigate(`/project/${data.containerId}`);
+            const data = await res.json();
+            console.log(data);
+            navigate(`/project/${data.containerId}`);
         } else if (res.status === 401) {
-        alert("Not Authenticated!!");
-        navigate("/login");
+            alert("Not Authenticated!!");
+            navigate("/login");
         }
     }
+
+    
+
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -62,27 +139,27 @@ function CreateContButton(){
                         <Label htmlFor="name" className="text-right">
                             Template
                         </Label>
-                        <Select>
+                        <Select onValueChange={handleTemplateChange} value={template.name}>
                             <SelectTrigger className="w-64">
                                 <SelectValue placeholder="Select Template" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
-                                    <SelectLabel>Fruits</SelectLabel>
-                                    <SelectItem value="apple">Apple</SelectItem>
-                                    <SelectItem value="banana">Banana</SelectItem>
-                                    <SelectItem value="blueberry">Blueberry</SelectItem>
-                                    <SelectItem value="grapes">Grapes</SelectItem>
-                                    <SelectItem value="pineapple">Pineapple</SelectItem>
+                                    <SelectLabel>Templates</SelectLabel>
+                                    {templates.map((template) => (
+                                        <SelectItem key={template.name} value={template.image}>
+                                            {template.name}
+                                        </SelectItem>
+                                    ))}
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="username" className="text-right">
+                        <Label htmlFor="title" className="text-right">
                             Title
                         </Label>
-                        <Input id="title" className="col-span-3" />
+                        <Input id="title" className="col-span-3" onChange={handleTitleChange} />
                     </div>
                 </div>
                 <DialogFooter>

@@ -6,7 +6,9 @@ const docker = new Docker();
 
 
 const createContainer = async (req, res) => {
-
+    const cont_Name = req.headers['title'];
+    const cont_Image = req.headers['template'];
+    console.log("my tera " ,req.headers['template']);
     let thePort;
     for (let i = 5000; i <= 8000; ++i) {
         const doc = await getContainerByPort(i);
@@ -18,9 +20,9 @@ const createContainer = async (req, res) => {
             }
         }
     }
-
     const container = await docker.createContainer({
-        Image: 'project-server',
+        Image: cont_Image,
+        name: `${cont_Name}_${thePort}`,
         ExposedPorts: {
             '4000/tcp': {}
         },
@@ -81,6 +83,36 @@ const runContainer = async (req, res) => {
 
 }
 
+const listAllContainers= async (req,res) => {
+    try{
+    const userId=req.userData.userId;
+    console.log(req.userData.userID);
+    const containers = await getContainersByEmail(userId);
+    console.log(containers);
+    res.json(containers);
+    }catch(err){
+        console.log(err);
+        res.status(500);
+        res.send();
+    }
+
+}
+
+// const listAllTemplates=async (req,res) => {
+//     try{
+//         const userEmail=req.userData.email;
+//         const containers = await getContainersByEmail(userEmail);
+//         console.log(containers);
+//         res.json(containers);
+//         }catch(err){
+//             console.log(err);
+//             res.status(500);
+//             res.send();
+//         }
+// }
+
+
+
 async function isPortAvailable(port) {
     return new Promise((resolve) => {
         const server = net.createServer();
@@ -99,3 +131,4 @@ async function isPortAvailable(port) {
 
 exports.createContainer = createContainer;
 exports.runContainer = runContainer;
+exports.listAllContainers = listAllContainers;  

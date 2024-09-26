@@ -48,7 +48,9 @@
     "zod": "^3.23.8",
     "ace-builds": "^1.36.2",
     "react-ace": "^12.0.0",
-    "react-xtermjs": "^1.0.9"
+    "react-xtermjs": "^1.0.9",
+    "@mui/icons-material": "^6.1.1",
+    "@mui/material": "^6.1.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

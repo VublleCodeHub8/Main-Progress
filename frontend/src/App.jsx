@@ -30,7 +30,7 @@ const router = createBrowserRouter([
         element: <DashboardLayout />,
         children: [
           {
-            index: true,
+            path: "",
             element: <Home />,
           },
         
@@ -54,7 +54,7 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: "project/projectId",
+        path: "project/:projectId",
         element: <Project />,
       },
     ],
@@ -74,7 +74,8 @@ function App() {
   useEffect(() => {
     async function checkForLogin() {
       dispatch(miscActions.setFallback(true));
-      const userDetails = JSON.parse(localStorage.getItem("token"));
+      console.log(localStorage.getItem("token"))
+      const userDetails = localStorage.getItem("token")!=""?JSON.parse(localStorage.getItem("token")):null;
       if (userDetails && new Date(userDetails.expiry) > new Date()) {
         await logIn();
       } else if (userDetails && !(new Date(userDetails.expiry) > new Date())) {
