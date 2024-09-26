@@ -30,9 +30,21 @@ async function addUser(email, password, username) {
     }
 }
 
+async function allUsers(){
+    try {
+        const res=await User.find();
+        console.log(res);
+        return res;
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
+}
+
 const User = mongoose.model('User', userSchema);
 
 
 exports.userModel = User;
 exports.findUserByEmail = findUserByEmail;
 exports.addUser = addUser;
+exports.allUsers=allUsers;

@@ -1,18 +1,27 @@
 import { useState, useEffect } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import Wrapper from "./pages/Wrapper";
-import Home from "./pages/Home";
 import Auth from "./pages/Auth";
+import About from "./pages/dashboard/About";
+import Containers from "./pages/dashboard/Containers";
+import Templates from "./pages/dashboard/Templates";
 import { useDispatch, useSelector } from "react-redux";
 import { miscActions } from "./store/main";
 import Project from "./pages/Project";
+import Home from './pages/dashboard/Home';
+import DashboardLayout from "./pages/Dashboard";
+import Profile from "./pages/dashboard/Profile";
+import AdminWrapper from "./pages/AdminWrapper";
+import AdminPage from "./pages/admin/page"
+import DevWrapper from "./pages/DevWrapper";
+import DevPage from "./pages/dev/devpage";
+
+
 
 const router = createBrowserRouter([
   {
     path: "auth",
-    element: <Auth></Auth>,
+    element: <Auth />,
   },
   {
     path: "",
@@ -20,17 +29,64 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <Home></Home>,
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <Home />,
+          },
+        
+          {
+            path: "about",
+            element: <About />,
+
+          },
+          {
+            path: "containers",
+            element: <Containers />,
+          },
+          {
+            path: "templates",
+            element: <Templates />,
+          },
+          {
+            path: "profile",
+            element: <Profile />, 
+          }
+        ],
       },
       {
-        path: "project/:projectId",
+        path: "project/projectId",
         element: <Project />,
       },
     ],
   },
+  {
+    // admin wrapper
+    path: "/admin",
+    element: <AdminWrapper />,
+    children: [
+      {
+        path: "",
+        element: <AdminPage />,
+      }
+    ]
+  },
+  {
+    // admin wrapper
+    path: "/dev",
+    element: <DevWrapper />,
+    children: [
+      {
+        path: "",
+        element: <DevPage />,
+      }
+    ]
+  }
 ]);
 
 let timer;
+
 
 function App() {
   const dispatch = useDispatch();

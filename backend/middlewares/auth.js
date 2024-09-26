@@ -10,7 +10,7 @@ const isAuthenticated = async (req, res, next) => {
     try {
         let token;
         token = req.headers.authorization?.split(' ')[1];
-        console.log(token)
+        console.log("hii",token)
         if (token) {
             const payload = jwt.verify(token, process.env.JWT_SECRET);
             const result = await checkRecords(payload.email, token);

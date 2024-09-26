@@ -64,6 +64,16 @@ const createNewContainer = async (email, userId, id, name, port) => {
     }
 }
 
+const allContainers = async () => {
+    try{
+    const containers = await Container.find();
+    return containers;
+    }catch(err){
+        console.log(err);
+        return null;
+    }
+}
+
 
 
 const Container = mongoose.model('Container', containerSchema);
@@ -74,4 +84,5 @@ exports.getContainerById = getContainerById;
 exports.getContainerByPort = getContainerByPort;
 exports.getContainersByEmail = getContainersByEmail;
 exports.createNewContainer = createNewContainer;
+exports.allContainers=allContainers;
 

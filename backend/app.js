@@ -10,6 +10,10 @@ const { isAuth } = require('./middlewares/auth')
 
 const { authRouter } = require("./routes/auth");
 const { containerRouter } = require('./routes/container');
+const {adminRouter} = require('./routes/admin')
+const {devRouter} = require('./routes/dev')
+
+
 const app = express();
 const bodyParser = require('body-parser');
 const server = http.createServer(app)
@@ -24,6 +28,12 @@ app.use('/auth', authRouter)
 app.use(isAuth);
 
 app.use('/container', containerRouter)
+
+app.use('/admin', adminRouter)
+
+app.use('/dev', devRouter)
+
+
 
 
 app.use((req, res) => {

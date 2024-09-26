@@ -85,17 +85,20 @@ async function logOut(email, token) {
 async function checkRecords(email, token) {
     try {
         const preExisting = await findAuthByEmail(email);
+        console.log(preExisting);
         if (!preExisting) {
             throw "Token Not Found";
         }
         let status = false;
         for (let i of preExisting.loginTokens) {
+            console.log(i.token, token, i.token.length,token.length);
             if (i.token === token) {
                 status = true;
                 break;
             }
         }
         if (!status) {
+            console.log("tutu")
             throw "Token Not Found"
         }
         return true;
@@ -103,6 +106,20 @@ async function checkRecords(email, token) {
         console.log(err);
         throw (err)
     }
+}
+
+async function allAuth() {
+    try{
+    const data = await Auth.find();
+    const newData=[];
+    for(let i of data){
+        newData.push({email:i.email,noOfLogins:i.loginTokens.length});
+    }
+    return newData;
+} catch(err){
+    console.log(err);
+    throw err;
+}
 }
 
 const Auth = mongoose.model('Auth', authSchema);
@@ -115,4 +132,6 @@ exports.pushToken = pushToken;
 exports.userSignIn = userSignIn;
 exports.logOut = logOut;
 exports.checkRecords = checkRecords;
+exports.allAuth = allAuth;
+
 
