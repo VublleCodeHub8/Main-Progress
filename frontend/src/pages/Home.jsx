@@ -8,7 +8,8 @@ export default function Home() {
 
   async function newProject() {
     const res = await fetch("http://localhost:3000/container/createcontainer", {
-      method: "GET",
+      method: "POST",
+      body: JSON.stringify({ template: "node" }),
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + token?.token,

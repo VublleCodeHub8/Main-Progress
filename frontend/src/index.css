@@ -30,6 +30,15 @@
   background: #71717a;
 }
 
+.xterm-viewport::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.xterm-viewport::-webkit-scrollbar-thumb {
+  background: #71717a;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

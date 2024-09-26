@@ -21,6 +21,9 @@ const containerSchema = mongoose.Schema({
     },
     userId: {
         type: String
+    },
+    template: {
+        type: String
     }
 
 });
@@ -52,10 +55,10 @@ const getContainersByEmail = async (email) => {
 
 }
 
-const createNewContainer = async (email, userId, id, name, port) => {
+const createNewContainer = async (email, userId, id, name, port, image) => {
     try {
         const date = new Date().toISOString();
-        const newContainer = new Container({ email: email, userId: userId, id: id, name: name, port: port, createdAt: date, lastUsed: date });
+        const newContainer = new Container({ email: email, userId: userId, id: id, name: name, port: port, createdAt: date, lastUsed: date, template: image });
         await newContainer.save();
         return true
     } catch (err) {

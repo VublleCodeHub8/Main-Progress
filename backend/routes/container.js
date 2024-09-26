@@ -3,7 +3,7 @@ const router = express.Router();
 
 const { runContainer, createContainer } = require('../controllers/container')
 
-router.get('/createcontainer', createContainer)
+router.post('/createcontainer', createContainer)
 
 router.get('/runcontainer/:containerId', runContainer)
 

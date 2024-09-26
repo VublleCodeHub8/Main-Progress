@@ -4,9 +4,13 @@ const { getContainerById, getContainerByPort, getContainersByEmail, createNewCon
 
 const docker = new Docker();
 
+const mappingOfImages = {
+    "node": "project-server"
+}
+
 
 const createContainer = async (req, res) => {
-
+    const template = req.body.template;
     let thePort;
     for (let i = 5000; i <= 8000; ++i) {
         const doc = await getContainerByPort(i);
@@ -19,8 +23,12 @@ const createContainer = async (req, res) => {
         }
     }
 
+    let image;
+    image = mappingOfImages[template];
+    console.log(template, image);
+
     const container = await docker.createContainer({
-        Image: 'project-server',
+        Image: image,
         ExposedPorts: {
             '4000/tcp': {}
         },
@@ -41,9 +49,9 @@ const createContainer = async (req, res) => {
     const contEmail = req.userData.email;
     const contUserId = req.userData.userId;
 
-    const saveRes = await createNewContainer(contEmail, contUserId, contId, contName, contPort);
+    const saveRes = await createNewContainer(contEmail, contUserId, contId, contName, contPort, image);
     if (saveRes) {
-        res.json({ containerId: contId, containerName: contName, containerPort: contPort });
+        res.json({ containerId: contId, containerName: contName, containerPort: contPort, containerTemplate: image });
     } else {
         res.status(500);
         res.send();
