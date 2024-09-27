@@ -52,6 +52,28 @@ const createContainer = async (req, res) => {
     }
 }
 
+const deleteContainer = async (req, res) => {
+    // try {
+    //     const contId = req.params.containerId;
+    //     const container = docker.getContainer(contId);
+    //     await container.stop();
+    //     await container.remove();
+    //     console.log(contId, " deleted");
+
+    //     // Optionally, remove the container from your database
+    //     const deleteRes = await deleteContainerById(contId);
+    //     if (deleteRes) {
+    //         res.json({ message: 'Container deleted successfully' });
+    //     } else {
+    //         res.status(500).json({ message: 'Failed to delete container from database' });
+    //     }
+    // } catch (err) {
+    //     console.log(err);
+    //     res.status(500);
+    //     res.send();
+    // }
+}
+
 const runContainer = async (req, res) => {
     try {
         const contId = req.params.containerId;
@@ -132,3 +154,4 @@ async function isPortAvailable(port) {
 exports.createContainer = createContainer;
 exports.runContainer = runContainer;
 exports.listAllContainers = listAllContainers;  
+// exports.deleteContainer = deleteContainer;

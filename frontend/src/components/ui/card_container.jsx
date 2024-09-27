@@ -12,6 +12,7 @@ export const HoverEffect = ({
   let [hoveredIndex, setHoveredIndex] = useState(null);
     const navigate = useNavigate();
 
+// change to navigate
 const handlePath = (link) => {
   window.location.href = link;
 };

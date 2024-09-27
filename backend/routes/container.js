@@ -9,4 +9,6 @@ router.get('/runcontainer/:containerId', runContainer)
 
 router.get('/listcontainers', listAllContainers)
 
+// router.get('/deletecontainer/:containerId', deleteContainer)
+
 exports.containerRouter = router;
