@@ -57,7 +57,6 @@ export default function CodeEditor({ socket }) {
 
   useEffect(() => {
     if (currFile != null) {
-      console.log("zaddy");
       getFile();
     }
   }, [currFile]);

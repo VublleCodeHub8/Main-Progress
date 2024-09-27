@@ -21,6 +21,9 @@ const containerSchema = mongoose.Schema({
     },
     userId: {
         type: String
+    },
+    template: {
+        type: String
     }
 
 });
@@ -46,16 +49,20 @@ const getContainerById = async (id) => {
 }
 
 const getContainersByEmail = async (email) => {
-
-    const containers = await Container.find({ emai: email });
-    return containers;
+    try {
+        const containers = await Container.find({ email: email });
+        return containers;
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
 
 }
 
-const createNewContainer = async (email, userId, id, name, port) => {
+const createNewContainer = async (email, userId, id, name, port, image) => {
     try {
         const date = new Date().toISOString();
-        const newContainer = new Container({ email: email, userId: userId, id: id, name: name, port: port, createdAt: date, lastUsed: date });
+        const newContainer = new Container({ email: email, userId: userId, id: id, name: name, port: port, createdAt: date, lastUsed: date, template: image });
         await newContainer.save();
         return true
     } catch (err) {
@@ -65,14 +72,16 @@ const createNewContainer = async (email, userId, id, name, port) => {
 }
 
 const allContainers = async () => {
-    try{
-    const containers = await Container.find();
-    return containers;
-    }catch(err){
+    try {
+        const containers = await Container.find();
+        return containers;
+    } catch (err) {
         console.log(err);
         return null;
     }
 }
+
+
 
 
 
@@ -84,5 +93,4 @@ exports.getContainerById = getContainerById;
 exports.getContainerByPort = getContainerByPort;
 exports.getContainersByEmail = getContainersByEmail;
 exports.createNewContainer = createNewContainer;
-exports.allContainers=allContainers;
-
+exports.allContainers = allContainers;

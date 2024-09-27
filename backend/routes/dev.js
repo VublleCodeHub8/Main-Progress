@@ -1,33 +1,13 @@
 const express = require('express');
 const router = express.Router();
 
-const { allTemplate, addTemplate } = require('../models/template');
+const { getAllTemplates, addNewTemplate } = require('../controllers/dev');
 
 
 
-router.get('/getAllTemplates', async (req, res) => {
-    const data = await allTemplate();
-    console.log(data);
-    if (!data) {
-        res.status(500);
-        res.send();
-    }
-    res.json(data);
-})
+router.get('/getAllTemplates', getAllTemplates)
 
-router.post('/addNewTemplate', async (req, res) => {
-    const dataToAdd = req.body;
-    const data = await addTemplate(dataToAdd.name, dataToAdd.image);
-    console.log(data);
-    if (!data) {
-        res.status(500);
-        res.send();
-    }
-    res.status(200);
-    res.send();
-})
-
-
+router.post('/addNewTemplate', addNewTemplate)
 
 
 exports.devRouter = router;

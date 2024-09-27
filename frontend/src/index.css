@@ -2,6 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+.loginBg {
+  background-image: url("./assets/black-bg.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.blur {
+  backdrop-filter: blur(4px);
+}
+
+.fileBarScroll::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.fileBarScroll::-webkit-scrollbar-thumb {
+  background: #71717a;
+}
+
+.ace_scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.ace_scrollbar::-webkit-scrollbar-thumb {
+  background: #71717a;
+}
+
+.xterm-viewport::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.xterm-viewport::-webkit-scrollbar-thumb {
+  background: #71717a;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

@@ -9,6 +9,17 @@ const userSchema = mongoose.Schema({
     },
     password: {
         type: 'String'
+    },
+    bio: {
+        type: 'String',
+        required: false
+    },
+    profilePic: {
+        type: 'String',
+        required: false
+    },
+    role: {
+        type: 'String'
     }
 })
 
@@ -20,9 +31,10 @@ async function findUserByEmail(email) {
     }
     return null;
 }
-async function addUser(email, password, username) {
+
+async function addUser(email, password, username, role) {
     try {
-        const newUser = new User({ email: email, password: password, username: username });
+        const newUser = new User({ email: email, password: password, username: username, role: role });
         await newUser.save();
     } catch (err) {
         console.log(err);
@@ -30,11 +42,41 @@ async function addUser(email, password, username) {
     }
 }
 
-async function allUsers(){
+async function allUsers() {
     try {
-        const res=await User.find();
+        const res = await User.find();
         console.log(res);
         return res;
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
+}
+
+async function editUser(email, username, bio, profilePic) {
+    try {
+        const result = await User.updateOne(
+            { email: email },
+            {
+                $set: {
+                    username: username,
+                    bio: bio,
+                    profilePic: profilePic
+                }
+            }
+        )
+        return true;
+    }
+    catch (err) {
+        console.log(err);
+        throw err;
+    }
+}
+
+async function getUserByEmail(email) {
+    try {
+        const user = await User.findOne({ email: email });
+        return user;
     } catch (err) {
         console.log(err);
         return null;
@@ -47,4 +89,8 @@ const User = mongoose.model('User', userSchema);
 exports.userModel = User;
 exports.findUserByEmail = findUserByEmail;
 exports.addUser = addUser;
-exports.allUsers=allUsers;
+exports.allUsers = allUsers;
+exports.editUser = editUser;
+exports.getUserByEmail = getUserByEmail;
+
+
