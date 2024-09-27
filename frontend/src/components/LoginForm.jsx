@@ -76,13 +76,19 @@ export function LoginForm() {
         const token = {
           token: content.token,
           expiry: content.expiry,
+          role: content.role,
         };
         localStorage.setItem("token", JSON.stringify(token));
         console.log(content);
         dispatch(miscActions.setLogin(true));
         dispatch(miscActions.setToken(token));
-
-        navigate("/");
+        if (content.role === "admin") {
+          navigate("/admin");
+        } else if (content.role === "dev") {
+          navigate("/dev");
+        } else {
+          navigate("/");
+        }
       } else if (res.status == 400) {
         setMsg("Invalid details.");
       } else if (res.status == 500) {

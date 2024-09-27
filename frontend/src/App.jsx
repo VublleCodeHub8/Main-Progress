@@ -1,13 +1,20 @@
 import { useState, useEffect } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Wrapper from "./pages/Wrapper";
-import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import { useDispatch, useSelector } from "react-redux";
 import { miscActions } from "./store/main";
 import Project from "./pages/Project";
+import Home from "./pages/dashboard/Home";
+import DashboardLayout from "./pages/Dashboard";
+import Profile from "./pages/dashboard/Profile";
+import About from "./pages/dashboard/About";
+import Containers from "./pages/dashboard/Containers";
+import Templates from "./pages/dashboard/Templates";
+import AdminWrapper from "./pages/AdminWrapper";
+import AdminPage from "./pages/admin/page";
+import DevWrapper from "./pages/DevWrapper";
+import DevPage from "./pages/dev/devpage";
 
 const router = createBrowserRouter([
   {
@@ -20,11 +27,56 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <Home></Home>,
+        element: <DashboardLayout />,
+        children: [
+          {
+            path: "",
+            element: <Home />,
+          },
+
+          {
+            path: "about",
+            element: <About />,
+          },
+          {
+            path: "containers",
+            element: <Containers />,
+          },
+          {
+            path: "templates",
+            element: <Templates />,
+          },
+          {
+            path: "profile",
+            element: <Profile />,
+          },
+        ],
       },
       {
         path: "project/:projectId",
         element: <Project />,
+      },
+      {
+        // admin wrapper
+        path: "/admin",
+        element: <AdminWrapper />,
+        children: [
+          {
+            path: "",
+            element: <AdminPage />,
+          },
+        ],
+      },
+      {
+        // admin wrapper
+        path: "/dev",
+        element: <DevWrapper />,
+        children: [
+          {
+            path: "",
+            element: <DevPage />,
+          },
+        ],
       },
     ],
   },
@@ -42,7 +94,10 @@ function App() {
   useEffect(() => {
     async function checkForLogin() {
       dispatch(miscActions.setFallback(true));
-      const userDetails = JSON.parse(localStorage.getItem("token"));
+      const userDetails =
+        localStorage.getItem("token") != ""
+          ? JSON.parse(localStorage.getItem("token"))
+          : null;
       if (userDetails && new Date(userDetails.expiry) > new Date()) {
         await logIn();
       } else if (userDetails && !(new Date(userDetails.expiry) > new Date())) {
