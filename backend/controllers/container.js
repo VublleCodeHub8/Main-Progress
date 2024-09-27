@@ -10,7 +10,9 @@ const mappingOfImages = {
 
 
 const createContainer = async (req, res) => {
-    const template = req.body.template;
+    const cont_Name = req.headers['title'];
+    const cont_Image = req.headers['template'];
+    console.log("my tera ", req.headers['template']);
     let thePort;
     for (let i = 5000; i <= 8000; ++i) {
         const doc = await getContainerByPort(i);
@@ -23,12 +25,13 @@ const createContainer = async (req, res) => {
         }
     }
 
-    let image;
-    image = mappingOfImages[template];
-    console.log(template, image);
+    // let image;
+    // image = mappingOfImages[template];
+    // console.log(template, image);
 
     const container = await docker.createContainer({
-        Image: image,
+        Image: cont_Image,
+        name: `${cont_Name}_${thePort}`,
         ExposedPorts: {
             '4000/tcp': {}
         },
@@ -49,9 +52,9 @@ const createContainer = async (req, res) => {
     const contEmail = req.userData.email;
     const contUserId = req.userData.userId;
 
-    const saveRes = await createNewContainer(contEmail, contUserId, contId, contName, contPort, image);
+    const saveRes = await createNewContainer(contEmail, contUserId, contId, contName, contPort, cont_Image);
     if (saveRes) {
-        res.json({ containerId: contId, containerName: contName, containerPort: contPort, containerTemplate: image });
+        res.json({ containerId: contId, containerName: contName, containerPort: contPort, containerTemplate: cont_Image });
     } else {
         res.status(500);
         res.send();
@@ -89,6 +92,34 @@ const runContainer = async (req, res) => {
 
 }
 
+const listAllContainers = async (req, res) => {
+    try {
+        const email = req.userData.email;
+        const containers = await getContainersByEmail(email);
+        console.log(containers);
+        res.json(containers);
+    } catch (err) {
+        console.log(err);
+        res.status(500);
+        res.send();
+    }
+
+}
+
+// const listAllTemplates=async (req,res) => {
+//     try{
+//         const userEmail=req.userData.email;
+//         const containers = await getContainersByEmail(userEmail);
+//         console.log(containers);
+//         res.json(containers);
+//         }catch(err){
+//             console.log(err);
+//             res.status(500);
+//             res.send();
+//         }
+// }
+
+
 async function isPortAvailable(port) {
     return new Promise((resolve) => {
         const server = net.createServer();
@@ -107,3 +138,4 @@ async function isPortAvailable(port) {
 
 exports.createContainer = createContainer;
 exports.runContainer = runContainer;
+exports.listAllContainers = listAllContainers; 

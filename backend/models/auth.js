@@ -105,6 +105,20 @@ async function checkRecords(email, token) {
     }
 }
 
+async function allAuth() {
+    try {
+        const data = await Auth.find();
+        const newData = [];
+        for (let i of data) {
+            newData.push({ email: i.email, noOfLogins: i.loginTokens.length });
+        }
+        return newData;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    }
+}
+
 const Auth = mongoose.model('Auth', authSchema);
 
 
@@ -115,4 +129,4 @@ exports.pushToken = pushToken;
 exports.userSignIn = userSignIn;
 exports.logOut = logOut;
 exports.checkRecords = checkRecords;
-
+exports.allAuth = allAuth;
