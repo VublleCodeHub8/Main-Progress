@@ -55,7 +55,11 @@ function Sidebar () {
             <nav>
                 <div className='flex flex-col'>
                     {menuItem.map((item, index) => (
+<<<<<<< HEAD
                         <Link to={item.path} key={index}  onClick={() => setActiveIndex(index)}>
+=======
+                        <Link to={item.path} key={index}>
+>>>>>>> final
                             <div className='my-2 rounded-md'>
                             <TailwindcssButtons idx={0} className="w-full" isActive={isActive(item.path)}>
                                 <div className='flex flex-row items-center'>

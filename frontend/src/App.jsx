@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Wrapper from "./pages/Wrapper";
 import Auth from "./pages/Auth";
 import About from "./pages/dashboard/About";
@@ -8,15 +8,16 @@ import Templates from "./pages/dashboard/Templates";
 import { useDispatch, useSelector } from "react-redux";
 import { miscActions } from "./store/main";
 import Project from "./pages/Project";
-import Home from './pages/dashboard/Home';
+import Home from "./pages/dashboard/Home";
 import DashboardLayout from "./pages/Dashboard";
 import Profile from "./pages/dashboard/Profile";
+import About from "./pages/dashboard/About";
+import Containers from "./pages/dashboard/Containers";
+import Templates from "./pages/dashboard/Templates";
 import AdminWrapper from "./pages/AdminWrapper";
-import AdminPage from "./pages/admin/page"
+import AdminPage from "./pages/admin/page";
 import DevWrapper from "./pages/DevWrapper";
 import DevPage from "./pages/dev/devpage";
-
-
 
 const router = createBrowserRouter([
   {
@@ -32,14 +33,13 @@ const router = createBrowserRouter([
         element: <DashboardLayout />,
         children: [
           {
-            index: true,
+            path: "",
             element: <Home />,
           },
-        
+
           {
             path: "about",
             element: <About />,
-
           },
           {
             path: "containers",
@@ -51,38 +51,38 @@ const router = createBrowserRouter([
           },
           {
             path: "profile",
-            element: <Profile />, 
-          }
+            element: <Profile />,
+          },
         ],
       },
       {
-        path: "project/projectId",
+        path: "project/:projectId",
         element: <Project />,
+      },
+      {
+        // admin wrapper
+        path: "/admin",
+        element: <AdminWrapper />,
+        children: [
+          {
+            path: "",
+            element: <AdminPage />,
+          },
+        ],
+      },
+      {
+        // admin wrapper
+        path: "/dev",
+        element: <DevWrapper />,
+        children: [
+          {
+            path: "",
+            element: <DevPage />,
+          },
+        ],
       },
     ],
   },
-  {
-    // admin wrapper
-    path: "/admin",
-    element: <AdminWrapper />,
-    children: [
-      {
-        path: "",
-        element: <AdminPage />,
-      }
-    ]
-  },
-  {
-    // admin wrapper
-    path: "/dev",
-    element: <DevWrapper />,
-    children: [
-      {
-        path: "",
-        element: <DevPage />,
-      }
-    ]
-  }
 ]);
 
 let timer;
@@ -98,7 +98,10 @@ function App() {
   useEffect(() => {
     async function checkForLogin() {
       dispatch(miscActions.setFallback(true));
-      const userDetails = JSON.parse(localStorage.getItem("token"));
+      const userDetails =
+        localStorage.getItem("token") != ""
+          ? JSON.parse(localStorage.getItem("token"))
+          : null;
       if (userDetails && new Date(userDetails.expiry) > new Date()) {
         await logIn();
       } else if (userDetails && !(new Date(userDetails.expiry) > new Date())) {
