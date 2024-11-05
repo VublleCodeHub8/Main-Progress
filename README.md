@@ -1,4 +1,4 @@
-#Bugs:
+# Bugs:
 ## login page 
 * space char at the last is also taken.
 ## User dashboard 
