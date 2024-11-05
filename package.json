@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "dockerode": "^4.0.2",
+    "node-docker-api": "^1.1.22"
+  }
+}

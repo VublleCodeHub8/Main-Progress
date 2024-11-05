@@ -106,6 +106,107 @@ const listAllContainers = async (req, res) => {
 
 }
 
+// container inspects
+const continerInspects = async (req, res) => {
+    try {
+        const contId = req.params.containerId;
+        const containerDetails = await docker.getContainer(contId).inspect();
+        res.json({
+            status: containerDetails.State.Status
+        });
+    }
+    catch(err){
+        console.log(err);
+        res.status(500);
+        res.send();
+    }
+}
+
+const stopContainer = async(req, res) => {
+    try{
+        const contId = req.params.containerId;
+        const container = docker.getContainer(contId);
+        const containerDetails = await docker.getContainer(contId).inspect();
+        if(containerDetails.State.Running){
+            await container.stop();
+            res.json({
+                status: "stopped"
+            });
+        }else{
+            res.json({
+                status: "already stopped"
+            });
+        }
+    }catch(err){
+        console.log(err);
+        res.status(500);
+        res.send();
+    }
+}
+
+const restartContainer = async(req, res) => {
+    try{
+        const contId = req.params.containerId;
+        const container = docker.getContainer(contId);
+        const containerDetails = await docker.getContainer(contId).inspect();
+        if(containerDetails.State.Running){
+            await container.restart();
+            res.json({
+                status: "restarted"
+            });
+        }else{
+            res.json({
+                status: "already stopped"
+            });
+        }
+    }catch(err){
+        console.log(err);
+        res.status(500);
+        res.send();
+    }
+}
+
+const startContainer = async(req, res) => {
+    try{
+        const contId = req.params.containerId;
+        const container = docker.getContainer(contId);
+        const containerDetails = await docker.getContainer(contId).inspect();
+        if(containerDetails.State.Running){
+            res.json({
+                status: "already running"
+            });
+        }else{
+            await container.start();
+            res.json({
+                status: "started"
+            });
+        }
+    }catch(err){
+        console.log(err);
+        res.status(500);
+        res.send();
+    }
+}
+
+const deleteContainer = async(req, res) => {
+    try{
+        const contId = req.params.containerId;
+        const container = docker.getContainer(contId);
+        const containerDetails = await docker.getContainer(contId).inspect();
+        if(containerDetails.State.Running){
+            await container.stop();
+        }
+        await container.remove();
+        res.json({
+            status: "deleted"
+        });
+    }catch(err){
+        console.log(err);
+        res.status(500);
+        res.send();
+    }
+}
+
 // const listAllTemplates=async (req,res) => {
 //     try{
 //         const userEmail=req.userData.email;
@@ -136,6 +237,14 @@ async function isPortAvailable(port) {
     });
 }
 
+
+
+
 exports.createContainer = createContainer;
 exports.runContainer = runContainer;
 exports.listAllContainers = listAllContainers; 
+exports.continerInspects = continerInspects;
+exports.stopContainer = stopContainer;
+exports.restartContainer = restartContainer;
+exports.startContainer = startContainer;
+exports.deleteContainer = deleteContainer;
