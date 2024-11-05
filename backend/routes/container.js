@@ -17,7 +17,7 @@ router.get('/restart/:containerId', restartContainer)
 
 router.get('/start/:containerId', startContainer)
 
-router.get('/delete/:containerId', deleteContainer)
+router.delete('/delete/:containerId', deleteContainer)
 
 
 exports.containerRouter = router;

@@ -1,6 +1,6 @@
 const Docker = require('dockerode')
 const net = require('net');
-const { getContainerById, getContainerByPort, getContainersByEmail, createNewContainer } = require('../models/containers')
+const { getContainerById, getContainerByPort, getContainersByEmail, createNewContainer, deleteOneContainer } = require('../models/containers')
 
 const docker = new Docker();
 
@@ -189,22 +189,25 @@ const startContainer = async(req, res) => {
 }
 
 const deleteContainer = async(req, res) => {
+    // it should delete the container from the database as well, there is also a route in '../models/containers' to delete the container from the database
+    const contId = req.params.containerId;
+    console.log(contId);
     try{
-        const contId = req.params.containerId;
         const container = docker.getContainer(contId);
         const containerDetails = await docker.getContainer(contId).inspect();
         if(containerDetails.State.Running){
             await container.stop();
         }
         await container.remove();
+        
+        await deleteOneContainer(contId);
         res.json({
             status: "deleted"
         });
-    }catch(err){
+    } catch (err) {
         console.log(err);
         res.status(500);
-        res.send();
-    }
+    } 
 }
 
 // const listAllTemplates=async (req,res) => {

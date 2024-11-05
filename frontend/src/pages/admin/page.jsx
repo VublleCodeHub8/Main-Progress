@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSelector } from 'react-redux';
-import { Activity, Users, Box, Power } from "lucide-react";
+import { Activity, Users, Box, Power, StopCircle, Trash, XCircle } from "lucide-react";
 import { Link } from 'react-router-dom';
 
 const AdminPage = () => {
   const [users, setUsers] = useState([]);
   const [containers, setContainers] = useState([]);
   const [error, setError] = useState(null);
-  const [expandedUserId, setExpandedUserId] = useState(null);
+  const [expandedUserIds, setExpandedUserIds] = useState([]);
   const [searchTerm, setSearchTerm] = useState(""); // Add search term state
   const token = useSelector((state) => state.misc.token);
 
@@ -95,8 +95,17 @@ const AdminPage = () => {
   };
 
   const toggleShowContainers = (userId) => {
-    setExpandedUserId(prevUserId => prevUserId === userId ? null : userId);
+
+    setExpandedUserIds(prevUserIds =>{
+      if(prevUserIds.includes(userId)){
+        return prevUserIds.filter(id => id !== userId);
+      } else {
+        return [...prevUserIds, userId];
+      }
+    });
+    // console.log(expandedUserIds);
   };
+
   const handleStopContainer = async (containerId) => {
     try {
       // wait for the response before fetching the latest data
@@ -150,7 +159,6 @@ const AdminPage = () => {
           Authorization: `Bearer ${token.token}`,
         },
       });
-      console.lgo(response);
       console.log(response);
       if (response.ok) {
         // Fetch the latest data to refresh the page 
@@ -160,6 +168,27 @@ const AdminPage = () => {
       }
     } catch (error) {
       console.error(`Error restarting container ${containerId}:`, error);
+    }
+  };
+
+  const handleDeleteContainer = async (containerId) => {
+    try {
+      const response = await fetch(`http://localhost:3000/container/delete/${containerId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.token}`,
+        },
+      });
+      console.log(response);
+      if (response.ok) {
+        // Fetch the latest data to refresh the page 
+        await fetchData();
+      } else {
+        console.error(`Failed to delete container ${containerId}`);
+      }
+    } catch{
+      console.error(`Error deleting container ${containerId}`, error);
     }
   };
 
@@ -221,7 +250,7 @@ const AdminPage = () => {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-          <UserTable users={filteredUsers} toggleShowContainers={toggleShowContainers} expandedUserId={expandedUserId} onStopContainer={handleStopContainer} onStartContainer= {handleStartContainer} onRestartContainer={handleRestartContainer}/>
+          <UserTable users={filteredUsers} toggleShowContainers={toggleShowContainers} expandedUserIds={expandedUserIds} onStopContainer={handleStopContainer} onStartContainer= {handleStartContainer} onRestartContainer={handleRestartContainer} onDeleteContainer={handleDeleteContainer}/>
           </div>
         </CardContent>
       </Card>
@@ -243,7 +272,7 @@ const StatCard = ({ title, value, icon, color = "text-gray-500" }) => (
 );
 
 // Reusable UserTable component
-const UserTable = ({ users, toggleShowContainers, expandedUserId, onStopContainer, onStartContainer, onRestartContainer}) => (
+const UserTable = ({ users, toggleShowContainers, expandedUserIds, onStopContainer, onStartContainer, onRestartContainer, onDeleteContainer}) => (
   <table className="w-full border-collapse">
     <thead>
       <tr className="border-b border-gray-200 text-left">
@@ -256,20 +285,20 @@ const UserTable = ({ users, toggleShowContainers, expandedUserId, onStopContaine
     </thead>
     <tbody>
       {users.map(user => (
-        <React.Fragment key={user.id}>
+        <React.Fragment key={user._id}>
           <tr className="border-b border-gray-200 cursor-pointer" >
-            <td className="px-4 py-3 font-medium" onClick={() => toggleShowContainers(user.id)}>{user.username} </td>
+            <td className="px-4 py-3 font-medium" onClick={() => toggleShowContainers(user._id)}>{user.username} </td>
             <td className="px-4 py-3">{user.email}</td>
             <td className="px-4 py-3">
               <StatusBadge status={user.isLoggedIn} />
             </td>
             <td className="px-4 py-3">{user.containers.length}</td>
             <td className="px-4 py-3">
-              <button className="text-blue-500 hover:text-blue-700">Manage</button>
+              <button className="text-blue-500 hover:text-blue-700"><XCircle lassName="h-4 w-4" color="red" /></button>
             </td>
           </tr>
-          {expandedUserId === user.id && user.containers.map(container => (
-            <ContainerRow key={container.id} container={container} onStopContainer={onStopContainer} onStartContainer={onStartContainer} onRestartContainer ={onRestartContainer} />
+          {expandedUserIds.includes(user._id) && user.containers.map(container => (
+            <ContainerRow key={container.id} container={container} onStopContainer={onStopContainer} onStartContainer={onStartContainer} onRestartContainer ={onRestartContainer} onDeleteContainer={onDeleteContainer}/>
           ))}
         </React.Fragment>
       ))}
@@ -287,7 +316,7 @@ const StatusBadge = ({ status }) => (
   </span>
 );
 
-const ContainerRow = ({ container, onStopContainer, onStartContainer, onRestartContainer}) => (
+const ContainerRow = ({ container, onStopContainer, onStartContainer, onRestartContainer, onDeleteContainer}) => (
   <tr className="border-b border-gray-100 bg-gray-50">
     <td className="px-4 py-3 pl-12" colSpan={2}>{container.name}</td>
     <td className="px-4 py-3">
@@ -297,10 +326,14 @@ const ContainerRow = ({ container, onStopContainer, onStartContainer, onRestartC
     </td>
     <td className="px-4 py-3">CPU: {container.cpu} | Memory: {container.memory}</td>
     <td className="px-4 py-3">
-      <button onClick={() => onStopContainer(container.id)} className="mr-2 text-red-500 hover:text-red-700">Stop</button>
-      <button onClick={() => onRestartContainer(container.id)} className="text-blue-500 hover:text-blue-700">Restart</button>
-      <button onClick={() => onStartContainer(container.id)} className="ml-2 text-green-500 hover:text-green-700">Start</button>
-      {/* <button className="ml-2 text-red-500 hover:text-red-700">Delete</button> */}
+      <button onClick={() => onStopContainer(container.id)} className="mr-2 text-red-500 hover:text-red-700">
+        <StopCircle className="h-4 w-4" />
+      </button>
+      {/* <button onClick={() => onRestartContainer(container.id)} className="text-blue-500 hover:text-blue-700">Restart</button> */}
+      {/* <button onClick={() => onStartContainer(container.id)} className="ml-2 text-green-500 hover:text-green-700">Start</button> */}
+      <button onClick={() => onDeleteContainer(container.id)} className="ml-2 text-red-700 hover:text-red-900">
+        <Trash className="h-4 w-4" />
+      </button>
     </td>
   </tr>
 );
