@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Bar, Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { useSelector } from 'react-redux';
-import { Activity, Users, Box, Power, StopCircle, Trash, XCircle } from "lucide-react";
+import { Activity, Users, Box, Power, StopCircle, Trash, XCircle, Play, Settings } from "lucide-react";
 import { Link } from 'react-router-dom';
+
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const AdminPage = () => {
   const [users, setUsers] = useState([]);
@@ -21,7 +25,8 @@ const AdminPage = () => {
           fetchAuthData(),
         ]);
 
-        const containersWithStatus = await addContainerStatus(containersData);
+        const containersWithStatus = await addContainerDetails(containersData);
+        // console.log(containersWithStatus);
         setContainers(containersWithStatus);
 
         const combinedData = usersData.map(user => ({
@@ -73,19 +78,46 @@ const AdminPage = () => {
     return response.ok ? await response.json() : [];
   };
 
-  const addContainerStatus = async (containersData) => {
+  // const addContainerStatus = async (containersData) => {
+  //   return Promise.all(
+  //     containersData.map(async (container) => {
+  //       try {
+  //         const response = await fetch(`http://localhost:3000/container/inspect/${container.id}`, {
+  //           method: "GET",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${token.token}`,
+  //           },
+  //         });
+  //         const statusData = await response.json();
+  //         return { ...container, status: statusData };
+  //       } catch (error) {
+  //         console.error(`Error fetching data for container ${container.id}:`, error);
+  //         return container;
+  //       }
+  //     })
+  //   );
+  // };
+
+  const addContainerDetails = async (containersData) => {
     return Promise.all(
       containersData.map(async (container) => {
         try {
-          const response = await fetch(`http://localhost:3000/container/inspect/${container.id}`, {
+          const response = await fetch(`http://localhost:3000/container/details/${container.id}`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token.token}`,
             },
           });
-          const statusData = await response.json();
-          return { ...container, status: statusData };
+          const details = await response.json();
+          return {
+            ...container,
+            status: details.status,
+            cpu: details.cpuUsagePercentage,
+            memory: details.memoryUsagePercentage,
+
+          };
         } catch (error) {
           console.error(`Error fetching data for container ${container.id}:`, error);
           return container;
@@ -96,8 +128,8 @@ const AdminPage = () => {
 
   const toggleShowContainers = (userId) => {
 
-    setExpandedUserIds(prevUserIds =>{
-      if(prevUserIds.includes(userId)){
+    setExpandedUserIds(prevUserIds => {
+      if (prevUserIds.includes(userId)) {
         return prevUserIds.filter(id => id !== userId);
       } else {
         return [...prevUserIds, userId];
@@ -128,7 +160,7 @@ const AdminPage = () => {
     }
   };
 
-  const handleStartContainer = async (containerId) =>{
+  const handleStartContainer = async (containerId) => {
     try {
       // wait for the response before fetching the latest data
       const response = await fetch(`http://localhost:3000/container/start/${containerId}`, {
@@ -138,7 +170,7 @@ const AdminPage = () => {
           Authorization: `Bearer ${token.token}`,
         },
       });
-      console.log(response);
+      // console.log(response);
       if (response.ok) {
         // Fetch the latest data to refresh the page 
         await fetchData();
@@ -151,7 +183,7 @@ const AdminPage = () => {
   };
 
   const handleRestartContainer = async (containerId) => {
-    try{
+    try {
       const response = await fetch(`http://localhost:3000/container/restart/${containerId}`, {
         method: "GET",
         headers: {
@@ -159,7 +191,7 @@ const AdminPage = () => {
           Authorization: `Bearer ${token.token}`,
         },
       });
-      console.log(response);
+      // console.log(response);
       if (response.ok) {
         // Fetch the latest data to refresh the page 
         await fetchData();
@@ -180,14 +212,14 @@ const AdminPage = () => {
           Authorization: `Bearer ${token.token}`,
         },
       });
-      console.log(response);
+      // console.log(response);
       if (response.ok) {
         // Fetch the latest data to refresh the page 
         await fetchData();
       } else {
         console.error(`Failed to delete container ${containerId}`);
       }
-    } catch{
+    } catch {
       console.error(`Error deleting container ${containerId}`, error);
     }
   };
@@ -202,6 +234,44 @@ const AdminPage = () => {
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.containers.length > 0
   );
+
+  const getSystemHealthStatus = (containers) => {
+    const runningContainers = containers.filter(container => container.status === 'running').length;
+    const totalContainers = containers.length;
+    const runningPercentage = (runningContainers / totalContainers) * 100;
+    // console.log(runningPercentage);
+    return runningPercentage >= 40 ? "Healthy" : "Unhealthy";
+  };
+
+  const userRoleData = {
+    labels: ['Admin', 'Developer', 'User'],
+    datasets: [
+      {
+        label: 'Number of Users',
+        data: [
+          users.filter(user => user.role === 'admin').length,
+          users.filter(user => user.role === 'dev').length,
+          users.filter(user => user.role === 'user').length,
+        ],
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+      },
+    ],
+  };
+
+  const containerStatusData = {
+    labels: ['Running', 'Stopped'],
+    datasets: [
+      {
+        label: 'Container Status',
+        data: [
+          containers.filter(container => container.status === 'running').length,
+          containers.filter(container => container.status === 'exited').length,
+        ],
+        backgroundColor: ['#4CAF50', '#F44336'],
+      },
+    ],
+  };
+
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -230,10 +300,15 @@ const AdminPage = () => {
         <StatCard title="Total Users" value={users.length} icon={<Users className="h-4 w-4 text-gray-500" />} />
         <StatCard
           title="Active Containers"
-          value={containers.filter(container => container.status.status === 'running').length}
+          value={containers.filter(container => container.status === 'running').length}
           icon={<Box className="h-4 w-4 text-gray-500" />}
         />
-        <StatCard title="System Status" value="Healthy" icon={<Activity className="h-4 w-4 text-gray-500" />} color="text-green-500" />
+        <StatCard
+          title="System Status"
+          value={getSystemHealthStatus(containers)}
+          icon={<Activity className="h-4 w-4" />}
+          color={getSystemHealthStatus(containers) === "Healthy" ? "text-green-500" : "text-red-500"}
+        />
       </div>
 
       {/* Error Message */}
@@ -243,6 +318,27 @@ const AdminPage = () => {
         </div>
       )}
 
+      <div className="mb-8 grid gap-4 md:grid-cols-2">
+        {/* User Role Bar Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>User Roles Distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Bar data={userRoleData} options={{ responsive: true, maintainAspectRatio: false }} />
+          </CardContent>
+        </Card>
+
+        {/* Container Status Pie Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Container Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Pie data={containerStatusData} options={{ responsive: true, maintainAspectRatio: false }} />
+          </CardContent>
+        </Card>
+      </div>
       {/* Users Table */}
       <Card className="mb-8">
         <CardHeader>
@@ -250,7 +346,7 @@ const AdminPage = () => {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-          <UserTable users={filteredUsers} toggleShowContainers={toggleShowContainers} expandedUserIds={expandedUserIds} onStopContainer={handleStopContainer} onStartContainer= {handleStartContainer} onRestartContainer={handleRestartContainer} onDeleteContainer={handleDeleteContainer}/>
+            <UserTable users={filteredUsers} toggleShowContainers={toggleShowContainers} expandedUserIds={expandedUserIds} onStopContainer={handleStopContainer} onStartContainer={handleStartContainer} onRestartContainer={handleRestartContainer} onDeleteContainer={handleDeleteContainer} />
           </div>
         </CardContent>
       </Card>
@@ -272,12 +368,13 @@ const StatCard = ({ title, value, icon, color = "text-gray-500" }) => (
 );
 
 // Reusable UserTable component
-const UserTable = ({ users, toggleShowContainers, expandedUserIds, onStopContainer, onStartContainer, onRestartContainer, onDeleteContainer}) => (
+const UserTable = ({ users, toggleShowContainers, expandedUserIds, onStopContainer, onStartContainer, onRestartContainer, onDeleteContainer }) => (
   <table className="w-full border-collapse">
     <thead>
       <tr className="border-b border-gray-200 text-left">
         <TableHeader title="User" />
         <TableHeader title="Email" />
+        <TableHeader title="Role" />
         <TableHeader title="Login Status" />
         <TableHeader title="Containers" />
         <TableHeader title="Actions" />
@@ -286,25 +383,46 @@ const UserTable = ({ users, toggleShowContainers, expandedUserIds, onStopContain
     <tbody>
       {users.map(user => (
         <React.Fragment key={user._id}>
-          <tr className="border-b border-gray-200 cursor-pointer" >
-            <td className="px-4 py-3 font-medium" onClick={() => toggleShowContainers(user._id)}>{user.username} </td>
+          <tr className="border-b border-gray-200 cursor-pointer">
+            <td className="px-4 py-3 font-medium" onClick={() => toggleShowContainers(user._id)}>{user.username}</td>
             <td className="px-4 py-3">{user.email}</td>
+            <td className="px-4 py-3">
+              <span
+                className={
+                  user.role === 'admin' ? 'text-red-500 font-bold' :
+                    user.role === 'dev' ? 'text-blue-500 font-bold' :
+                      user.role === 'user' ? 'text-green-500 font-bold' : ''
+                }
+              >
+                {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+              </span>
+            </td>
             <td className="px-4 py-3">
               <StatusBadge status={user.isLoggedIn} />
             </td>
             <td className="px-4 py-3">{user.containers.length}</td>
             <td className="px-4 py-3">
-              <button className="text-blue-500 hover:text-blue-700"><XCircle lassName="h-4 w-4" color="red" /></button>
+              <button className="text-blue-500 hover:text-blue-700">
+                <Settings className="h-4 w-4" color="blue" />
+              </button>
             </td>
           </tr>
           {expandedUserIds.includes(user._id) && user.containers.map(container => (
-            <ContainerRow key={container.id} container={container} onStopContainer={onStopContainer} onStartContainer={onStartContainer} onRestartContainer ={onRestartContainer} onDeleteContainer={onDeleteContainer}/>
+            <ContainerRow
+              key={container.id}
+              container={container}
+              onStopContainer={onStopContainer}
+              onStartContainer={onStartContainer}
+              onRestartContainer={onRestartContainer}
+              onDeleteContainer={onDeleteContainer}
+            />
           ))}
         </React.Fragment>
       ))}
     </tbody>
   </table>
 );
+
 
 const TableHeader = ({ title }) => (
   <th className="px-4 py-3 text-sm font-medium text-gray-500">{title}</th>
@@ -316,12 +434,13 @@ const StatusBadge = ({ status }) => (
   </span>
 );
 
-const ContainerRow = ({ container, onStopContainer, onStartContainer, onRestartContainer, onDeleteContainer}) => (
+const ContainerRow = ({ container, onStopContainer, onStartContainer, onRestartContainer, onDeleteContainer }) => (
   <tr className="border-b border-gray-100 bg-gray-50">
-    <td className="px-4 py-3 pl-12" colSpan={2}>{container.name}</td>
+    <td className="px-4 py-3 pl-12" colSpan={3}>{container.name}</td>
+
     <td className="px-4 py-3">
-      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${container.status.status === 'running' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-        {container.status.status}
+      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${container.status === 'running' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+        {container.status}
       </span>
     </td>
     <td className="px-4 py-3">CPU: {container.cpu} | Memory: {container.memory}</td>
@@ -330,7 +449,9 @@ const ContainerRow = ({ container, onStopContainer, onStartContainer, onRestartC
         <StopCircle className="h-4 w-4" />
       </button>
       {/* <button onClick={() => onRestartContainer(container.id)} className="text-blue-500 hover:text-blue-700">Restart</button> */}
-      {/* <button onClick={() => onStartContainer(container.id)} className="ml-2 text-green-500 hover:text-green-700">Start</button> */}
+      <button onClick={() => onStartContainer(container.id)} className="ml-2 text-green-500 hover:text-green-700">
+        <Play className="h-4 w-4" />
+      </button>
       <button onClick={() => onDeleteContainer(container.id)} className="ml-2 text-red-700 hover:text-red-900">
         <Trash className="h-4 w-4" />
       </button>

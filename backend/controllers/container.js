@@ -115,91 +115,91 @@ const continerInspects = async (req, res) => {
             status: containerDetails.State.Status
         });
     }
-    catch(err){
+    catch (err) {
         console.log(err);
         res.status(500);
         res.send();
     }
 }
 
-const stopContainer = async(req, res) => {
-    try{
+const stopContainer = async (req, res) => {
+    try {
         const contId = req.params.containerId;
         const container = docker.getContainer(contId);
         const containerDetails = await docker.getContainer(contId).inspect();
-        if(containerDetails.State.Running){
+        if (containerDetails.State.Running) {
             await container.stop();
             res.json({
                 status: "stopped"
             });
-        }else{
+        } else {
             res.json({
                 status: "already stopped"
             });
         }
-    }catch(err){
+    } catch (err) {
         console.log(err);
         res.status(500);
         res.send();
     }
 }
 
-const restartContainer = async(req, res) => {
-    try{
+const restartContainer = async (req, res) => {
+    try {
         const contId = req.params.containerId;
         const container = docker.getContainer(contId);
         const containerDetails = await docker.getContainer(contId).inspect();
-        if(containerDetails.State.Running){
+        if (containerDetails.State.Running) {
             await container.restart();
             res.json({
                 status: "restarted"
             });
-        }else{
+        } else {
             res.json({
                 status: "already stopped"
             });
         }
-    }catch(err){
+    } catch (err) {
         console.log(err);
         res.status(500);
         res.send();
     }
 }
 
-const startContainer = async(req, res) => {
-    try{
+const startContainer = async (req, res) => {
+    try {
         const contId = req.params.containerId;
         const container = docker.getContainer(contId);
         const containerDetails = await docker.getContainer(contId).inspect();
-        if(containerDetails.State.Running){
+        if (containerDetails.State.Running) {
             res.json({
                 status: "already running"
             });
-        }else{
+        } else {
             await container.start();
             res.json({
                 status: "started"
             });
         }
-    }catch(err){
+    } catch (err) {
         console.log(err);
         res.status(500);
         res.send();
     }
 }
 
-const deleteContainer = async(req, res) => {
+const deleteContainer = async (req, res) => {
     // it should delete the container from the database as well, there is also a route in '../models/containers' to delete the container from the database
     const contId = req.params.containerId;
     console.log(contId);
-    try{
+    try {
         const container = docker.getContainer(contId);
         const containerDetails = await docker.getContainer(contId).inspect();
-        if(containerDetails.State.Running){
+        if (containerDetails.State.Running) {
             await container.stop();
         }
         await container.remove();
-        
+
         await deleteOneContainer(contId);
         res.json({
             status: "deleted"
@@ -207,8 +207,78 @@ const deleteContainer = async(req, res) => {
     } catch (err) {
         console.log(err);
         res.status(500);
-    } 
+    }
 }
+
+const getContainerCPUandMemoryStats = async (req, res) => {
+    const { containerId } = req.params;
+
+    try {
+        // Fetch the container
+        const container = docker.getContainer(containerId);
+
+        // Fetch container statistics (stream=false to get a single snapshot)
+        const stats = await container.stats({ stream: false });
+
+        // Calculate CPU usage percentage
+        const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
+        const systemCpuDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
+        const numberCpus = stats.cpu_stats.online_cpus || 1; // Default to 1 if not defined
+        const cpuUsagePercentage = ((cpuDelta / systemCpuDelta) * 100) / numberCpus;
+
+        // Calculate memory usage percentage
+        const memoryUsage = stats.memory_stats.usage;
+        const memoryLimit = stats.memory_stats.limit;
+        const memoryUsagePercentage = (memoryUsage / memoryLimit) * 100;
+
+        // Respond with the metrics
+        res.json({
+            cpuUsagePercentage: cpuUsagePercentage.toFixed(2) + '%',
+            memoryUsagePercentage: memoryUsagePercentage.toFixed(2) + '%'
+        });
+    } catch (error) {
+        console.error('Error fetching container stats:', error);
+        res.status(500).json({ error: 'Unable to fetch container stats' });
+    }
+}
+
+const getContainerDetails = async (req, res) => {
+    const { containerId } = req.params;
+
+    try {
+        // Fetch the container
+        const container = docker.getContainer(containerId);
+
+        // Fetch container details (status)
+        const containerDetails = await container.inspect();
+
+        // Fetch container statistics (stream=false to get a single snapshot)
+        const stats = await container.stats({ stream: false });
+
+        // Calculate CPU usage percentage
+        const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
+        const systemCpuDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
+        const numberCpus = stats.cpu_stats.online_cpus || 1; // Default to 1 if not defined
+        const cpuUsagePercentage = ((cpuDelta / systemCpuDelta) * 100) / numberCpus;
+
+        // Calculate memory usage percentage
+        const memoryUsage = stats.memory_stats.usage;
+        const memoryLimit = stats.memory_stats.limit;
+        const memoryUsagePercentage = (memoryUsage / memoryLimit) * 100;
+
+        // Respond with the metrics and status
+        res.json({
+            status: containerDetails.State.Status,
+            cpuUsagePercentage: cpuUsagePercentage.toFixed(2) + '%',
+            memoryUsagePercentage: memoryUsagePercentage.toFixed(2) + '%'
+        });
+    } catch (error) {
+        console.error('Error fetching container details:', error);
+        res.status(500).json({ error: 'Unable to fetch container details' });
+    }
+}
+
+
 
 // const listAllTemplates=async (req,res) => {
 //     try{
@@ -245,9 +315,11 @@ async function isPortAvailable(port) {
 
 exports.createContainer = createContainer;
 exports.runContainer = runContainer;
-exports.listAllContainers = listAllContainers; 
+exports.listAllContainers = listAllContainers;
 exports.continerInspects = continerInspects;
 exports.stopContainer = stopContainer;
 exports.restartContainer = restartContainer;
 exports.startContainer = startContainer;
 exports.deleteContainer = deleteContainer;
+exports.getContainerCPUandMemoryStats = getContainerCPUandMemoryStats;
+exports.getContainerDetails = getContainerDetails;

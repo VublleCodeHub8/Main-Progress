@@ -28,6 +28,8 @@ const getAllAuth = async (req, res) => {
     res.json(data);
 }
 
+
+
 exports.getAllAuth = getAllAuth;
 exports.getAllContainers = getAllContainers;
 exports.getAllUsers = getAllUsers;
