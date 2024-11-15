@@ -83,6 +83,36 @@ async function getUserByEmail(email) {
     }
 }
 
+async function changeRole(email) {
+    try {
+        // Find the user by email
+        const user = await User.findOne({ email: email });
+        
+        if (!user) {
+            console.log("User not found");
+            return null;
+        }
+        
+        // Toggle the role based on current role
+        const newRole = user.role === 'user' ? 'dev' : 'user';
+        
+        // Update the role in the database
+        const result = await User.updateOne({ email: email }, { $set: { role: newRole } });
+        
+        // if (result.modifiedCount === 1) {
+        //     console.log(`Role updated successfully to ${newRole}`);
+        // } else {
+        //     console.log("Failed to update role");
+        // }
+        
+        return result;
+    } catch (err) {
+        console.log("Error:", err);
+        return null;
+    }
+}
+
+
 const User = mongoose.model('User', userSchema);
 
 
@@ -92,5 +122,5 @@ exports.addUser = addUser;
 exports.allUsers = allUsers;
 exports.editUser = editUser;
 exports.getUserByEmail = getUserByEmail;
-
+exports.changeRole = changeRole;
 

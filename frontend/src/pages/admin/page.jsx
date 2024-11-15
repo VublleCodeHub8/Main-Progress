@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { useSelector } from 'react-redux';
-import { Activity, Users, Box, Power, StopCircle, Trash, XCircle, Play, Settings } from "lucide-react";
+import { Activity, Users, Box, Power, StopCircle, Trash, XCircle, Play, Settings, ToggleRight, ArrowRight, LogOut } from "lucide-react";
 import { Link } from 'react-router-dom';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
@@ -34,7 +34,7 @@ const AdminPage = () => {
           containers: containersWithStatus.filter(container => container.email === user.email),
           isLoggedIn: authData.some(auth => auth.email === user.email && auth.noOfLogins > 0),
         }));
-
+        console.log(combinedData);
         setUsers(combinedData);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -78,27 +78,6 @@ const AdminPage = () => {
     return response.ok ? await response.json() : [];
   };
 
-  // const addContainerStatus = async (containersData) => {
-  //   return Promise.all(
-  //     containersData.map(async (container) => {
-  //       try {
-  //         const response = await fetch(`http://localhost:3000/container/inspect/${container.id}`, {
-  //           method: "GET",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //             Authorization: `Bearer ${token.token}`,
-  //           },
-  //         });
-  //         const statusData = await response.json();
-  //         return { ...container, status: statusData };
-  //       } catch (error) {
-  //         console.error(`Error fetching data for container ${container.id}:`, error);
-  //         return container;
-  //       }
-  //     })
-  //   );
-  // };
-
   const addContainerDetails = async (containersData) => {
     return Promise.all(
       containersData.map(async (container) => {
@@ -125,6 +104,7 @@ const AdminPage = () => {
       })
     );
   };
+
 
   const toggleShowContainers = (userId) => {
 
@@ -224,6 +204,49 @@ const AdminPage = () => {
     }
   };
 
+  const logoutUser = async (userEmail) => { // Rename parameter to avoid conflict
+    try {
+      const response = await fetch("http://localhost:3000/admin/adminLogout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.token}`,
+        },
+        body: JSON.stringify({ email: userEmail }), // Use userEmail directly in the payload
+      });
+  
+      if (response.ok) {
+        // console.log(`Successfully logged out user: ${userEmail}`);
+        await fetchData(); // Fetch updated data if logout was successful
+      } else {
+        console.error(`Failed to logout user: ${userEmail}`);
+      }
+    } catch (error) {
+      console.error(`Error logging out user ${userEmail}:`, error);
+    }
+  };
+
+  const changeRole = async (userEmail) => {
+    try {
+      const response = await fetch("http://localhost:3000/admin/roleChange", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.token}`,
+        },
+        body: JSON.stringify({email: userEmail}),
+      });
+      if(response.ok){
+        await fetchData();
+      } else {
+        console.error(`Failed to change role for user: ${userEmail}`);
+      }
+    } catch (error) {
+      console.error("Error changing role for user: ${userEmail}", error);
+    }
+  };
+  
+
   // Filter users and containers based on the search term
   const filteredUsers = users.map(user => ({
     ...user,
@@ -242,6 +265,7 @@ const AdminPage = () => {
     // console.log(runningPercentage);
     return runningPercentage >= 40 ? "Healthy" : "Unhealthy";
   };
+
 
   const userRoleData = {
     labels: ['Admin', 'Developer', 'User'],
@@ -268,6 +292,20 @@ const AdminPage = () => {
           containers.filter(container => container.status === 'exited').length,
         ],
         backgroundColor: ['#4CAF50', '#F44336'],
+      },
+    ],
+  };
+
+  const userLoggedInData = {
+    labels: ['Logged In', 'Logged Out'],
+    datasets:[
+      {
+        label: 'User Login Status',
+        data:[
+          users.filter(user => user.isLoggedIn).length,
+          users.filter(user => !user.isLoggedIn).length
+        ],
+        backgroundColor: ['#4CAF50', '#F44336']
       },
     ],
   };
@@ -318,7 +356,7 @@ const AdminPage = () => {
         </div>
       )}
 
-      <div className="mb-8 grid gap-4 md:grid-cols-2">
+      <div className="mb-8 grid gap-4 md:grid-cols-3">
         {/* User Role Bar Chart */}
         <Card>
           <CardHeader>
@@ -338,6 +376,16 @@ const AdminPage = () => {
             <Pie data={containerStatusData} options={{ responsive: true, maintainAspectRatio: false }} />
           </CardContent>
         </Card>
+        {/* Logged In user Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>User Login Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Pie data={userLoggedInData} options={{ responsive: true, maintainAspectRatio: false }} />
+          </CardContent>
+        </Card>
+        
       </div>
       {/* Users Table */}
       <Card className="mb-8">
@@ -346,7 +394,7 @@ const AdminPage = () => {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <UserTable users={filteredUsers} toggleShowContainers={toggleShowContainers} expandedUserIds={expandedUserIds} onStopContainer={handleStopContainer} onStartContainer={handleStartContainer} onRestartContainer={handleRestartContainer} onDeleteContainer={handleDeleteContainer} />
+            <UserTable users={filteredUsers} toggleShowContainers={toggleShowContainers} expandedUserIds={expandedUserIds} onStopContainer={handleStopContainer} onStartContainer={handleStartContainer} onRestartContainer={handleRestartContainer} onDeleteContainer={handleDeleteContainer} onLogoutUser = {logoutUser} onChangeRole = {changeRole} />
           </div>
         </CardContent>
       </Card>
@@ -368,7 +416,7 @@ const StatCard = ({ title, value, icon, color = "text-gray-500" }) => (
 );
 
 // Reusable UserTable component
-const UserTable = ({ users, toggleShowContainers, expandedUserIds, onStopContainer, onStartContainer, onRestartContainer, onDeleteContainer }) => (
+const UserTable = ({ users, toggleShowContainers, expandedUserIds, onStopContainer, onStartContainer, onRestartContainer, onDeleteContainer, onLogoutUser, onChangeRole }) => (
   <table className="w-full border-collapse">
     <thead>
       <tr className="border-b border-gray-200 text-left">
@@ -402,8 +450,11 @@ const UserTable = ({ users, toggleShowContainers, expandedUserIds, onStopContain
             </td>
             <td className="px-4 py-3">{user.containers.length}</td>
             <td className="px-4 py-3">
-              <button className="text-blue-500 hover:text-blue-700">
-                <Settings className="h-4 w-4" color="blue" />
+              <button onClick={() => onLogoutUser(user.email)} className="text-red-500 hover:text-red-800">
+                <LogOut  className="h-4 w-4" />
+              </button>
+              <button onClick={() => onChangeRole(user.email)} className="px-4 text-blue-500 hover:text-blue-800">
+                <ToggleRight className="h-4 w-4" />
               </button>
             </td>
           </tr>

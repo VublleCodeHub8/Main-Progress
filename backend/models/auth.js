@@ -119,6 +119,22 @@ async function allAuth() {
     }
 }
 
+// function to logout user by deleting the all token
+async function deleteToken(email) {
+    try {
+        const preExisting = await findAuthByEmail(email);
+        if (!preExisting) {
+            return true;
+        }
+        // console.log(email);
+        const res = await Auth.updateOne({ email: email }, { loginTokens: [] });
+        return true;
+    } catch (err) {
+        console.log(err);
+        throw (err)
+    }
+}
+
 const Auth = mongoose.model('Auth', authSchema);
 
 
@@ -130,3 +146,4 @@ exports.userSignIn = userSignIn;
 exports.logOut = logOut;
 exports.checkRecords = checkRecords;
 exports.allAuth = allAuth;
+exports.deleteToken = deleteToken;
