@@ -6,6 +6,12 @@ const templateSchema = mongoose.Schema({
     },
     image: {
         type: String
+    },
+    phase:{
+        type: String
+    },
+    description: {
+        type: String
     }
 })
 
@@ -23,9 +29,9 @@ async function findTemplateByName(name) {
     }
 }
 
-async function addTemplate(name, image) {
+async function addTemplate(name, image, phase, description) {
     try {
-        const newTemplate = new Template({ name: name, image: image });
+        const newTemplate = new Template({ name: name, image: image, phase: phase, description: description });
         await newTemplate.save();
         return true;
     } catch (err) {

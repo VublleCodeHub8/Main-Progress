@@ -12,7 +12,7 @@ const getAllTemplates = async (req, res) => {
 
 const addNewTemplate = async (req, res) => {
     const dataToAdd = req.body;
-    const data = await addTemplate(dataToAdd.name, dataToAdd.image);
+    const data = await addTemplate(dataToAdd.name, dataToAdd.image, dataToAdd.phase, dataToAdd.description);
     console.log(data);
     if (!data) {
         res.status(500);
