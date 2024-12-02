@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { HoverEffect } from "@/components/dashboard/TemplateCard";
+
+
 // export const projects = [
 //     {
 //       title: "Stripe",
@@ -59,8 +61,10 @@ const Templates = () => {
 
         const userContainers = data.map((container) => ({
           title: container.name,
-          description: `This is an image of : ${container.image}`,
+          description: container.description,
           link: `project`,
+          image: container.image,
+          price: container.price,
         }));
         console.log(userContainers);
         setProjects(userContainers);
@@ -121,7 +125,7 @@ const Templates = () => {
     <div>
       <div className="mt-8 flex flex-col gap-3  pr-32">
         <div className="flex ">
-          <h1 className="text-5xl bg-transparent ">Containers</h1>
+          <h1 className="text-5xl bg-transparent font-bold ">Templates</h1>
         </div>
         <div className="flex ">
           <h2 className="text-xl bg-transparent ">

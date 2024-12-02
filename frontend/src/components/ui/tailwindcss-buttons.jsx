@@ -28,7 +28,7 @@ export const TailwindcssButtons = ({
   idx
 }) => {
   return (
-    <ButtonsCard onClick={onClick} className={isActive ? "bg-slate-300 " : "bg-transparent"}>
+    <ButtonsCard onClick={onClick} className={isActive ? "bg-slate-300 font-bold" : "bg-transparent"}>
       {React.cloneElement(buttons[idx].component, {}, children)}
     </ButtonsCard>
   );
@@ -43,8 +43,7 @@ export const buttons = [
 
     component: (
       <button
-        className="px-4 py-2 rounded-md border border-black text-black text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200 w-full">
-          sgrt
+        className="px-2 py-1 rounded-md border border-black text-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)]  transition duration-200 w-full">
       </button>
     ),
   },

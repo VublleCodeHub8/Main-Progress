@@ -7,14 +7,17 @@ import { miscActions } from "./store/main";
 import Project from "./pages/Project";
 import Home from "./pages/dashboard/Home";
 import DashboardLayout from "./pages/Dashboard";
+import Settings from "./pages/dashboard/Settings";  
 import Profile from "./pages/dashboard/Profile";
-import About from "./pages/dashboard/About";
+// import About from "./pages/dashboard/About";
 import Containers from "./pages/dashboard/Containers";
 import Templates from "./pages/dashboard/Templates";
 import AdminWrapper from "./pages/AdminWrapper";
 import AdminPage from "./pages/admin/page";
 import DevWrapper from "./pages/DevWrapper";
 import DevPage from "./pages/dev/devpage";
+import Analytics from "./pages/dashboard/Analytics";
+import DevEdit from "./pages/dev/devedit";
 
 const router = createBrowserRouter([
   {
@@ -33,11 +36,10 @@ const router = createBrowserRouter([
             path: "",
             element: <Home />,
           },
-
-          {
-            path: "about",
-            element: <About />,
-          },
+          // {
+          //   path: "about",
+          //   element: <About />,
+          // },
           {
             path: "containers",
             element: <Containers />,
@@ -50,6 +52,14 @@ const router = createBrowserRouter([
             path: "profile",
             element: <Profile />,
           },
+          {
+            path : "analytics",
+            element : <Analytics/>
+          },
+          {
+            path : "settings",
+            element : <Settings/>
+          }
         ],
       },
       {
@@ -68,7 +78,7 @@ const router = createBrowserRouter([
         ],
       },
       {
-        // admin wrapper
+        // Dev wrapper
         path: "/dev",
         element: <DevWrapper />,
         children: [
@@ -76,6 +86,10 @@ const router = createBrowserRouter([
             path: "",
             element: <DevPage />,
           },
+          {
+            path: "editor",
+            element: <DevEdit />,
+          }
         ],
       },
     ],

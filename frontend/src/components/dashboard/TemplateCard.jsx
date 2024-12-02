@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {Link} from "react-router-dom";    
 import { useState } from "react";
+import CreateContButton  from  "@/components/dashboard/CreateContainer"
 
 export const HoverEffect = ({
   items,
@@ -13,6 +14,7 @@ export const HoverEffect = ({
     (<div
       className={cn("grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3  py-10", className)}>
       {items.map((item, idx) => (
+        <CreateContButton templateDefault = {item?.image}>
         <Link
           href={item?.link}
           key={item?.link}
@@ -22,7 +24,7 @@ export const HoverEffect = ({
           <AnimatePresence>
             {hoveredIndex === idx && (
               <motion.span
-                className="absolute inset-0 h-full w-full bg-neutral-200 block  rounded-xl"
+                className="absolute inset-0 h-full w-full bg-blue-200 block  rounded-xl"
                 layoutId="hoverBackground"
                 initial={{ opacity: 0 }}
                 animate={{
@@ -37,9 +39,10 @@ export const HoverEffect = ({
           </AnimatePresence>
           <Card>
             <CardTitle>{item.title}</CardTitle>
-            <CardDescription>{item.description}</CardDescription>
+            <CardDescription cont_price={item.price}>{item.description}</CardDescription>
           </Card>
         </Link>
+        </CreateContButton>
       ))}
     </div>)
   );
@@ -52,7 +55,7 @@ export const Card = ({
   return (
     (<div
       className={cn(
-        "rounded-xl h-full w-full p-4 overflow-hidden bg-white border border-transparent group-hover:border-slate-500 relative z-20",
+        "rounded-xl h-full w-full p-4 overflow-hidden bg-white  border border-transparent group-hover:border-slate-500 relative z-20",
         className
       )}>
       <div className="relative z-50">
@@ -66,19 +69,25 @@ export const CardTitle = ({
   children
 }) => {
   return (
-    (<h4 className={cn("text-zinc-700 font-bold tracking-wide mt-4", className)}>
+    (<h2 className={cn("text-zinc-700 text-2xl font-bold tracking-wide mt-2 ", className)}>
       {children}
-    </h4>)
+    </h2>)
   );
 };
 export const CardDescription = ({
+  cont_price,
   className,
   children
 }) => {
   return (
-    (<p
-      className={cn("mt-8 text-zinc-900 tracking-wide leading-relaxed text-sm", className)}>
-      {children}
-    </p>)
+
+    (<div>
+      <h4 className={cn("text-zinc-900 tracking-wide leading-relaxed text-xl", className)}>
+        {cont_price}$ /per hour
+      </h4>
+      <p className={cn("pt-4 text-zinc-900 tracking-wide leading-relaxed text-sm", className)}>
+        {children}
+      </p>
+    </div>)
   );
 };

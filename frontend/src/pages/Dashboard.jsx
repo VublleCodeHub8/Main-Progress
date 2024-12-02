@@ -60,7 +60,7 @@ function DashboardLayout() {
   return (
     <>
       <div className="flex flex-col h-screen bg-home_background">
-        <div className="border-b-2 border-stone-400 h-16 text-gray-600 flex items-center justify-end p-4">
+        <div className="border-b-2 border-stone-400 text-gray-600 h-16 flex items-center justify-end p-4">
           <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center focus:outline-none">
@@ -80,6 +80,12 @@ function DashboardLayout() {
                 <DropdownMenuItem onSelect={() => navigate("/containers")}>
                   My Containers
                 </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => navigate("/analytics")}>
+                  Analytics
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => navigate("/settings")}>
+                  Settings
+                </DropdownMenuItem>
                 <DropdownMenuItem onSelect={handleLogout}>
                   Logout
                 </DropdownMenuItem>
@@ -89,7 +95,7 @@ function DashboardLayout() {
         </div>
         <div className="flex flex-1">
           <Sidebar />
-          <div className="flex-1 justify-center flex-wrap px-56 py-10">
+          <div className="w-full justify-center flex-wrap px-20 py-10">
             <Outlet />
           </div>
         </div>

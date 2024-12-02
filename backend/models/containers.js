@@ -81,6 +81,14 @@ const allContainers = async () => {
     }
 }
 
+const deleteOneContainer = async (id) => {
+    try {
+        await Container.deleteOne({ id: id });
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
+}
 
 
 
@@ -94,3 +102,4 @@ exports.getContainerByPort = getContainerByPort;
 exports.getContainersByEmail = getContainersByEmail;
 exports.createNewContainer = createNewContainer;
 exports.allContainers = allContainers;
+exports.deleteOneContainer = deleteOneContainer; 

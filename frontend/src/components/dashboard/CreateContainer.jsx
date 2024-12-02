@@ -24,29 +24,12 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
-function CreateContButton(templateDefault = 1) {
+const CreateContButton = ({ templateDefault = 1, className, children }) =>{
   const token = useSelector((state) => state.misc.token);
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
-  const [template, setTemplate] = useState("");
+  const [template, setTemplate] = useState(templateDefault);
 
-  // async function newProject() {
-  //     const res = await fetch("http://localhost:3000/container/createcontainer", {
-  //     method: "GET",
-  //     headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: "Bearer " + token?.token,
-  //     },
-  //     });
-  //     if (res.ok) {
-  //     const data = await res.json();
-  //     console.log(data);
-  //     navigate(`/project/${data.containerId}`);
-  //     } else if (res.status === 401) {
-  //     alert("Not Authenticated!!");
-  //     navigate("/login");
-  //     }
-  // }
   const handleTemplateChange = (value) => {
     setTemplate(value);
   };
@@ -73,6 +56,7 @@ function CreateContButton(templateDefault = 1) {
           id: template?.id === null ? index : template.id,
           image: template.image,
         }));
+        templates.unshift({ name: "Select Template", id: "", image: "undefined" });
         console.log(" teok ", templates);
         setTemplates(templates);
       }
@@ -119,7 +103,7 @@ function CreateContButton(templateDefault = 1) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <TailwindcssButtons idx={2}>+ CREATE</TailwindcssButtons>
+        {children}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -133,9 +117,9 @@ function CreateContButton(templateDefault = 1) {
             <Label htmlFor="name" className="text-right">
               Template
             </Label>
-            <Select onValueChange={handleTemplateChange} value={template.name}>
+            <Select onValueChange={handleTemplateChange} value={template}>
               <SelectTrigger className="w-64">
-                <SelectValue placeholder="Select Template" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -157,6 +141,7 @@ function CreateContButton(templateDefault = 1) {
               id="title"
               className="col-span-3"
               onChange={handleTitleChange}
+              value={title}
             />
           </div>
         </div>

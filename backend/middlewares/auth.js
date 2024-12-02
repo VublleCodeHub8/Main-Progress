@@ -49,6 +49,7 @@ const isAdmin = async (req, res, next) => {
 }
 
 const isDev = async (req, res, next) => {
+    console.log(req.userData.role);
     if (req.userData && (req.userData.role === "dev" || req.userData.role === "admin")) {
         next();
     } else {

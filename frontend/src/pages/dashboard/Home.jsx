@@ -96,7 +96,9 @@ useEffect(() => {
   return (
     <div>
       <div className=" ">
-        <CreateContButton />    
+        <CreateContButton templateDefault = {"undefined"}>
+          <TailwindcssButtons idx={2} > + Create Container</TailwindcssButtons>
+        </CreateContButton>    
       {/* Add recent activity content */}
       </div>
     <div>

@@ -1,216 +1,253 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { Bar, Pie } from 'react-chartjs-2';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Power, Edit, Search, Sliders } from "lucide-react";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
+
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const DevPage = () => {
-  const [data, setData] = useState(null); // State to hold the template data
-  const [error, setError] = useState(null); // State to handle any errors
-  const [isFormVisible, setFormVisible] = useState(false); // State to toggle form visibility
-  const [newTemplate, setNewTemplate] = useState({ name: '', image: '' }); // State for new template
+  const dispatch = useDispatch();
+  const [templates, setTemplates] = useState([]);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState(""); // Add search term state
   const token = useSelector((state) => state.misc.token);
 
-  // Function to show template data
-  const showTemplates = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/dev/getAllTemplates", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token.token,
-        },
-      });
-      if (response.ok) {
-        const fetchedData = await response.json();
-        // setData(fetchedData);
-        setData({
-            type: 'template',
-            details: fetchedData,
-        });
-      } else {
-        setError("Failed to fetch templates");
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [templateData, containerData] = await Promise.all([
+          fetchTemplate(),
+          fetchContainers(),
+        ]);
+        const combinedData = templateData.map((template) => {
+          const uses = containerData.filter((container) => container.template === template.image).length;
+          return { ...template, uses };
+        })
+        console.log(combinedData);
+        setTemplates(combinedData);
+      } catch (err) {
+        setError(err.message);
       }
-    } catch (error) {
-      console.error("Error fetching templates:", error);
-      setError("An error occurred while fetching templates");
-    }
+    };
+    fetchData();
+  }, [token]);
+
+  const fetchTemplate = async () => {
+    const response = await fetch("http://localhost:3000/dev/getAllTemplates", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.token}`,
+      },
+    });
+    return response.ok ? await response.json() : Promise.reject(response);
+  }
+  const fetchContainers = async () => {
+    const response = await fetch("http://localhost:3000/admin/getAllContainers", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.token}`,
+      },
+    });
+    return response.ok ? await response.json() : [];
   };
 
-  // Function to handle form submission for creating a new template
-  const handleCreateTemplate = async (e) => {
-    e.preventDefault(); // Prevent page reload
-    try {
-      const response = await fetch("http://localhost:3000/dev/addNewTemplate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token.token,
-        },
-        body: JSON.stringify(newTemplate),
-      });
-    //   console.log(response.ok);    
-      if (response.ok) {
-        //   console.log("xyz");
-        // const createdTemplate = await response.json();
-        alert('Template created successfully');
-        setNewTemplate({ name: '', image: '' }); // Clear form
-        setFormVisible(false); // Hide form after submission
-      } else {
-        setError("Failed to create template");
-      }
-    } catch (error) {
-      console.error("Error creating template:", error);
-      setError("An error occurred while creating the template");
-    }
+
+  const filteredTemplates = templates.filter((template => {
+    return template.name.toLowerCase().includes(searchTerm.toLowerCase());
+  }))
+
+  const templatePhase = {
+    labels: ['Development', 'Testing', 'Production'],
+    datasets: [
+      {
+        label: 'Phase',
+        data: [
+          templates.filter(template => template.phase === 'Development').length,
+          templates.filter(template => template.phase === 'Testing').length,
+          templates.filter(template => template.phase === 'Production').length
+        ],
+        backgroundColor: ['#bfdbfe', '#fef08a', '#bbf7d0'],
+      },
+    ],
   };
 
-  // Function to handle input changes in form
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewTemplate((prevState) => ({ ...prevState, [name]: value }));
+  const generateRandomColor = () => {
+    const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+    return randomColor.padEnd(7, "0"); 
+  };
+  
+  const templateStatus = {
+    labels: templates.map(template => template.name),
+    datasets: [
+      {
+        label: 'Status',
+        data: templates.map(template => template.uses),
+        backgroundColor: templates.map(template => generateRandomColor()),
+      },
+    ],
   };
 
   return (
-    <div style={{ padding: '20px', textAlign: 'center' }}>
-      <h1>Dev Page</h1>
-
-      {/* Button to fetch and show templates */}
-      <div>
-        <button onClick={showTemplates} style={buttonStyle}>
-          Show Templates
-        </button>
-
-        {/* Button to toggle form visibility */}
-        <button onClick={() => setFormVisible(!isFormVisible)} style={buttonStyle}>
-          Create New Template
-        </button>
+    <div className="min-h-screen bg-gray-100 p-8">
+      {/* Header */}
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-4xl font-bold">Developer Dashboard</h1>
+        <div className="flex gap-4">
+          <Link
+            to="/auth"
+            className="flex items-center gap-2 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+          >
+            <Power className="h-4 w-4" />
+            Logout
+          </Link>
+          <Link
+            to="/dev/editor"
+            className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+          >
+            <Edit className="h-4 w-4" />
+            Editor
+          </Link>
+        </div>
       </div>
 
-      {/* Display the user data in a table */}
-      <div style={{ marginTop: '20px' }}>
-        {data && data.type === 'template' && (
-          <div>
-            <h2>Showing Tamplate Details</h2>
-            <table style={tableStyle}>
-              <thead>
-                <tr>
-                  {Object.keys(data.details[0]).map((key) => (
-                    <th key={key}>{key}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {data.details.map((item) => (
-                  <tr key={item.id}>
-                    {Object.values(item).map((value, index) => (
-                      <td key={index}>{value}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Search Bar */}
+      <div className="mb-8 flex items-center rounded border border-gray-300 bg-white px-4 py-2 shadow-sm">
+        <Search className="h-5 w-5 text-gray-500" />
+        <input
+          type="text"
+          placeholder="Search by template name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="ml-2 w-full border-none outline-none focus:ring-0"
+        />
+      </div>
+
+      {/* Stats Overview */}
+      <div className="mb-8 grid gap-4 md:grid-cols-2">
+        <StatCard title="Total Templates" value={templates.length} icon={<Sliders className="h-4 w-4 text-gray-500" />} />
+        <StatCard
+          title="Active Templates"
+          value={templates.filter(templates => templates.phase === 'Production').length}
+          icon={<Edit className="h-4 w-4 text-gray-500" />}
+        />
+      </div>
+
+      <div className='mb-8 grid gap-4 md:grid-cols-2'>
+          {/* Phase Bar Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Template Phase</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Bar data = {templatePhase} options={{ responsive: true, maintainAspectRatio: false }} />
+            </CardContent>
+          </Card>
+
+          {/* Template Status Pie Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Template Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Pie data = {templateStatus} options={{ responsive: true, maintainAspectRatio: false }} />
+            </CardContent>
+          </Card>
+          
+      </div>
+
+
+      {/* Template table */}
+      <Card className='mb-8'>
+        <CardHeader>
+          <CardTitle>Templates</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className='overflow-x-auto'>
+            <TempTable templates={filteredTemplates} />
           </div>
-        )}
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Form to create a new template */}
-      {isFormVisible && (
-        <div style={formStyle}>
-          <h2>Create New Template</h2>
-          <form onSubmit={handleCreateTemplate}>
-            <div>
-              <label htmlFor="name">Name: </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={newTemplate.name}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="image">Image Name: </label>
-              <input
-                type="text"
-                id="image"
-                name="image"
-                value={newTemplate.image}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <button type="submit" style={createButtonStyle}>
-              Create Template
-            </button>
-          </form>
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 rounded bg-red-100 p-4 text-red-700">
+          {error}
         </div>
       )}
     </div>
   );
 };
 
-// Styles
-const buttonStyle = {
-    padding: '10px 20px',
-    margin: '10px',
-    backgroundColor: '#007BFF',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  };
-  
-  const tableStyle = {
-    margin: '0 auto',
-    borderCollapse: 'collapse',
-    width: '80%',
-    border: '1px solid #ddd',
-  };
-  
-  const formContainerStyle = {
-    marginTop: '20px',
-    backgroundColor: '#f0f0f0',
-    padding: '30px',
-    border: '1px solid #ddd',
-    borderRadius: '8px',
-    width: '60%',
-    margin: '0 auto',
-  };
-  
-  const formStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '15px',
-  };
-  
-  const formFieldStyle = {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-  };
-  
-  const labelStyle = {
-    flex: '1',
-    textAlign: 'right',
-    marginRight: '10px',
-    fontWeight: 'bold',
-  };
-  
-  const inputStyle = {
-    flex: '2',
-    padding: '8px',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    width: '100%',
-  };
-  
-  const createButtonStyle = {
-    padding: '12px 20px',
-    marginTop: '10px',
-    backgroundColor: '#28a745',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  };
-  
+const TempTable = ({ templates }) => (
+  <table className='w-full border-collapse'>
+    <thead>
+      <tr className="border-b border-gray-200 text-left">
+        <TableHeader title="Name" className="text-lg font-semibold" />
+        <TableHeader title="Image" className="text-lg font-semibold" />
+        <TableHeader title="Phase" className="text-lg font-semibold" />
+        <TableHeader title="Description" className="text-lg font-semibold" />
+        <TableHeader title = "Price" className="text-lg font-semibold" />
+        <TableHeader title="Uses" className="text-lg font-semibold" />
+      </tr>
+
+    </thead>
+    <tbody>
+      {templates.map(template => (
+        <React.Fragment key={template._id}>
+          <tr className='border-b border-gray-200'>
+            <td className='px-4 py-3 font-meduim' >{template.name}</td>
+            <td className='px-4 py-3' >{template.image}</td>
+            <td className='px-4 py-3' >
+              <span
+                className={
+                  template.phase === 'Development' ? 'bg-blue-200 px-2 py-1 rounded' :
+                    template.phase === 'Testing' ? 'bg-yellow-200 px-2 py-1 rounded' :
+                      template.phase === 'Production' ? 'bg-green-200 px-2 py-1 rounded' : ''
+                }
+              >
+                {template.phase}
+              </span>
+            </td>
+            {/* description should be half hidden and show full on hover */}
+            <td className="px-4 py-3">
+              <div className="relative max-w-xs">
+                <p
+                  className="overflow-hidden text-ellipsis whitespace-nowrap hover:whitespace-normal bg-gray-100 p-2 rounded transition-all duration-300"
+                  title={template.description} // Optional: Tooltip for non-hover devices
+                >
+                  {template.description}
+                </p>
+              </div>
+            </td>
+            <td className='px-4 py-3 text-green-500 font-bold' >${template.price}</td>
+            <td className='px-4 py-3' >{template.uses}</td>
+          </tr>
+        </React.Fragment>
+      ))}
+    </tbody>
+  </table>
+);
+
+const TableHeader = ({ title }) => (
+  <th className="px-4 py-3 text-lg font-medium text-gray-500">{title}</th>
+);
+
+const StatCard = ({ title, value, icon, color = "text-gray-500" }) => (
+  <Card>
+    <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <CardTitle className="text-sm font-medium">{title}</CardTitle>
+      <div className={color}>{icon}</div>
+    </CardHeader>
+    <CardContent>
+      <div className="text-3xl font-bold">{value}</div>
+    </CardContent>
+  </Card>
+);
+
+
 export default DevPage;

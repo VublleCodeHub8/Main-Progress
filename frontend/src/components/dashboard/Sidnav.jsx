@@ -6,7 +6,8 @@ import {
     FaShoppingBag,
     FaFile,
     FaLightbulb,
-    FaHome
+    FaHome,
+    FaCog
 }from "react-icons/fa";
 import { TailwindcssButtons } from "@/components/ui/tailwindcss-buttons";
 
@@ -41,33 +42,43 @@ function Sidebar () {
             name: "Profile",
             icon: <FaLightbulb />
         },
+        // {
+        //     path: "/about",
+        //     name: "About",
+        //     icon: <FaUserAlt />
+        // },
         {
-            path: "/about",
-            name: "About",
-            icon: <FaUserAlt />
+            path: "/analytics",
+            name: "Analytics",
+            icon: <FaRegChartBar/>
+        
         },
+        {
+            path : "/settings",
+            name : "Settings",
+            icon : <FaCog/>
+        }
         
     ];
 
     return (
-        <div style={{ width: isOpen ? "w-full" : "50px" }} className="border-r-2 border-stone-400 text-slate-900 w-64 min-h-screen p-4">
+        <div style={{ width: isOpen ? "w-full" : "115px" }} className="border-r-2 border-stone-400 text-slate-900 w-[18rem] p-4">
             
-            <nav>
                 <div className='flex flex-col'>
                     {menuItem.map((item, index) => (
                         <Link to={item.path} key={index}>
                             <div className='my-2 rounded-md'>
-                            <TailwindcssButtons idx={0} className="w-full" isActive={isActive(item.path)}>
-                                <div className='flex flex-row items-center'>
-                                    <div className="icon m-2">{item.icon}</div>
-                                    <div style={{ display: isOpen ? "block" : "none" }} className="block "> {item.name} </div>
+                            <TailwindcssButtons idx={0} className="w-full " isActive={isActive(item.path)}>
+                                <div className='flex flex-row items-center text-2xl hover:font-bold' >
+                                    <div className="icon m-2 ">{item.icon}</div>
+                                    <div style={{ display: isOpen ? "block" : "none" }} className="block pl-2"> {item.name} </div>
                                 </div>
                             </TailwindcssButtons>
                             </div>
                         </Link>
                     ))}
                 </div>
-            </nav>
+    
         </div>
     );
 }
