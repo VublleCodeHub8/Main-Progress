@@ -315,7 +315,9 @@ const AdminPage = () => {
     <div className="min-h-screen bg-gray-100 p-8">
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-4xl font-bold">Admin Dashboard</h1>
+        <Link to = "/">
+          <h1 className="text-4xl font-bold">Admin Dashboard</h1>
+        </Link>
         <Link to="/auth" className="flex items-center gap-2 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600">
           <Power className="h-4 w-4" />
           Logout

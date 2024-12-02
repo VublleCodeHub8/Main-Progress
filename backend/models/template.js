@@ -43,7 +43,7 @@ async function addTemplate(name, image, phase, description, price) {
     }
 }
 
-async function updateTemplate(id, { name, phase, description, price }) {
+async function updateTemplates(id, { name, phase, description, price }) {
     try {
         if (!id) {
             throw new Error("Template ID is required.");
@@ -54,9 +54,7 @@ async function updateTemplate(id, { name, phase, description, price }) {
         if (description) updateData.description = description;
         if (price) updateData.price = price;
 
-        const result = await TemplateModel.findByIdAndUpdate(id, updateData, {
-            new: true, 
-        });
+        const result = await Template.findByIdAndUpdate(id, updateData, { new: true });
         if (!result) {
             throw new Error("Template not found.");
         }
@@ -88,4 +86,4 @@ exports.templateModel = Template;
 exports.findTemplateByName = findTemplateByName;
 exports.allTemplate = allTemplate;
 exports.addTemplate = addTemplate;
-exports.updateTemplate = updateTemplate;
+exports.updateTemplates = updateTemplates;
