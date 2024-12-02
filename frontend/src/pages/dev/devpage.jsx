@@ -96,7 +96,9 @@ const DevPage = () => {
     <div className="min-h-screen bg-gray-100 p-8">
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-4xl font-bold">Developer Dashboard</h1>
+        <Link to = "/">
+          <h1 className="text-4xl font-bold">Developer Dashboard</h1>
+        </Link>
         <div className="flex gap-4">
           <Link
             to="/auth"
