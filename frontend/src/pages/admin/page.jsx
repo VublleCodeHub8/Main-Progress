@@ -5,6 +5,8 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearSca
 import { useSelector } from 'react-redux';
 import { Activity, Users, Box, Power, StopCircle, Trash, Search, Play, Edit, ToggleRight, ArrowRight, LogOut } from "lucide-react";
 import { Link } from 'react-router-dom';
+import Popup from '@/components/Popup';
+import { set } from 'react-hook-form';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
@@ -15,6 +17,9 @@ const AdminPage = () => {
   const [expandedUserIds, setExpandedUserIds] = useState([]);
   const [searchTerm, setSearchTerm] = useState(""); // Add search term state
   const token = useSelector((state) => state.misc.token);
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState("success"); // 'success' or 'error'
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,7 +31,6 @@ const AdminPage = () => {
         ]);
 
         const containersWithStatus = await addContainerDetails(containersData);
-        // console.log(containersWithStatus);
         setContainers(containersWithStatus);
 
         const combinedData = usersData.map(user => ({
@@ -114,13 +118,11 @@ const AdminPage = () => {
       } else {
         return [...prevUserIds, userId];
       }
-    });
-    // console.log(expandedUserIds);
+    });   
   };
 
   const handleStopContainer = async (containerId) => {
     try {
-      // wait for the response before fetching the latest data
       const response = await fetch(`http://localhost:3000/container/stop/${containerId}`, {
         method: "GET",
         headers: {
@@ -128,21 +130,28 @@ const AdminPage = () => {
           Authorization: `Bearer ${token.token}`,
         },
       });
-      // console.log(response);
       if (response.ok) {
-        // Fetch the latest data to refresh the page 
-        await fetchData();
-      } else {
+        setContainers(containers.map(container => container.id === containerId ? { ...container, status: "exited" } : container));
+        setPopupMessage("Container stopped successfully");
+        setPopupType("success");
+        setPopupVisible(true);
+        console.log(response.ok);
+      } else { 
         console.error(`Failed to stop container ${containerId}`);
+        setPopupMessage("Failed to stop container");
+        setPopupType("error");
+        setPopupVisible(true);
       }
     } catch (error) {
       console.error(`Error stopping container ${containerId}:`, error);
+      setPopupMessage("Error stopping container");
+      setPopupType("error");
+      setPopupVisible(true);
     }
-  };
+  }; 
 
   const handleStartContainer = async (containerId) => {
     try {
-      // wait for the response before fetching the latest data
       const response = await fetch(`http://localhost:3000/container/start/${containerId}`, {
         method: "GET",
         headers: {
@@ -150,16 +159,23 @@ const AdminPage = () => {
           Authorization: `Bearer ${token.token}`,
         },
       });
-      // console.log(response);
       if (response.ok) {
-        // Fetch the latest data to refresh the page 
-        await fetchData();
+        setContainers(containers.map(container => container.id === containerId ? { ...container, status: "running" } : container));
+        setPopupMessage("Container started successfully");
+        setPopupType("success");
+        setPopupVisible(true);
       } else {
         console.error(`Failed to start container ${containerId}`);
+        setPopupMessage("Failed to start container");
+        setPopupType("error");
+        setPopupVisible(true);
       }
     } catch (error) {
       console.error(`Error starting container ${containerId}:`, error);
-    }
+      setPopupMessage("Error starting container");
+      setPopupType("error");
+      setPopupVisible(true);
+    } 
   };
 
   const handleRestartContainer = async (containerId) => {
@@ -171,9 +187,7 @@ const AdminPage = () => {
           Authorization: `Bearer ${token.token}`,
         },
       });
-      // console.log(response);
       if (response.ok) {
-        // Fetch the latest data to refresh the page 
         await fetchData();
       } else {
         console.error(`Failed to restart container ${containerId}`);
@@ -191,19 +205,28 @@ const AdminPage = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token.token}`,
         },
-      });
-      // console.log(response);
+      });  
       if (response.ok) {
-        // Fetch the latest data to refresh the page 
-        await fetchData();
+        // await fetchData();
+        console.log(containers.filter(container => container.id !== containerId));
+        setContainers(containers.filter(container => container.id !== containerId));
+        setPopupMessage("Container deleted successfully");
+        setPopupType("success");
+        setPopupVisible(true);
       } else {
         console.error(`Failed to delete container ${containerId}`);
+        setPopupMessage("Failed to delete container");
+        setPopupType("error"); 
+        setPopupVisible(true);
       }
     } catch {
       console.error(`Error deleting container ${containerId}`, error);
+      setPopupMessage("Error deleting container");
+      setPopupType("error");
+      setPopupVisible(true);
     }
-  };
-
+  }; 
+ 
   const logoutUser = async (userEmail) => { // Rename parameter to avoid conflict
     try {
       const response = await fetch("http://localhost:3000/admin/adminLogout", {
@@ -213,16 +236,25 @@ const AdminPage = () => {
           Authorization: `Bearer ${token.token}`,
         },
         body: JSON.stringify({ email: userEmail }), // Use userEmail directly in the payload
-      });
+      }); 
 
       if (response.ok) {
-        // console.log(`Successfully logged out user: ${userEmail}`);
-        await fetchData(); // Fetch updated data if logout was successful
+        // await fetchData(); // Fetch updated data if logout was successful\
+        setUsers(users.map(user => user.email === userEmail ? { ...user, isLoggedIn: false } : user));
+        setPopupMessage("User logged out successfully");
+        setPopupType("success");
+        setPopupVisible(true);
       } else {
         console.error(`Failed to logout user: ${userEmail}`);
+        setPopupMessage("Failed to logout user");
+        setPopupType("error");
+        setPopupVisible(true);
       }
     } catch (error) {
       console.error(`Error logging out user ${userEmail}:`, error);
+      setPopupMessage("Error logging out user");
+      setPopupType("error");
+      setPopupVisible(true);
     }
   };
 
@@ -237,17 +269,26 @@ const AdminPage = () => {
         body: JSON.stringify({ email: userEmail }),
       });
       if (response.ok) {
-        await fetchData();
+        // await fetchData();
+        setUsers(users.map(user => user.email === userEmail ? { ...user, role: user.role === 'dev' ? 'user' : 'dev' } : user));
+        setPopupMessage("Role changed successfully");
+        setPopupType("success");
+        setPopupVisible(true);
       } else {
         console.error(`Failed to change role for user: ${userEmail}`);
+        setPopupMessage("Failed to change role for user");
+        setPopupType("error");
+        setPopupVisible(true);
       }
     } catch (error) {
       console.error("Error changing role for user: ${userEmail}", error);
+      setPopupMessage("Error changing role for user");
+      setPopupType("error");
+      setPopupVisible(true);
     }
   };
 
 
-  // Filter users and containers based on the search term
   const filteredUsers = users.map(user => ({
     ...user,
     containers: user.containers.filter(container =>
@@ -262,7 +303,6 @@ const AdminPage = () => {
     const runningContainers = containers.filter(container => container.status === 'running').length;
     const totalContainers = containers.length;
     const runningPercentage = (runningContainers / totalContainers) * 100;
-    // console.log(runningPercentage);
     return runningPercentage >= 40 ? "Healthy" : "Unhealthy";
   };
 
@@ -388,6 +428,7 @@ const AdminPage = () => {
           </CardHeader>
           <CardContent>
             <Pie data={containerStatusData} options={{ responsive: true, maintainAspectRatio: false }} />
+
           </CardContent>
         </Card>
         {/* Logged In user Chart */}
@@ -408,8 +449,22 @@ const AdminPage = () => {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <UserTable users={filteredUsers} toggleShowContainers={toggleShowContainers} expandedUserIds={expandedUserIds} onStopContainer={handleStopContainer} onStartContainer={handleStartContainer} onRestartContainer={handleRestartContainer} onDeleteContainer={handleDeleteContainer} onLogoutUser={logoutUser} onChangeRole={changeRole} />
+            <UserTable
+              setPopupVisible={setPopupVisible}
+              popupMessage={popupMessage}
+              popupType={popupType}
+              popupVisible={popupVisible}
+              users={filteredUsers}
+              toggleShowContainers={toggleShowContainers}
+              expandedUserIds={expandedUserIds}
+              onStopContainer={handleStopContainer}
+              onStartContainer={handleStartContainer}
+              onRestartContainer={handleRestartContainer}
+              onDeleteContainer={handleDeleteContainer}
+              onLogoutUser={logoutUser}
+              onChangeRole={changeRole} />
           </div>
+
         </CardContent>
       </Card>
     </div>
@@ -430,7 +485,7 @@ const StatCard = ({ title, value, icon, color = "text-gray-500" }) => (
 );
 
 // Reusable UserTable component
-const UserTable = ({ users, toggleShowContainers, expandedUserIds, onStopContainer, onStartContainer, onRestartContainer, onDeleteContainer, onLogoutUser, onChangeRole }) => (
+const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, users, toggleShowContainers, expandedUserIds, onStopContainer, onStartContainer, onRestartContainer, onDeleteContainer, onLogoutUser, onChangeRole }) => (
   <table className="w-full border-collapse">
     <thead>
       <tr className="border-b border-gray-200 text-left">
@@ -454,7 +509,7 @@ const UserTable = ({ users, toggleShowContainers, expandedUserIds, onStopContain
                   user.role === 'admin' ? 'text-red-500 font-bold' :
                     user.role === 'dev' ? 'text-blue-500 font-bold' :
                       user.role === 'user' ? 'text-green-500 font-bold' : ''
-                }
+                } 
               >
                 {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
               </span>
@@ -469,7 +524,13 @@ const UserTable = ({ users, toggleShowContainers, expandedUserIds, onStopContain
               </button>
               <button onClick={() => onChangeRole(user.email)} className="px-4 text-blue-500 hover:text-blue-800">
                 <ToggleRight className="h-4 w-4" />
-              </button>
+              </button> 
+              <Popup
+                visible={popupVisible}
+                message={popupMessage}
+                onClose={() => setPopupVisible(false)}
+                type={popupType}
+              />
             </td>
           </tr>
           {expandedUserIds.includes(user._id) && user.containers.map(container => (
@@ -480,6 +541,7 @@ const UserTable = ({ users, toggleShowContainers, expandedUserIds, onStopContain
               onStartContainer={onStartContainer}
               onRestartContainer={onRestartContainer}
               onDeleteContainer={onDeleteContainer}
+              setPopupVisible={setPopupVisible} popupMessage={popupMessage} popupType={popupType} popupVisible={popupVisible}
             />
           ))}
         </React.Fragment>
@@ -499,7 +561,7 @@ const StatusBadge = ({ status }) => (
   </span>
 );
 
-const ContainerRow = ({ container, onStopContainer, onStartContainer, onRestartContainer, onDeleteContainer }) => (
+const ContainerRow = ({ setPopupVisible, popupMessage, popupType, popupVisible, container, onStopContainer, onStartContainer, onRestartContainer, onDeleteContainer }) => (
   <tr className="border-b border-gray-100 bg-gray-50">
     <td className="px-4 py-3 pl-12" colSpan={3}>{container.name}</td>
 
@@ -513,14 +575,20 @@ const ContainerRow = ({ container, onStopContainer, onStartContainer, onRestartC
       <button onClick={() => onStopContainer(container.id)} className="mr-2 text-red-500 hover:text-red-700">
         <StopCircle className="h-4 w-4" />
       </button>
-      {/* <button onClick={() => onRestartContainer(container.id)} className="text-blue-500 hover:text-blue-700">Restart</button> */}
       <button onClick={() => onStartContainer(container.id)} className="ml-2 text-green-500 hover:text-green-700">
         <Play className="h-4 w-4" />
       </button>
       <button onClick={() => onDeleteContainer(container.id)} className="ml-2 text-red-700 hover:text-red-900">
         <Trash className="h-4 w-4" />
       </button>
+      <Popup
+        visible={popupVisible}
+        message={popupMessage}
+        onClose={() => setPopupVisible(false)}
+        type={popupType}
+      />
     </td>
+
   </tr>
 );
 
