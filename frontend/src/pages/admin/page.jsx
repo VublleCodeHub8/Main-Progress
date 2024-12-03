@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { useSelector } from 'react-redux';
-import { Activity, Users, Box, Power, StopCircle, Trash, Search, Play, Edit, ToggleRight, ArrowRight, LogOut } from "lucide-react";
+import { Activity, Users, User, Box, Power, StopCircle, Trash, Search, Play, Edit, ToggleRight, ArrowRight, LogOut } from "lucide-react";
 import { Link } from 'react-router-dom';
 import Popup from '@/components/Popup';
 import { set } from 'react-hook-form';
@@ -118,7 +118,7 @@ const AdminPage = () => {
       } else {
         return [...prevUserIds, userId];
       }
-    });   
+    });
   };
 
   const handleStopContainer = async (containerId) => {
@@ -136,7 +136,7 @@ const AdminPage = () => {
         setPopupType("success");
         setPopupVisible(true);
         console.log(response.ok);
-      } else { 
+      } else {
         console.error(`Failed to stop container ${containerId}`);
         setPopupMessage("Failed to stop container");
         setPopupType("error");
@@ -148,7 +148,7 @@ const AdminPage = () => {
       setPopupType("error");
       setPopupVisible(true);
     }
-  }; 
+  };
 
   const handleStartContainer = async (containerId) => {
     try {
@@ -175,7 +175,7 @@ const AdminPage = () => {
       setPopupMessage("Error starting container");
       setPopupType("error");
       setPopupVisible(true);
-    } 
+    }
   };
 
   const handleRestartContainer = async (containerId) => {
@@ -205,7 +205,7 @@ const AdminPage = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token.token}`,
         },
-      });  
+      });
       if (response.ok) {
         // await fetchData();
         console.log(containers.filter(container => container.id !== containerId));
@@ -216,7 +216,7 @@ const AdminPage = () => {
       } else {
         console.error(`Failed to delete container ${containerId}`);
         setPopupMessage("Failed to delete container");
-        setPopupType("error"); 
+        setPopupType("error");
         setPopupVisible(true);
       }
     } catch {
@@ -225,8 +225,8 @@ const AdminPage = () => {
       setPopupType("error");
       setPopupVisible(true);
     }
-  }; 
- 
+  };
+
   const logoutUser = async (userEmail) => { // Rename parameter to avoid conflict
     try {
       const response = await fetch("http://localhost:3000/admin/adminLogout", {
@@ -236,7 +236,7 @@ const AdminPage = () => {
           Authorization: `Bearer ${token.token}`,
         },
         body: JSON.stringify({ email: userEmail }), // Use userEmail directly in the payload
-      }); 
+      });
 
       if (response.ok) {
         // await fetchData(); // Fetch updated data if logout was successful\
@@ -501,7 +501,14 @@ const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, use
       {users.map(user => (
         <React.Fragment key={user._id}>
           <tr className="border-b border-gray-200 cursor-pointer">
-            <td className="px-4 py-3 font-medium" onClick={() => toggleShowContainers(user._id)}>{user.username}</td>
+            <td
+              className="px-4 py-3 font-medium flex items-center gap-2"
+              onClick={() => toggleShowContainers(user._id)}
+            >
+              <User className="h-4 w-4 text-gray-500" />
+              <span>{user.username}</span>
+            </td>
+
             <td className="px-4 py-3" onClick={() => toggleShowContainers(user._id)}>{user.email}</td>
             <td className="px-4 py-3" onClick={() => toggleShowContainers(user._id)}>
               <span
@@ -509,7 +516,7 @@ const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, use
                   user.role === 'admin' ? 'text-red-500 font-bold' :
                     user.role === 'dev' ? 'text-blue-500 font-bold' :
                       user.role === 'user' ? 'text-green-500 font-bold' : ''
-                } 
+                }
               >
                 {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
               </span>
@@ -524,7 +531,7 @@ const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, use
               </button>
               <button onClick={() => onChangeRole(user.email)} className="px-4 text-blue-500 hover:text-blue-800">
                 <ToggleRight className="h-4 w-4" />
-              </button> 
+              </button>
               <Popup
                 visible={popupVisible}
                 message={popupMessage}
@@ -563,8 +570,8 @@ const StatusBadge = ({ status }) => (
 
 const ContainerRow = ({ setPopupVisible, popupMessage, popupType, popupVisible, container, onStopContainer, onStartContainer, onRestartContainer, onDeleteContainer }) => (
   <tr className="border-b border-gray-100 bg-gray-50">
-    <td className="px-4 py-3 pl-12" colSpan={3}>{container.name}</td>
-
+    <td className="px-4 py-3 pl-12" colSpan={2}>{container.name}</td>
+    <td className="px-4 py-3">{container.template}</td>
     <td className="px-4 py-3">
       <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${container.status === 'running' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
         {container.status}
