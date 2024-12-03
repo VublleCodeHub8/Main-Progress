@@ -66,6 +66,23 @@ async function updateTemplates(id, { name, phase, description, price }) {
     }
 }
 
+async function deleteTemplates(id) {
+    try {
+        if (!id) {
+            throw new Error("Template ID is required.");
+        }
+        const result = await Template.findByIdAndDelete(id);
+        if (!result) {
+            throw new Error("Template not found.");
+        }
+        console.log("Template deleted successfully:", result);
+        return result;
+    } catch (error) {
+        console.error("Error deleting template:", error.message);
+        throw error;
+    }
+}
+
 
 
 async function allTemplate() {
@@ -87,3 +104,4 @@ exports.findTemplateByName = findTemplateByName;
 exports.allTemplate = allTemplate;
 exports.addTemplate = addTemplate;
 exports.updateTemplates = updateTemplates;
+exports.deleteTemplates = deleteTemplates;

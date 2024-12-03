@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { useSelector } from 'react-redux';
-import { Activity, Users, Box, Power, StopCircle, Trash, Search, Play, Settings, ToggleRight, ArrowRight, LogOut } from "lucide-react";
+import { Activity, Users, Box, Power, StopCircle, Trash, Search, Play, Edit, ToggleRight, ArrowRight, LogOut } from "lucide-react";
 import { Link } from 'react-router-dom';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
@@ -214,7 +214,7 @@ const AdminPage = () => {
         },
         body: JSON.stringify({ email: userEmail }), // Use userEmail directly in the payload
       });
-  
+
       if (response.ok) {
         // console.log(`Successfully logged out user: ${userEmail}`);
         await fetchData(); // Fetch updated data if logout was successful
@@ -234,9 +234,9 @@ const AdminPage = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token.token}`,
         },
-        body: JSON.stringify({email: userEmail}),
+        body: JSON.stringify({ email: userEmail }),
       });
-      if(response.ok){
+      if (response.ok) {
         await fetchData();
       } else {
         console.error(`Failed to change role for user: ${userEmail}`);
@@ -245,7 +245,7 @@ const AdminPage = () => {
       console.error("Error changing role for user: ${userEmail}", error);
     }
   };
-  
+
 
   // Filter users and containers based on the search term
   const filteredUsers = users.map(user => ({
@@ -298,10 +298,10 @@ const AdminPage = () => {
 
   const userLoggedInData = {
     labels: ['Logged In', 'Logged Out'],
-    datasets:[
+    datasets: [
       {
         label: 'User Login Status',
-        data:[
+        data: [
           users.filter(user => user.isLoggedIn).length,
           users.filter(user => !user.isLoggedIn).length
         ],
@@ -313,15 +313,26 @@ const AdminPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
-      {/* Header */}
       <div className="mb-8 flex items-center justify-between">
-        <Link to = "/">
+        <Link to="/">
           <h1 className="text-4xl font-bold">Admin Dashboard</h1>
         </Link>
-        <Link to="/auth" className="flex items-center gap-2 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600">
-          <Power className="h-4 w-4" />
-          Logout
-        </Link>
+        <div className="flex gap-4">
+          <Link
+            to="/auth"
+            className="flex items-center gap-2 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+          >
+            <Power className="h-4 w-4" />
+            Logout
+          </Link>
+          <Link
+            to="/dev"
+            className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+          >
+            <Edit className="h-4 w-4" />
+            Developer
+          </Link>
+        </div>
       </div>
 
       {/* Search Bar */}
@@ -388,7 +399,7 @@ const AdminPage = () => {
             <Pie data={userLoggedInData} options={{ responsive: true, maintainAspectRatio: false }} />
           </CardContent>
         </Card>
-        
+
       </div>
       {/* Users Table */}
       <Card className="mb-8">
@@ -397,7 +408,7 @@ const AdminPage = () => {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <UserTable users={filteredUsers} toggleShowContainers={toggleShowContainers} expandedUserIds={expandedUserIds} onStopContainer={handleStopContainer} onStartContainer={handleStartContainer} onRestartContainer={handleRestartContainer} onDeleteContainer={handleDeleteContainer} onLogoutUser = {logoutUser} onChangeRole = {changeRole} />
+            <UserTable users={filteredUsers} toggleShowContainers={toggleShowContainers} expandedUserIds={expandedUserIds} onStopContainer={handleStopContainer} onStartContainer={handleStartContainer} onRestartContainer={handleRestartContainer} onDeleteContainer={handleDeleteContainer} onLogoutUser={logoutUser} onChangeRole={changeRole} />
           </div>
         </CardContent>
       </Card>
@@ -454,7 +465,7 @@ const UserTable = ({ users, toggleShowContainers, expandedUserIds, onStopContain
             <td className="px-4 py-3">{user.containers.length}</td>
             <td className="px-4 py-3">
               <button onClick={() => onLogoutUser(user.email)} className="text-red-500 hover:text-red-800">
-                <LogOut  className="h-4 w-4" />
+                <LogOut className="h-4 w-4" />
               </button>
               <button onClick={() => onChangeRole(user.email)} className="px-4 text-blue-500 hover:text-blue-800">
                 <ToggleRight className="h-4 w-4" />

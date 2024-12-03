@@ -1,11 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { set } from 'react-hook-form';
 
 const initialMiscState = {
     toastMsg: null,
     login: false,
     token: { token: null, expiry: null },
-    fallback: false
-
+    fallback: false,
+    role: "user",
 };
 
 const miscSlice = createSlice({
@@ -23,6 +24,9 @@ const miscSlice = createSlice({
         },
         setFallback(state, action) {
             state.fallback = action.payload;
+        },
+        setRole(state, action) {
+            state.role = action.payload;
         }
     },
 });

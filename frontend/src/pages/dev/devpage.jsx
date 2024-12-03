@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Power, Edit, Search, Sliders } from "lucide-react";
+import { Power, Edit, Search, Sliders, Trash, Shield } from "lucide-react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
+import Popup from '@/components/Popup';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const DevPage = () => {
-  const dispatch = useDispatch();
   const [templates, setTemplates] = useState([]);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState(""); // Add search term state
   const token = useSelector((state) => state.misc.token);
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState("success"); // 'success' or 'error'
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,7 +29,7 @@ const DevPage = () => {
           const uses = containerData.filter((container) => container.template === template.image).length;
           return { ...template, uses };
         })
-        console.log(combinedData);
+        // console.log(combinedData);
         setTemplates(combinedData);
       } catch (err) {
         setError(err.message);
@@ -46,7 +49,7 @@ const DevPage = () => {
     return response.ok ? await response.json() : Promise.reject(response);
   }
   const fetchContainers = async () => {
-    const response = await fetch("http://localhost:3000/admin/getAllContainers", {
+    const response = await fetch("http://localhost:3000/dev/getAllContainers", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -78,25 +81,54 @@ const DevPage = () => {
 
   const generateRandomColor = () => {
     const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-    return randomColor.padEnd(7, "0"); 
+    // console.log(randomColor);
+    return randomColor.padEnd(7, "0");
   };
-  
+
   const templateStatus = {
     labels: templates.map(template => template.name),
     datasets: [
       {
-        label: 'Status',
+        label: 'Containers',
         data: templates.map(template => template.uses),
         backgroundColor: templates.map(template => generateRandomColor()),
       },
     ],
   };
 
+  const deleteTemplate = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:3000/dev/deleteTemplate/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.token}`,
+        },
+      });
+      if (response.ok) {
+        setTemplates(templates.filter((template) => template._id !== id));
+        setPopupMessage("Template deleted successfully");
+        setPopupType("success");
+        setPopupVisible(true);
+      } else {
+        throw new Error("Failed to delete template");
+        setPopupMessage("Failed to delete template");
+        setPopupType("error");
+        setPopupVisible(true);
+      }
+    } catch (err) {
+      setError(err + "Failed to delete template");
+      setPopupMessage("Failed to delete template");
+      setPopupType("error");
+      setPopupVisible(true);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
-        <Link to = "/">
+        <Link to="/">
           <h1 className="text-4xl font-bold">Developer Dashboard</h1>
         </Link>
         <div className="flex gap-4">
@@ -114,6 +146,16 @@ const DevPage = () => {
             <Edit className="h-4 w-4" />
             Editor
           </Link>
+          {/* Admin Page Button */}
+          {token.role === 'admin' && (
+            <Link
+              to="/admin"
+              className="flex items-center gap-2 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
+            >
+              <Shield className="h-4 w-4" />
+              Admin Page
+            </Link>
+          )}
         </div>
       </div>
 
@@ -140,26 +182,26 @@ const DevPage = () => {
       </div>
 
       <div className='mb-8 grid gap-4 md:grid-cols-2'>
-          {/* Phase Bar Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Template Phase</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Bar data = {templatePhase} options={{ responsive: true, maintainAspectRatio: false }} />
-            </CardContent>
-          </Card>
+        {/* Phase Bar Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Template Phase</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Bar data={templatePhase} options={{ responsive: true, maintainAspectRatio: false }} />
+          </CardContent>
+        </Card>
 
-          {/* Template Status Pie Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Template Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Pie data = {templateStatus} options={{ responsive: true, maintainAspectRatio: false }} />
-            </CardContent>
-          </Card>
-          
+        {/* Template Status Pie Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Template Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Pie data={templateStatus} options={{ responsive: true, maintainAspectRatio: false }} />
+          </CardContent>
+        </Card>
+
       </div>
 
 
@@ -170,7 +212,7 @@ const DevPage = () => {
         </CardHeader>
         <CardContent>
           <div className='overflow-x-auto'>
-            <TempTable templates={filteredTemplates} />
+            <TempTable templates={filteredTemplates} deleteTemplate={deleteTemplate} />
           </div>
         </CardContent>
       </Card>
@@ -185,7 +227,7 @@ const DevPage = () => {
   );
 };
 
-const TempTable = ({ templates }) => (
+const TempTable = ({ templates, deleteTemplate }) => (
   <table className='w-full border-collapse'>
     <thead>
       <tr className="border-b border-gray-200 text-left">
@@ -193,8 +235,9 @@ const TempTable = ({ templates }) => (
         <TableHeader title="Image" className="text-lg font-semibold" />
         <TableHeader title="Phase" className="text-lg font-semibold" />
         <TableHeader title="Description" className="text-lg font-semibold" />
-        <TableHeader title = "Price" className="text-lg font-semibold" />
+        <TableHeader title="Price" className="text-lg font-semibold" />
         <TableHeader title="Uses" className="text-lg font-semibold" />
+        <TableHeader title="Action" className="text-lg font-semibold" />
       </tr>
 
     </thead>
@@ -226,8 +269,23 @@ const TempTable = ({ templates }) => (
                 </p>
               </div>
             </td>
-            <td className='px-4 py-3 text-green-500 font-bold' >${template.price}</td>
+            <td className='px-4 py-3 text-green-500 font-bold' >${template.price} / hour</td>
             <td className='px-4 py-3' >{template.uses}</td>
+            <td className='px-4 py-3' >
+              <button
+                onClick={() => deleteTemplate(template._id)}
+                className='flex items-center text-red-700 hover:text-red-900'
+              >
+                <Trash className='h-5 w-5' />
+              </button>
+              {/* Reusable Popup */}
+              {/* <Popup
+                visible={popupVisible}
+                message={popupMessage}
+                onClose={() => setPopupVisible(false)}
+                type={popupType}
+              /> */}
+            </td>
           </tr>
         </React.Fragment>
       ))}
