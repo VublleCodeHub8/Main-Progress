@@ -1,0 +1,251 @@
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Raleway:wght@400;700&display=swap");
+
+:root {
+  --color-brand-1: hsl(0, 0%, 100%);
+  --color-brand-2: hsl(0, 100%, 63%);
+
+  --color-site-1: hsl(217, 28%, 15%);
+  --color-site-2: hsl(218, 28%, 13%);
+  --color-site-3: hsl(219, 30%, 18%);
+  --color-site-4: hsl(216, 53%, 9%);
+
+  --color-site-cta-1: hsl(176, 68%, 64%);
+  --color-site-cta-2: hsl(198, 60%, 50%);
+
+  --font-heading-cta-nav: "Raleway", sans-serif;
+  --font-body: "Open Sans", sans-serif;
+}
+
+*,
+*::after,
+*::before {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+main {
+  background-color: var(--color-site-2);
+  padding: 5rem 0;
+}
+
+.FeaturesWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4rem;
+  flex-direction: column;
+  padding: 3rem 2rem;
+}
+
+.StayProductiveCard {
+  padding: 6rem 2rem 10rem;
+}
+
+.StayProductiveCard-ImgBox {
+  width: 100%;
+  margin-bottom: 3rem;
+}
+
+.StayProductiveCard-ImgBox > img {
+  width: 100%;
+}
+
+.StayProductiveCard-TxtBox-Title {
+  color: var(--color-brand-1);
+  font-size: 2rem;
+  font-family: var(--font-heading-cta-nav);
+  margin-bottom: 2rem;
+}
+
+.StayProductiveCard-TxtBox-Para {
+  font-size: 1.6rem;
+  color: var(--color-brand-1);
+  font-family: var(--font-body);
+  margin-bottom: 2rem;
+}
+
+.StayProductiveCard-TxtBox-LinkBox {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+}
+
+.StayProductiveCard-TxtBox-LinkBox-Link {
+  font-size: 1.6rem;
+  font-family: var(--font-heading-cta-nav);
+  text-decoration: none;
+  color: var(--color-site-cta-1);
+  position: relative;
+}
+
+.StayProductiveCard-TxtBox-LinkBox-Link::after {
+  position: absolute;
+  content: "";
+  display: block;
+  width: calc(100% + 3rem);
+  height: 1px;
+  left: 0;
+  bottom: -1rem;
+  background-color: var(--color-site-cta-1);
+}
+
+.StayProductiveCard-TxtBox-LinkBox-Arrow {
+  display: block;
+  width: 2.5rem;
+}
+
+.ReviewsWrapper {
+  background: url("../assets/bg-quotes.png");
+  background-position: top 0.8rem left 2.4rem;
+  background-size: 4rem 4rem;
+  background-repeat: no-repeat;
+  padding: 4rem 2rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4rem;
+  flex-direction: column;
+}
+
+.AccessWrapper {
+  width: 90%;
+  max-width: 90rem;
+  margin: auto;
+  border-radius: 1rem;
+  background-color: var(--color-site-1);
+  padding: 5rem 2rem;
+  text-align: center;
+  transform: translateY(18rem);
+}
+
+.AccessWrapper-Title {
+  font-size: 3rem;
+  color: var(--color-brand-1);
+  font-family: var(--font-heading-cta-nav);
+  margin-bottom: 2rem;
+}
+
+.AccessWrapper-Para {
+  font-size: 1.6rem;
+  color: var(--color-brand-1);
+  font-family: var(--font-body);
+  margin-bottom: 2rem;
+}
+
+.AccessWrapper-Form-Label {
+  display: block;
+  width: 100%;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.AccessWrapper-Form-Input {
+  display: block;
+  width: 100%;
+  border: none;
+  outline: none;
+  padding: 1rem 2rem;
+  border-radius: 2rem;
+  font-size: 1.6rem;
+  font-family: var(--font-body);
+}
+
+.error {
+  position: absolute;
+  left: 1rem;
+  font-family: var(--font-body);
+  bottom: -2rem;
+  font-size: 1.3rem;
+  color: var(--color-brand-2);
+}
+
+.AccessWrapper-Form-Btn {
+  display: block;
+  width: 100%;
+  border: none;
+  outline: none;
+  border-radius: 2rem;
+  color: var(--color-brand-1);
+  font-size: 1.6rem;
+  font-family: var(--font-heading-cta-nav);
+  cursor: pointer;
+  background: linear-gradient(
+    120deg,
+    var(--color-site-cta-1),
+    var(--color-site-cta-2)
+  );
+  padding: 1rem 2rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.AccessWrapper-Form-Btn:hover {
+  filter: brightness(120%);
+}
+
+@media screen and (min-width: 768px) {
+  .FeaturesWrapper {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(25rem, 45rem));
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 4rem;
+    padding: 3rem 4rem;
+  }
+
+  .StayProductiveCard {
+    padding: 6rem 4rem 10rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+  }
+
+  .StayProductiveCard-TxtBox-Title {
+    font-size: 3rem;
+    max-width: 35rem;
+  }
+
+  .StayProductiveCard-TxtBox-Para {
+    max-width: 55rem;
+  }
+
+  .ReviewsWrapper {
+    background: url("../assets/bg-quotes.png");
+    background-position: top 0.8rem left 4.4rem;
+    background-size: 4rem 4rem;
+    background-repeat: no-repeat;
+    padding: 4rem 4rem 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(25rem, 1fr));
+    align-items: flex-start;
+    justify-content: center;
+    gap: 4rem;
+  }
+
+  .AccessWrapper {
+    padding: 5rem 4rem;
+  }
+
+  .AccessWrapper-Title {
+    font-size: 4rem;
+  }
+
+  .AccessWrapper-Form {
+    display: grid;
+    grid-template-columns: 60% 40%;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 3rem;
+  }
+
+  .AccessWrapper-Form-Btn {
+    max-width: 25rem;
+  }
+}

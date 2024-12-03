@@ -1,0 +1,125 @@
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Raleway:wght@400;700&display=swap");
+
+:root {
+  --color-brand-1: hsl(0, 0%, 100%);
+  --color-brand-2: hsl(0, 100%, 63%);
+
+  --color-site-1: hsl(217, 28%, 15%);
+  --color-site-2: hsl(218, 28%, 13%);
+  --color-site-3: hsl(219, 30%, 18%);
+  --color-site-4: hsl(216, 53%, 9%);
+
+  --color-site-cta-1: hsl(176, 68%, 64%);
+  --color-site-cta-2: hsl(198, 60%, 50%);
+
+  --font-heading-cta-nav: "Raleway", sans-serif;
+  --font-body: "Open Sans", sans-serif;
+}
+
+*,
+*::after,
+*::before {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+header {
+  background: url("../assets/bg-curvy-mobile.svg"),
+    linear-gradient(transparent 62%, var(--color-site-2) 62% 100%);
+  background-position: bottom 45% left, center;
+  background-size: 100% 12rem, cover;
+  background-repeat: no-repeat, no-repeat;
+  background-color: var(--color-site-1);
+  padding: 3rem 2rem 4rem;
+  text-align: center;
+}
+
+.HeaderWrapper-ImgBox {
+  width: 100%;
+  max-width: 60rem;
+
+  margin: 0 auto 3rem;
+}
+
+.HeaderWrapper-ImgBox > img {
+  width: 100%;
+}
+
+.HeaderWrapper-TxtBox-Title {
+  font-size: 2.5rem;
+  line-height: 3.5rem;
+  font-family: var(--font-heading-cta-nav);
+  color: var(--color-brand-1);
+  margin-bottom: 2rem;
+}
+
+.HeaderWrapper-TxtBox-Para {
+  font-size: 1.6rem;
+  font-family: var(--font-body);
+  color: var(--color-brand-1);
+  margin-bottom: 3rem;
+}
+
+.HeaderWrapper-TxtBox-Btn {
+  display: block;
+  width: 100%;
+  max-width: 30rem;
+  margin: auto;
+  background: linear-gradient(
+    120deg,
+    var(--color-site-cta-1),
+    var(--color-site-cta-2)
+  );
+  cursor: pointer;
+  font-size: 1.6rem;
+  padding: 1.5rem 2rem;
+  color: var(--color-brand-1);
+  border-radius: 2rem;
+  border: none;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.HeaderWrapper-TxtBox-Btn:hover {
+  filter: brightness(130%);
+}
+
+@media screen and (min-width: 500px) {
+  header {
+    background: url("../assets/bg-curvy-mobile.svg"),
+      linear-gradient(transparent 60%, var(--color-site-2) 60% 100%);
+    background-position: bottom 45% left, center;
+    background-size: 100% 12rem, cover;
+    background-repeat: no-repeat, no-repeat;
+    background-color: var(--color-site-1);
+  }
+}
+
+@media screen and (min-width: 768px) {
+  header {
+    background: url("../assets/bg-curvy-desktop.svg");
+    background-position: bottom left;
+    background-size: 100% 30rem;
+    background-repeat: no-repeat;
+    background-color: var(--color-site-1);
+    padding: 3rem 4rem 4rem;
+    text-align: center;
+  }
+
+  .HeaderWrapper-TxtBox-Title {
+    font-size: 4rem;
+    max-width: 68rem;
+    margin: 0 auto 2rem;
+    line-height: 5rem;
+  }
+
+  .HeaderWrapper-TxtBox-Para {
+    max-width: 60rem;
+    margin: 0 auto 3rem;
+  }
+}
