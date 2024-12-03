@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { useSelector } from 'react-redux';
-import { Activity, Users, Box, Power, StopCircle, Trash, XCircle, Play, Settings, ToggleRight, ArrowRight, LogOut } from "lucide-react";
+import { Activity, Users, Box, Power, StopCircle, Trash, Search, Play, Settings, ToggleRight, ArrowRight, LogOut } from "lucide-react";
 import { Link } from 'react-router-dom';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
@@ -315,7 +315,9 @@ const AdminPage = () => {
     <div className="min-h-screen bg-gray-100 p-8">
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <Link to = "/">
+          <h1 className="text-4xl font-bold">Admin Dashboard</h1>
+        </Link>
         <Link to="/auth" className="flex items-center gap-2 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600">
           <Power className="h-4 w-4" />
           Logout
@@ -323,13 +325,14 @@ const AdminPage = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="mb-8">
+      <div className="mb-8 flex items-center rounded border border-gray-300 bg-white px-4 py-2 shadow-sm">
+        <Search className="h-5 w-5 text-gray-500" />
         <input
           type="text"
-          placeholder="Search by username or container name..."
+          placeholder="Search by template name..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full rounded border border-gray-300 px-4 py-2"
+          className="ml-2 w-full border-none outline-none focus:ring-0"
         />
       </div>
 
@@ -433,8 +436,8 @@ const UserTable = ({ users, toggleShowContainers, expandedUserIds, onStopContain
         <React.Fragment key={user._id}>
           <tr className="border-b border-gray-200 cursor-pointer">
             <td className="px-4 py-3 font-medium" onClick={() => toggleShowContainers(user._id)}>{user.username}</td>
-            <td className="px-4 py-3">{user.email}</td>
-            <td className="px-4 py-3">
+            <td className="px-4 py-3" onClick={() => toggleShowContainers(user._id)}>{user.email}</td>
+            <td className="px-4 py-3" onClick={() => toggleShowContainers(user._id)}>
               <span
                 className={
                   user.role === 'admin' ? 'text-red-500 font-bold' :

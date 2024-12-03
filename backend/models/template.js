@@ -12,6 +12,9 @@ const templateSchema = mongoose.Schema({
     },
     description: {
         type: String
+    },
+    price: {
+        type: Number
     }
 })
 
@@ -29,14 +32,37 @@ async function findTemplateByName(name) {
     }
 }
 
-async function addTemplate(name, image, phase, description) {
+async function addTemplate(name, image, phase, description, price) {
     try {
-        const newTemplate = new Template({ name: name, image: image, phase: phase, description: description });
+        const newTemplate = new Template({ name: name, image: image, phase: phase, description: description, price: price });
         await newTemplate.save();
         return true;
     } catch (err) {
         console.log(err);
         return false;
+    }
+}
+
+async function updateTemplates(id, { name, phase, description, price }) {
+    try {
+        if (!id) {
+            throw new Error("Template ID is required.");
+        }
+        const updateData = {};
+        if (name) updateData.name = name;
+        if (phase) updateData.phase = phase;
+        if (description) updateData.description = description;
+        if (price) updateData.price = price;
+
+        const result = await Template.findByIdAndUpdate(id, updateData, { new: true });
+        if (!result) {
+            throw new Error("Template not found.");
+        }
+        console.log("Template updated successfully:", result);
+        return result;
+    } catch (error) {
+        console.error("Error updating template:", error.message);
+        throw error; 
     }
 }
 
@@ -60,3 +86,4 @@ exports.templateModel = Template;
 exports.findTemplateByName = findTemplateByName;
 exports.allTemplate = allTemplate;
 exports.addTemplate = addTemplate;
+exports.updateTemplates = updateTemplates;

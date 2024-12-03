@@ -101,19 +101,12 @@ async function changeRole(email) {
             console.log("User not found");
             return null;
         }
-        
-        // Toggle the role based on current role
+        if(user.role == 'admin'){
+            console.log("Cannot change role of admin");
+            return null;
+        }
         const newRole = user.role === 'user' ? 'dev' : 'user';
-        
-        // Update the role in the database
         const result = await User.updateOne({ email: email }, { $set: { role: newRole } });
-        
-        // if (result.modifiedCount === 1) {
-        //     console.log(`Role updated successfully to ${newRole}`);
-        // } else {
-        //     console.log("Failed to update role");
-        // }
-        
         return result;
     } catch (err) {
         console.log("Error:", err);

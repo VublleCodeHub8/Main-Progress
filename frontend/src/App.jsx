@@ -15,6 +15,7 @@ import AdminWrapper from "./pages/AdminWrapper";
 import AdminPage from "./pages/admin/page";
 import DevWrapper from "./pages/DevWrapper";
 import DevPage from "./pages/dev/devpage";
+import DevEdit from "./pages/dev/devedit";
 
 const router = createBrowserRouter([
   {
@@ -68,7 +69,7 @@ const router = createBrowserRouter([
         ],
       },
       {
-        // admin wrapper
+        // Dev wrapper
         path: "/dev",
         element: <DevWrapper />,
         children: [
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
             path: "",
             element: <DevPage />,
           },
+          {
+            path: "editor",
+            element: <DevEdit />,
+          }
         ],
       },
     ],
