@@ -30,7 +30,6 @@ const getAllAuth = async (req, res) => {
 
 const roleChange = async (req, res) => {
     const email = req.body.email;
-    // console.log(email); 
     const data = await changeRole(email);
     console.log(data);
     res.json(data);
