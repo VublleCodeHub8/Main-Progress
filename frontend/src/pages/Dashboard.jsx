@@ -19,11 +19,8 @@ const useAuth = () => {
 function DashboardLayout() {
   const dispatch = useDispatch();
   const token = useSelector((state) => state.misc.token);
-  const user = useSelector((state) => state.user.user);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-
-  console.log("user", user);
 
   if (!isAuthenticated) {
     return <Navigate to="/auth" replace />;
@@ -69,12 +66,12 @@ function DashboardLayout() {
               <DropdownMenuTrigger className="flex items-center focus:outline-none">
                 <Avatar>
                   <AvatarImage
-                    src={user?.profilePicUrl || "https://via.placeholder.com/150"}
+                    src="https://github.com/shadcn.png"
                     alt="@shadcn"
                   />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
-                <span className="ml-2">{user?.username}</span>
+                <span className="ml-2">{userData?.username}</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="mt-2 w-48">
                 <DropdownMenuItem onSelect={() => navigate("/profile")}>
