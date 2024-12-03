@@ -1,12 +1,10 @@
 import AuthForm from "@/components/AuthForm";
-import { LoginForm } from "@/components/LoginForm";
+import { Button } from "@/components/ui/button";
+import { miscActions } from "@/store/main";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { miscActions } from "@/store/main";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 
 export default function Auth() {
   const newToast = useSelector((state) => state.misc.toastMsg);

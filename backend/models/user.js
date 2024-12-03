@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+
 const userSchema = mongoose.Schema({
     username: {
         type: 'String',
@@ -15,8 +16,8 @@ const userSchema = mongoose.Schema({
         required: false
     },
     profilePic: {
-        type: 'String',
-        required: false
+        data : Buffer,
+        contentType: String,
     },
     role: {
         type: 'String'
@@ -53,25 +54,33 @@ async function allUsers() {
     }
 }
 
-async function editUser(email, username, bio, profilePic) {
+async function editUser(email, username, bio, file) {
     try {
+        const updateData = {
+            username: username,
+            bio: bio,
+        };
+
+        
+        if (file) {
+            updateData.profilePic = {
+                data: file.buffer,
+                contentType: file.mimetype,
+            };
+        }
+
         const result = await User.updateOne(
             { email: email },
-            {
-                $set: {
-                    username: username,
-                    bio: bio,
-                    profilePic: profilePic
-                }
-            }
-        )
-        return true;
-    }
-    catch (err) {
-        console.log(err);
+            { $set: updateData },
+            { new: true } 
+        );
+        return result;
+    } catch (err) {
+        console.error(err);
         throw err;
     }
 }
+
 
 async function getUserByEmail(email) {
     try {

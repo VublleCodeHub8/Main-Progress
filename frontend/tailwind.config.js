@@ -12,6 +12,8 @@ module.exports = {
 		'./components/**/*.{js,jsx}',
 		'./app/**/*.{js,jsx}',
 		'./src/**/*.{js,jsx}',
+		"./src/**/*.{js,jsx,ts,tsx}",
+		"./node_modules/@shadcn/ui/**/*.{js,ts,jsx,tsx}"
 	],
 	prefix: "",
 	theme: {
