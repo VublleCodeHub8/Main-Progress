@@ -9,7 +9,7 @@ import Home from "./pages/dashboard/Home";
 import DashboardLayout from "./pages/Dashboard";
 import Settings from "./pages/dashboard/Settings";  
 import Profile from "./pages/dashboard/Profile";
-// import About from "./pages/dashboard/About";
+// import AboutUs from "./pages/dashboard/About";
 import Containers from "./pages/dashboard/Containers";
 import Templates from "./pages/dashboard/Templates";
 import AdminWrapper from "./pages/AdminWrapper";
@@ -18,6 +18,7 @@ import DevWrapper from "./pages/DevWrapper";
 import DevPage from "./pages/dev/devpage";
 import Analytics from "./pages/dashboard/Analytics";
 import DevEdit from "./pages/dev/devedit";
+import  BugReportForm  from "./pages/dashboard/BugReport";
 
 const router = createBrowserRouter([
   {
@@ -38,7 +39,7 @@ const router = createBrowserRouter([
           },
           // {
           //   path: "about",
-          //   element: <About />,
+          //   element: <AboutUs />,
           // },
           {
             path: "containers",
@@ -56,9 +57,13 @@ const router = createBrowserRouter([
             path : "analytics",
             element : <Analytics/>
           },
+          // {
+          //   path : "settings",
+          //   element : <Settings/>
+          // }
           {
-            path : "settings",
-            element : <Settings/>
+            path: "bugreport",
+            element: <BugReportForm />,
           }
         ],
       },

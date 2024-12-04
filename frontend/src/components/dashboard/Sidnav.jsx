@@ -7,7 +7,8 @@ import {
     FaFile,
     FaLightbulb,
     FaHome,
-    FaCog
+    FaCog,
+    FaBug
 }from "react-icons/fa";
 import { TailwindcssButtons } from "@/components/ui/tailwindcss-buttons";
 
@@ -54,9 +55,9 @@ function Sidebar () {
         
         },
         {
-            path : "/settings",
-            name : "Settings",
-            icon : <FaCog/>
+            path : "/bugreport",
+            name : "Bug Report",
+            icon : <FaBug/>
         }
         
     ];

@@ -57,7 +57,8 @@ const Templates = () => {
             Authorization: "Bearer " + tok.token,
           },
         });
-        const data = await response.json();
+        let data = await response.json();
+        data = data.filter((container) => container.phase === "Production");
 
         const userContainers = data.map((container) => ({
           title: container.name,
@@ -140,7 +141,7 @@ const Templates = () => {
       </div>
 
       <div className="rounded-sm h-auto overflow-auto">
-        <div className="max-w-5xl text-black">
+        <div className="text-black">
           <HoverEffect items={projects} />
         </div>
         {/* Add more containers as needed */}

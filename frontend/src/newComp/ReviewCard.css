@@ -1,0 +1,68 @@
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Raleway:wght@400;700&display=swap");
+
+:root {
+  --color-brand-1: hsl(0, 0%, 100%);
+  --color-brand-2: hsl(0, 100%, 63%);
+
+  --color-site-1: hsl(217, 28%, 15%);
+  --color-site-2: hsl(218, 28%, 13%);
+  --color-site-3: hsl(219, 30%, 18%);
+  --color-site-4: hsl(216, 53%, 9%);
+
+  --color-site-cta-1: hsl(176, 68%, 64%);
+  --color-site-cta-2: hsl(198, 60%, 50%);
+
+  --font-heading-cta-nav: "Raleway", sans-serif;
+  --font-body: "Open Sans", sans-serif;
+}
+
+*,
+*::after,
+*::before {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+.ReviewCard {
+  background-color: var(--color-site-3);
+  padding: 2rem;
+  border-radius: 1rem;
+}
+
+.ReviewCard-Para {
+  font-size: 1.6rem;
+  color: var(--color-brand-1);
+  font-family: var(--font-body);
+  margin-bottom: 2rem;
+}
+
+.ReviewCard-UserBox {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2rem;
+}
+
+.ReviewCard-UserBox-Img {
+  display: block;
+  width: 5rem;
+  border-radius: 50%;
+}
+
+.ReviewCard-UserBox-UserName {
+  font-size: 2rem;
+  color: var(--color-brand-1);
+  font-family: var(--font-body);
+  margin-bottom: 0.5rem;
+}
+
+.ReviewCard-UserBox-UserJob {
+  font-size: 1.6rem;
+  color: var(--color-brand-1);
+  font-family: var(--font-body);
+}

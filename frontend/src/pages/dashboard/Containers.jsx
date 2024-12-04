@@ -43,6 +43,21 @@ import { HoverEffect } from "@/components/ui/card_container";
 //     // },
 //   ];
 
+const getContainerStatus = async (containerId) => { 
+  const tok = JSON.parse(localStorage.getItem("token"));
+  const response = await fetch(`http://localhost:3000/container/details/${containerId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${tok.token}`,
+    },
+  });
+  const details = await response.json();
+  return {status : details.status, cpu : details.cpuUsagePercentage, memory : details.memoryUsagePercentage} ;
+};
+
+
+
 function  Containers(){
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,13 +74,20 @@ useEffect(() => {
           Authorization: "Bearer " + tok.token,
         },
       });
-      const data = await response.json();
-      
-      const userContainers = data.map(container => ({
-        title: container.name,
-        description: `Last used: ${container.lastUsed}`,
-        link: `project/${container.id}`
+      let data = await response.json();
+      const userContainers = await Promise.all(data.map(async (container) => {
+        const details = await getContainerStatus(container.id);
+        return {
+          id: container.id,
+          title: container.name,
+          description: `Last used: ${container.lastUsed}`,
+          link: `project/${container.id}`,
+          Status: details.status,
+          CPU: details.cpu,
+          Memory: details.memory,
+        };
       }));
+      // userContainers = addContainerDetails(userContainers);
       console.log(userContainers);
       setProjects(userContainers);
       if (data === null) {
@@ -130,7 +152,7 @@ useEffect(() => {
       </div>
 
       <div className="rounded-sm h-auto overflow-auto">
-        <div className="max-w-5xl text-black border-2 h-[700px] overflow-auto">
+        <div className=" text-black border-2 h-[700px] overflow-auto justify-center ">
         {loading ? (
           <div>Loading...</div>
         ) : error ? (

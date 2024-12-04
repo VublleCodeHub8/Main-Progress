@@ -68,34 +68,71 @@ const options = {
 
 function Analytics() {
   const [activeTab, setActiveTab] = useState("total");
+const months = ["January", "February", "March", "April", "May", "June", "July"];
+const [selectedMonth, setSelectedMonth] = useState("February");
 
-  return (
-    <div className="w-full">
-      <h1 className="text-2xl font-bold mb-4">Analytics</h1>
-      <div className="tabs">
-        <button
-          className={`tab ${activeTab === "total" ? "active" : ""}`}
-          onClick={() => setActiveTab("total")}
-        >
-          Total Analysis
-        </button>
-        <button
-          className={`tab ${activeTab === "february" ? "active" : ""}`}
-          onClick={() => setActiveTab("february")}
-        >
-          February Analysis
-        </button>
-      </div>
-      <div className="h-[700px]">
-      {activeTab === "total" && <Bar data={barData} options={{ ...options, maintainAspectRatio: false }}/>}
-      {activeTab === "february" && (
-        
-          <Pie data={pieData} options={{ ...options, maintainAspectRatio: false }} />
-        
-      )}
-      </div>
+const handleMonthChange = (event) => {
+  setSelectedMonth(event.target.value);
+};
+
+const pieDataForSelectedMonth = {
+  labels: ["Number of Containers Running", "Bill Generated ($)"],
+  datasets: [
+    {
+      data: [
+        barData.datasets[0].data[months.indexOf(selectedMonth)],
+        barData.datasets[1].data[months.indexOf(selectedMonth)],
+      ],
+      backgroundColor: ["rgba(75, 192, 192, 0.2)", "rgba(153, 102, 255, 0.2)"],
+      borderColor: ["rgba(75, 192, 192, 1)", "rgba(153, 102, 255, 1)"],
+      borderWidth: 1,
+    },
+  ],
+};
+
+return (
+  <div className="w-full">
+    <h1 className="text-2xl font-bold mb-4">Analytics</h1>
+    <div className="tabs flex justify-between">
+      <button
+        className={`tab ${activeTab === "total" ? "active bg-white " : ""} border-2 rounded-sm p-1 border-slate-800 mr-2`}
+        onClick={() => setActiveTab("total")}
+      >
+        Total Analysis
+      </button>
+      <button
+        className={`tab ${activeTab === "february" ? "active bg-white" : ""} border-2 rounded-sm p-1 border-slate-800 mr-2`}
+        onClick={() => setActiveTab("february")}
+      >
+        Monthly Analysis
+      </button>
     </div>
-  );
+    {activeTab === "february" && (
+      <div className="mb-4">
+        <label htmlFor="month-select" className="mr-2">Select Month:</label>
+        <select
+          id="month-select"
+          value={selectedMonth}
+          onChange={handleMonthChange}
+        >
+          {months.map((month) => (
+            <option key={month} value={month}>
+              {month}
+            </option>
+          ))}
+        </select>
+      </div>
+    )}
+    <div className="h-[700px]">
+      {activeTab === "total" && (
+        <Bar data={barData} options={{ ...options, maintainAspectRatio: false }} />
+      )}
+      {activeTab === "february" && (
+        <Pie data={pieDataForSelectedMonth} options={{ ...options, maintainAspectRatio: false }} />
+      )}
+    </div>
+  </div>
+);
 }
 
 export default Analytics;

@@ -15,7 +15,6 @@ export default function Project() {
 
   useEffect(() => {
     async function runContainer() {
-      console.log("janu");
       const containerId = params.projectId;
       const res = await fetch(
         `http://localhost:3000/container/runcontainer/${containerId}`,
@@ -56,17 +55,17 @@ export default function Project() {
         </div>
       ) : (
         <div className="w-full h-full flex">
-          <div id="our-fileSystem" className="h-full w-[200px] bg-zinc-800">
+          <div id="our-fileSystem" className="h-full  bg-zinc-800">
             <FileSystem socket={soc}></FileSystem>
           </div>
           <div className="flex flex-col flex-grow h-full">
             <div
               id="our-codeEditor"
-              className="w-full flex-grow overflow-auto bg-green-200"
+              className="w-full flex-grow overflow-auto "
             >
               <CodeEditor socket={soc}></CodeEditor>
             </div>
-            <div id="our-terminal" className="w-full h-fit bg-blue-200">
+            <div id="our-terminal" className="w-full h-fit ">
               <Terminal socket={soc}></Terminal>
             </div>
           </div>

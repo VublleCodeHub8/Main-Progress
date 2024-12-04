@@ -51,12 +51,15 @@ const CreateContButton = ({ templateDefault = 1, className, children }) =>{
       });
       if (res.ok) {
         const data = await res.json();
-        const templates = data.map((template, index) => ({
+        let templates = data.map((template, index) => ({
           name: template.name,
           id: template?.id === null ? index : template.id,
           image: template.image,
+          price: template.price,
+          phase: template.phase,
         }));
-        templates.unshift({ name: "Select Template", id: "", image: "undefined" });
+        templates = templates.filter((template) => template.phase === "Production");
+        templates.unshift({ name: "Select Template", id: "", image: "undefined", price: 0, phase: "Production" });
         console.log(" teok ", templates);
         setTemplates(templates);
       }
@@ -68,7 +71,8 @@ const CreateContButton = ({ templateDefault = 1, className, children }) =>{
     const titleSchema = z
       .string()
       .min(3)
-      .regex(/^[^\d]/, "Title should not start with a number");
+      .regex(/^[^\d]/, "Title should not start with a number")
+      .regex(/^[a-zA-Z0-9 ]*$/, "Title should only contain alphanumeric characters");
     const templateSchema = z.string().min(1, "Template should not be null");
 
     console.log(title, template);
@@ -107,7 +111,7 @@ const CreateContButton = ({ templateDefault = 1, className, children }) =>{
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create Template</DialogTitle>
+          <DialogTitle>Create Container</DialogTitle>
           <DialogDescription>
             Make a new template for your containers.
           </DialogDescription>
@@ -143,6 +147,14 @@ const CreateContButton = ({ templateDefault = 1, className, children }) =>{
               onChange={handleTitleChange}
               value={title}
             />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="price" className="text-right">
+              Price:
+            </Label>
+            <div className="col-span-3">
+              {templates.find((t) => t.image === template)?.price || "N/A"} / per hour
+            </div>
           </div>
         </div>
         <DialogFooter>

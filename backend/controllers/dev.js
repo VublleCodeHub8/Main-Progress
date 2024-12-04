@@ -1,4 +1,5 @@
-const { allTemplate, addTemplate, updateTemplates } = require('../models/template');
+const { allTemplate, addTemplate, updateTemplates, deleteTemplates } = require('../models/template');
+const { allContainers } = require('../models/containers');
 
 const getAllTemplates = async (req, res) => {
     const data = await allTemplate();
@@ -35,6 +36,30 @@ const updateTemplate = async (req, res) => {
     res.send();
 }
 
+const deleteTemplate = async (req, res) => {
+    const id = req.params.id;
+    const data = await deleteTemplates(id);
+    console.log(data);
+    if (!data) {
+        res.status(500);
+        res.send();
+    }
+    res.status(200);
+    res.send();
+}
+
+const getAllContainers = async (req, res) => {
+    const data = await allContainers();
+    console.log(data);
+    if (!data) {
+        res.status(500);
+        res.send();
+    }
+    res.json(data);
+}
+
 exports.getAllTemplates = getAllTemplates;
 exports.addNewTemplate = addNewTemplate;
 exports.updateTemplate = updateTemplate;
+exports.deleteTemplate = deleteTemplate;
+exports.getAllContainers = getAllContainers;
