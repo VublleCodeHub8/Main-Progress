@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import React, { useState, useEffect } from "react";
-import { Power, Edit, Search } from "lucide-react";
+import { Power, Edit, Search, Shield } from "lucide-react";
 import Popup from "@/components/Popup";
 import { set } from "react-hook-form";
 
@@ -167,7 +167,7 @@ const DevEdit = () => {
               to="/admin"
               className="flex items-center gap-2 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
             >
-              <Edit className="h-4 w-4" />
+              <Shield className="h-4 w-4" />
               Admin Page
             </Link>
           )}
