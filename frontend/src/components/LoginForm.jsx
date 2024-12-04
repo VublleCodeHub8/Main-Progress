@@ -19,7 +19,7 @@ import { miscActions } from "@/store/main";
 import { useNavigate } from "react-router-dom";
 
 const formSchema = z.object({
-  email: z.string().email({
+  email: z.string().trim().email({
     message: "Email invalid.",
   }),
   password: z

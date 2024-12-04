@@ -25,7 +25,7 @@ const filesSlice = createSlice({
             if (state.selected === null || state.selected.path != action.payload.path) {
                 state.selected = JSON.parse(JSON.stringify(action.payload));
             }
-        }
+        },
     },
 });
 
