@@ -78,7 +78,7 @@ io.on('connection', (socket) => {
         });
 
         ptyProcess.onExit(() => {
-            io.emit('terminal:data', "forbidden command");
+            io.emit('terminal:data', "forbidden command\n");
             spawnTerminal();
         })
 

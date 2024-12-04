@@ -29,7 +29,7 @@ export default function Files({ tree }) {
           opened = true;
         }
         return (
-          <div key={i.name} className=" w-full infoBlock z-20">
+          <div key={i.name} className=" w-full infoBlock ">
             {i.children === null ? (
               <div
                 style={{ paddingLeft: `${(i.level + 1) * 15 + 4}px` }}

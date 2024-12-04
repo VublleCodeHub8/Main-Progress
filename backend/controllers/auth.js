@@ -7,6 +7,7 @@ const signUp = async (req, res) => {
     //Server side validation
     let { email, username, password, confirmPassword } = req.body;
     email = email.trim().toLowerCase();
+    console.log(email);
     const doc = await findUserByEmail(email);
     if (doc) {
         res.status(409);
