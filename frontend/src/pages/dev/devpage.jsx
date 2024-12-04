@@ -212,7 +212,7 @@ const DevPage = () => {
         </CardHeader>
         <CardContent>
           <div className='overflow-x-auto'>
-            <TempTable templates={filteredTemplates} deleteTemplate={deleteTemplate} />
+            <TempTable setPopupVisible={setPopupVisible} popupMessage={popupMessage} popupType={popupType} popupVisible={popupVisible} templates={filteredTemplates} deleteTemplate={deleteTemplate} />
           </div>
         </CardContent>
       </Card>
@@ -227,7 +227,7 @@ const DevPage = () => {
   );
 };
 
-const TempTable = ({ templates, deleteTemplate }) => (
+const TempTable = ({ setPopupVisible, popupMessage, popupType,popupVisible, templates, deleteTemplate }) => (
   <table className='w-full border-collapse'>
     <thead>
       <tr className="border-b border-gray-200 text-left">
@@ -279,12 +279,12 @@ const TempTable = ({ templates, deleteTemplate }) => (
                 <Trash className='h-5 w-5' />
               </button>
               {/* Reusable Popup */}
-              {/* <Popup
+              <Popup
                 visible={popupVisible}
                 message={popupMessage}
                 onClose={() => setPopupVisible(false)}
                 type={popupType}
-              /> */}
+              />
             </td>
           </tr>
         </React.Fragment>

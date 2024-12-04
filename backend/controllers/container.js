@@ -246,27 +246,16 @@ const getContainerDetails = async (req, res) => {
     const { containerId } = req.params;
 
     try {
-        // Fetch the container
         const container = docker.getContainer(containerId);
-
-        // Fetch container details (status)
         const containerDetails = await container.inspect();
-
-        // Fetch container statistics (stream=false to get a single snapshot)
         const stats = await container.stats({ stream: false });
-
-        // Calculate CPU usage percentage
         const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
         const systemCpuDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
         const numberCpus = stats.cpu_stats.online_cpus || 1; // Default to 1 if not defined
         const cpuUsagePercentage = ((cpuDelta / systemCpuDelta) * 100) / numberCpus;
-
-        // Calculate memory usage percentage
         const memoryUsage = stats.memory_stats.usage;
         const memoryLimit = stats.memory_stats.limit;
         const memoryUsagePercentage = (memoryUsage / memoryLimit) * 100;
-
-        // Respond with the metrics and status
         res.json({
             status: containerDetails.State.Status,
             cpuUsagePercentage: cpuUsagePercentage.toFixed(2) + '%',

@@ -2,11 +2,16 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import React, { useState, useEffect } from "react";
 import { Power, Edit, Search } from "lucide-react";
+import Popup from "@/components/Popup";
+import { set } from "react-hook-form";
 
 const DevEdit = () => {
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [searchTerm, setSearchTerm] = useState(""); // Add search term state
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState("success"); // 'success' or 'error'
   const [updateTemplate, setUpdateTemplate] = useState({
     id: "",
     name: "",
@@ -74,11 +79,20 @@ const DevEdit = () => {
       });
       if (!response.ok) {
         throw new Error(`Failed to create template: ${response.statusText}`);
+        setPopupMessage("Failed to create template");
+        setPopupType("error");
+        setPopupVisible(true);
       }
+      setPopupMessage("Template created successfully");
+      setPopupType("success");
+      setPopupVisible(true);
       setNewTemplate({ name: "", image: "", phase: "", description: "", price: "" });
       setTemplates((prevTemplates) => [...prevTemplates, newTemplate]);
     } catch (error) {
       console.error("Error creating template:", error);
+      setPopupMessage("Failed to create template");
+      setPopupType("error");
+      setPopupVisible(true);
     }
   };
 
@@ -99,7 +113,13 @@ const DevEdit = () => {
       });
       if (!response.ok) {
         throw new Error(`Failed to update template: ${response.statusText}`);
+        setPopupMessage("Failed to update template");
+        setPopupType("error");
+        setPopupVisible(true);
       }
+      setPopupMessage("Template updated successfully");
+      setPopupType("success");
+      setPopupVisible(true);
       setTemplates((prev) =>
         prev.map((template) =>
           template.id === updateTemplate.id ? { ...template, ...updateTemplate } : template // 
@@ -109,6 +129,9 @@ const DevEdit = () => {
       setUpdateTemplate({ name: "", phase: "", description: "", price: "" });
     } catch (error) {
       console.error("Error updating template:", error.message);
+      setPopupMessage("Failed to update template");
+      setPopupType("error");
+      setPopupVisible(true);
     }
   };
 
@@ -223,9 +246,12 @@ const DevEdit = () => {
                 required
               />
             </div>
-            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-              Create
-            </button>
+            <div className="mb-4">
+              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Create
+              </button>
+              <Popup visible={popupVisible} message={popupMessage} onClose={() => setPopupVisible(false)} type={popupType} />
+            </div>
           </form>
         </div>
 
@@ -293,9 +319,12 @@ const DevEdit = () => {
                   required
                 />
               </div>
-              <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                Update
-              </button>
+              <div className="mb-4" >
+                <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                  Update
+                </button>
+                <Popup visible={popupVisible} message={popupMessage} onClose={() => setPopupVisible(false)} type={popupType} />
+              </div>
             </form>
           )}
         </div>
