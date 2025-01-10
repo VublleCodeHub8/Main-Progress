@@ -22,7 +22,7 @@ ChartJS.register(
 );
 
 const barData = {
-  labels: ["January", "February", "March", "April", "May", "June", "July"],
+  labels: [ "June", "July","August", "September", "October", "November", "December"],
   datasets: [
     {
       label: "Number of Containers Running",
@@ -33,7 +33,7 @@ const barData = {
     },
     {
       label: "Bill Generated ($)",
-      data: [200, 300, 400, 500, 600, 700, 800],
+      data: [140, 160, 35, 63, 20, 30, 108],
       backgroundColor: "rgba(153, 102, 255, 0.2)",
       borderColor: "rgba(153, 102, 255, 1)",
       borderWidth: 1,
@@ -45,7 +45,7 @@ const pieData = {
   labels: ["Number of Containers Running", "Bill Generated ($)"],
   datasets: [
     {
-      data: [19, 300], // Data for February
+      data: [19, 300], // Data for June
       backgroundColor: ["rgba(75, 192, 192, 0.2)", "rgba(153, 102, 255, 0.2)"],
       borderColor: ["rgba(75, 192, 192, 1)", "rgba(153, 102, 255, 1)"],
       borderWidth: 1,
@@ -68,8 +68,8 @@ const options = {
 
 function Analytics() {
   const [activeTab, setActiveTab] = useState("total");
-const months = ["January", "February", "March", "April", "May", "June", "July"];
-const [selectedMonth, setSelectedMonth] = useState("February");
+const months = [ "June", "July","August", "September", "October", "November", "December"];
+const [selectedMonth, setSelectedMonth] = useState("June");
 
 const handleMonthChange = (event) => {
   setSelectedMonth(event.target.value);
@@ -101,13 +101,13 @@ return (
         Total Analysis
       </button>
       <button
-        className={`tab ${activeTab === "february" ? "active bg-white" : ""} border-2 rounded-sm p-1 border-slate-800 mr-2`}
-        onClick={() => setActiveTab("february")}
+        className={`tab ${activeTab === "June" ? "active bg-white" : ""} border-2 rounded-sm p-1 border-slate-800 mr-2`}
+        onClick={() => setActiveTab("June")}
       >
         Monthly Analysis
       </button>
     </div>
-    {activeTab === "february" && (
+    {activeTab === "June" && (
       <div className="mb-4">
         <label htmlFor="month-select" className="mr-2">Select Month:</label>
         <select
@@ -123,11 +123,11 @@ return (
         </select>
       </div>
     )}
-    <div className="h-[700px]">
+    <div className="h-[500px]">
       {activeTab === "total" && (
         <Bar data={barData} options={{ ...options, maintainAspectRatio: false }} />
       )}
-      {activeTab === "february" && (
+      {activeTab === "June" && (
         <Pie data={pieDataForSelectedMonth} options={{ ...options, maintainAspectRatio: false }} />
       )}
     </div>

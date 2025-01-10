@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUserData, updateUserData, setEditMode } from "../../store/userSlice";
+import { fetchUserData, updateUserData, setEditMode } from "@/store/userSlice";
 
 const Profile = () => {
   const dispatch = useDispatch();

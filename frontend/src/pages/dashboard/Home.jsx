@@ -28,7 +28,7 @@ const getContainerStatus = async (containerId) => {
     },
   });
   const details = await response.json();
-  return {status : "running", cpu : details.cpuUsagePercentage, memory : details.memoryUsagePercentage} ;
+  return {status : details.status, cpu : details.cpuUsagePercentage, memory : details.memoryUsagePercentage} ;
 };
 
 useEffect(() => {
