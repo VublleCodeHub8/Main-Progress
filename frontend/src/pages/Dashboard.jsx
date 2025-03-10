@@ -9,33 +9,30 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { fetchUserData, updateUserData, setEditMode } from "@/store/userSlice";
+import { fetchUserData, updateUserData, setEditMode } from "../store/userSlice";
 
 
 const useAuth = () => {
   const token = useSelector((state) => state.misc.token);
   const isAuthenticated = token.token != null;
   return { isAuthenticated };
-  
-  
 };
 
 function DashboardLayout() {
   const dispatch = useDispatch();
   const token = useSelector((state) => state.misc.token);
-  const { user } = useSelector((state) => state.user);
-
-  useEffect(() => {
-    if (token) {
-      dispatch(fetchUserData(token));
-    }
-  }, [dispatch, token]);
+  const { user, status, isEditMode } = useSelector((state) => state.user);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   if (!isAuthenticated) {
     return <Navigate to="/auth" replace />;
   }
+  useEffect(() => {
+      if (token) {
+        dispatch(fetchUserData(token));
+      }
+    }, [dispatch, token]);
 
   const handleLogout = () => {
     navigate("/auth");
@@ -84,11 +81,11 @@ function DashboardLayout() {
               
                 <Avatar className="w-10 h-10">
                   <AvatarImage
-                    src={user?.profilePicUrl || "https://i.sstatic.net/frlIf.png"}
+                    src={user?.profilePicUrl || "https://via.placeholder.com/150"}
                     alt="@shadcn" 
-                    className="rounded-lg border-2 border-slate-900 w-15 h-15"
+                    className="rounded-lg w-12 h-12"
                   />
-                  <AvatarFallback>CN</AvatarFallback>
+                  <AvatarFallback></AvatarFallback>
                 </Avatar>
                 <div className="ml-1 border-l-2 border-x-slate-400 px-1">{user?.username}</div>
               </DropdownMenuTrigger>
