@@ -14,7 +14,7 @@ const signUp = async (req, res) => {
     } else {
         try {
             const passcode = await bcrypt.hash(password, 12);
-            const doc = await addUser(email, passcode, username);
+            const doc = await addUser(email, passcode, username, "user");
             res.status(200);
             res.send();
         }
@@ -40,11 +40,11 @@ const signIn = async (req, res) => {
             if (bool) {
                 const doc = await findUserByEmail(email);
 
-                const userData = { userId: doc._id, email: doc.email };
+                const userData = { userId: doc._id, email: doc.email, role: doc.role };
                 const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: "30d" })
                 const expiryDate = new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 30).toISOString();
                 await userSignIn(email, { token: token, expiry: expiryDate })
-                res.status(200).json({ token: token, expiry: expiryDate })
+                res.status(200).json({ token: token, expiry: expiryDate, role: doc.role })
 
             } else {
                 res.status(400);
@@ -116,6 +116,7 @@ const logIn = async (req, res) => {
         res.send()
     }
 }
+
 
 exports.signUp = signUp;
 exports.signOut = signOut;

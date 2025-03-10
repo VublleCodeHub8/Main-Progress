@@ -6,6 +6,7 @@ const isAuthenticated = async (req, res, next) => {
         res.status(200);
         return res.send();
     }
+    // return next();    // Bypass the Authentication step
     try {
         let token;
         token = req.headers.authorization?.split(' ')[1];
@@ -29,4 +30,35 @@ const isAuthenticated = async (req, res, next) => {
 
 }
 
+const isUser = async (req, res, next) => {
+    if (req.userData && req.userData.role === "user") {
+        next();
+    } else {
+        res.status(401);
+        res.send();
+    }
+}
+
+const isAdmin = async (req, res, next) => {
+    if (req.userData && req.userData.role === "admin") {
+        next();
+    } else {
+        res.status(401);
+        res.send();
+    }
+}
+
+const isDev = async (req, res, next) => {
+    console.log(req.userData.role);
+    if (req.userData && (req.userData.role === "dev" || req.userData.role === "admin")) {
+        next();
+    } else {
+        res.status(401);
+        res.send();
+    }
+}
+
 exports.isAuth = isAuthenticated;
+exports.isAdmin = isAdmin;
+exports.isDev = isDev;
+exports.isUser = isUser;

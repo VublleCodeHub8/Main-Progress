@@ -1,0 +1,53 @@
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Raleway:wght@400;700&display=swap");
+
+:root {
+  --color-brand-1: hsl(0, 0%, 100%);
+  --color-brand-2: hsl(0, 100%, 63%);
+
+  --color-site-1: hsl(217, 28%, 15%);
+  --color-site-2: hsl(218, 28%, 13%);
+  --color-site-3: hsl(219, 30%, 18%);
+  --color-site-4: hsl(216, 53%, 9%);
+
+  --color-site-cta-1: hsl(176, 68%, 64%);
+  --color-site-cta-2: hsl(198, 60%, 50%);
+
+  --font-heading-cta-nav: "Raleway", sans-serif;
+  --font-body: "Open Sans", sans-serif;
+}
+
+*,
+*::after,
+*::before {
+  padding: 0;
+  margin: 0;
+  box-sizing: content-box;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+.FeaturesCard {
+  text-align: justify;
+}
+
+.FeaturesCard-Img {
+  display: flex;
+  width: 8rem;
+  aspect-ratio: 1;
+  margin: 0 auto 3rem;
+}
+
+.FeaturesCard-Title {
+  color: var(--color-brand-1);
+  font-family: var(--font-heading-cta-nav);
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.FeaturesCard-Para {
+  font-size: 1.6rem;
+  font-family: var(--font-body);
+  color: var(--color-brand-1);
+}

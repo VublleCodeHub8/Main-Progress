@@ -26,7 +26,7 @@ const formSchema = z.object({
     .min(2, {
       message: "Username must be between 2 and 50 characters.",
     }),
-  email: z.string().email({
+  email: z.string().trim().email({
     message: "Email invalid.",
   }),
   password: z

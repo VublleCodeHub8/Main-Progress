@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      '@shadcn/ui': 'node_modules/@shadcn/ui/dist/index.esm.js',
     },
   },
 })

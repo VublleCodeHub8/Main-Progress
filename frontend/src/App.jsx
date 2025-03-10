@@ -1,12 +1,24 @@
 import { useState, useEffect } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Wrapper from "./pages/Wrapper";
-import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import { useDispatch, useSelector } from "react-redux";
 import { miscActions } from "./store/main";
+import Project from "./pages/Project";
+import Home from "./pages/dashboard/Home";
+import DashboardLayout from "./pages/Dashboard";
+import Settings from "./pages/dashboard/Settings";  
+import Profile from "./pages/dashboard/Profile";
+// import AboutUs from "./pages/dashboard/About";
+import Containers from "./pages/dashboard/Containers";
+import Templates from "./pages/dashboard/Templates";
+import AdminWrapper from "./pages/AdminWrapper";
+import AdminPage from "./pages/admin/page";
+import DevWrapper from "./pages/DevWrapper";
+import DevPage from "./pages/dev/devpage";
+import Analytics from "./pages/dashboard/Analytics";
+import DevEdit from "./pages/dev/devedit";
+import  BugReportForm  from "./pages/dashboard/BugReport";
 
 const router = createBrowserRouter([
   {
@@ -19,7 +31,71 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <Home></Home>,
+        element: <DashboardLayout />,
+        children: [
+          {
+            path: "",
+            element: <Home />,
+          },
+          // {
+          //   path: "about",
+          //   element: <AboutUs />,
+          // },
+          {
+            path: "containers",
+            element: <Containers />,
+          },
+          {
+            path: "templates",
+            element: <Templates />,
+          },
+          {
+            path: "profile",
+            element: <Profile />,
+          },
+          {
+            path : "analytics",
+            element : <Analytics/>
+          },
+          // {
+          //   path : "settings",
+          //   element : <Settings/>
+          // }
+          {
+            path: "bugreport",
+            element: <BugReportForm />,
+          }
+        ],
+      },
+      {
+        path: "project/:projectId",
+        element: <Project />,
+      },
+      {
+        // admin wrapper
+        path: "/admin",
+        element: <AdminWrapper />,
+        children: [
+          {
+            path: "",
+            element: <AdminPage />,
+          },
+        ],
+      },
+      {
+        // Dev wrapper
+        path: "/dev",
+        element: <DevWrapper />,
+        children: [
+          {
+            path: "",
+            element: <DevPage />,
+          },
+          {
+            path: "editor",
+            element: <DevEdit />,
+          }
+        ],
       },
     ],
   },
@@ -29,6 +105,7 @@ let timer;
 
 function App() {
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(true);
   const token = useSelector((state) => state.misc.token);
 
   console.log(token);
@@ -36,13 +113,17 @@ function App() {
   useEffect(() => {
     async function checkForLogin() {
       dispatch(miscActions.setFallback(true));
-      const userDetails = JSON.parse(localStorage.getItem("token"));
+      const userDetails =
+        localStorage.getItem("token") != ""
+          ? JSON.parse(localStorage.getItem("token"))
+          : null;
       if (userDetails && new Date(userDetails.expiry) > new Date()) {
         await logIn();
       } else if (userDetails && !(new Date(userDetails.expiry) > new Date())) {
         await logOut();
       }
       dispatch(miscActions.setFallback(false));
+      setLoading(false);
     }
     checkForLogin();
   }, [token]);
@@ -97,8 +178,15 @@ function App() {
       logOut();
     }
   }
-
-  return <RouterProvider router={router} />;
+  if (loading === true) {
+    return (
+      <div className="flex h-screen w-screen  justify-center items-center">
+        Checking Authentication....
+      </div>
+    );
+  } else {
+    return <RouterProvider router={router} />;
+  }
 }
 
 export default App;
