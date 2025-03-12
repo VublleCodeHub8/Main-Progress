@@ -5,6 +5,9 @@ const fs = require('fs/promises');
 const { connectToDB } = require('./util/database');
 require('dotenv').config();
 const cors = require('cors')
+const morgan = require('morgan')
+const rfs = require('rotating-file-stream')
+
 
 const { isAuth, isAdmin, isDev, isUser } = require('./middlewares/auth')
 
@@ -25,6 +28,26 @@ app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.use(cors());
+
+
+// Logging by morgan
+const logsDir = path.join(__dirname, 'logs');
+fs.mkdir(logsDir, { recursive: true }).catch(console.error);
+morgan.token('custom-date', () => {
+    return new Date().toISOString();
+});
+morgan.token('user-email', (req) => {
+    return req.userData ? req.userData.email : 'anonymous';
+});
+const customLogFormat = ':custom-date [:method] :url :status :response-time ms - User::user-email - :res[content-length]';
+const accessLogStream = rfs.createStream('access.log', {
+    interval: '1m', // rotate every hour
+    path: logsDir,
+    size: '10M', // rotate if size exceeds 10 MB
+});
+app.use(morgan(customLogFormat, { stream: accessLogStream }));
+// app.use(morgan('dev')); // Also log to console in development
+
 
 app.use('/auth', authRouter)
 
