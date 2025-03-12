@@ -47,13 +47,11 @@ const AdminPage = () => {
     }
   };
 
-  // Add this new function to assign template to user
   const assignTemplate = async (userEmail, templateId) => {
     try {
       setIsLoading(true); // Add loading state
       console.log("Assigning template:", { userEmail, templateId }); // Debug log
       
-      // Make sure both userEmail and templateId are present
       if (!userEmail || !templateId) {
         throw new Error("Email and template ID are required");
       }
@@ -70,18 +68,12 @@ const AdminPage = () => {
         }),
       });
       
-      // Log the raw response for debugging
-      // console.log("Raw response:", response);
-      
-      // Handle non-OK responses
       if (!response.ok) {
-        // console.log("Response not ok:", response.status);
         const errorData = await response.text();
         console.error("Server error:", errorData);
         throw new Error(`Server error: ${response.status} ${errorData}`);
       }
       
-      // Parse the response data
       const data = await response.json();
       console.log("Assignment response:", data);
       
@@ -100,7 +92,6 @@ const AdminPage = () => {
     }
   };
 
-  // Add useEffect to fetch templates
   useEffect(() => {
     fetchTemplates();
   }, [token]);
@@ -445,11 +436,11 @@ const AdminPage = () => {
               Logout
             </Link>
             <Link
-              to="/dev"
+              to="/admin/templates"
               className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
             >
               <Edit className="h-4 w-4" />
-              Developer
+              Templates
             </Link>
           </div>
         </div>

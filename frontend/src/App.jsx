@@ -18,6 +18,8 @@ import DevWrapper from "./pages/DevWrapper";
 import DevPage from "./pages/dev/devpage";
 import Analytics from "./pages/dashboard/Analytics";
 import DevEdit from "./pages/dev/devedit";
+import AdminTemp from "./pages/admin/adminTemp";
+import AdminTempEdit from "./pages/admin/adminTempEdit";
 import  BugReportForm  from "./pages/dashboard/BugReport";
 
 const router = createBrowserRouter([
@@ -79,6 +81,14 @@ const router = createBrowserRouter([
           {
             path: "",
             element: <AdminPage />,
+          },
+          {
+            path: "templates",
+            element: <AdminTemp />,
+          },
+          {
+            path: "templates/edit",
+            element: <AdminTempEdit />,
           },
         ],
       },
