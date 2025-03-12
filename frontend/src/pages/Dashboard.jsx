@@ -67,7 +67,7 @@ function DashboardLayout() {
 
   return (
     <>
-      <div className="flex flex-col h-screen bg-home_background">
+      <div className="flex flex-col h-screen bg-home_background overflow-y-hidden">
         <div className="border-b-2  border-stone-400 text-gray-600 h-16 flex items-center justify-between p-4">
           <div className="text-2xl font-bold px-5">
           <svg height="40" width="220" xmlns="http://www.w3.org/2000/svg">
@@ -81,7 +81,7 @@ function DashboardLayout() {
               
                 <Avatar className="w-10 h-10">
                   <AvatarImage
-                    src={user?.profilePicUrl || "https://via.placeholder.com/150"}
+                    src={user?.profilePicUrl || "https://github.com/shadcn.png"}
                     alt="@shadcn" 
                     className="rounded-lg w-12 h-12"
                   />
@@ -110,11 +110,15 @@ function DashboardLayout() {
                   <DropdownMenuItem onSelect={() => navigate("/admin")} className="text-lg">
                     Admin Dashboard
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => navigate("/dev")} className="text-lg">
-                    Dev Dashboard
-                  </DropdownMenuItem>
                   </>
                 )}
+                {
+                  token.role === "dev" && (
+                    <DropdownMenuItem onSelect={() => navigate("/dev")} className="text-lg">
+                      Dev Dashboard
+                    </DropdownMenuItem>
+                  )
+                }
                 {token.role === "dev" && (
                 
                   <DropdownMenuItem onSelect={() => navigate("/dev")} className="text-lg">
@@ -128,7 +132,7 @@ function DashboardLayout() {
         </div>
         <div className="flex flex-1">
           <Sidebar />
-          <div className="w-full justify-center flex-wrap px-20 py-10">
+          <div className="w-full h-screen justify-center flex-wrap px-20 pt-10 pb-24 overflow-y-auto">
             <Outlet />
           </div>
         </div>

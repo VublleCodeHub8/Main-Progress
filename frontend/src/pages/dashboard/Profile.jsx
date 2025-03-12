@@ -47,7 +47,7 @@ const Profile = () => {
         {/* Profile Details */}
         <div className="flex flex-col items-center lg:items-start flex-grow bg-white shadow-md rounded-lg p-10">
           <img
-            src={user?.profilePicUrl || "https://via.placeholder.com/150"}
+            src={user?.profilePicUrl || "https://github.com/shadcn.png"}
             alt="Profile"
             className="w-40 h-40 rounded-full border border-gray-300 mb-4 object-cover"
           />
@@ -90,9 +90,9 @@ const Profile = () => {
                 className="mt-1 block w-full"
                 onChange={handleFileChange}
               />
-              {updatedUser.profilePic && (
+              {updatedUser?.profilePic && (
                 <img
-                  src={updatedUser.profilePic}
+                  src={updatedUser?.profilePic}
                   alt="Preview"
                   className="mt-4 w-32 h-32 rounded-full border border-gray-300 object-cover"
                 />
