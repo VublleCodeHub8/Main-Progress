@@ -12,7 +12,7 @@ const mappingOfImages = {
 const createContainer = async (req, res) => {
     const cont_Name = req.headers['title'];
     const cont_Image = req.headers['template'];
-    console.log("my tera ", req.headers['template']);
+    // console.log("my tera ", req.headers['template']);
     let thePort;
     for (let i = 5000; i <= 8000; ++i) {
         const doc = await getContainerByPort(i);
@@ -45,7 +45,7 @@ const createContainer = async (req, res) => {
             }
         }
     })
-    console.log(container);
+    // console.log(container);
     const contName = (await docker.getContainer(container.id).inspect()).Name.substring(1);
     const contId = container.id;
     const contPort = thePort;
@@ -76,7 +76,7 @@ const runContainer = async (req, res) => {
         }
 
         await container.start();
-        console.log(contId, " started");
+        // console.log(contId, " started");
 
         const doc = await getContainerById(contId);
         res.json({
@@ -85,7 +85,7 @@ const runContainer = async (req, res) => {
             createdAt: doc.createdAt
         });
     } catch (err) {
-        console.log(err);
+        // console.log(err);
         res.status(500);
         res.send();
     }
@@ -96,10 +96,10 @@ const listAllContainers = async (req, res) => {
     try {
         const email = req.userData.email;
         const containers = await getContainersByEmail(email);
-        console.log(containers);
+        // console.log(containers);
         res.json(containers);
     } catch (err) {
-        console.log(err);
+        // console.log(err);
         res.status(500);
         res.send();
     }
@@ -116,7 +116,7 @@ const continerInspects = async (req, res) => {
         });
     }
     catch (err) {
-        console.log(err);
+        // console.log(err);
         res.status(500);
         res.send();
     }
@@ -138,7 +138,7 @@ const stopContainer = async (req, res) => {
             });
         }
     } catch (err) {
-        console.log(err);
+        // console.log(err);
         res.status(500);
         res.send();
     }
@@ -160,7 +160,7 @@ const restartContainer = async (req, res) => {
             });
         }
     } catch (err) {
-        console.log(err);
+        // console.log(err);
         res.status(500);
         res.send();
     }
@@ -182,7 +182,7 @@ const startContainer = async (req, res) => {
             });
         }
     } catch (err) {
-        console.log(err);
+        // console.log(err);
         res.status(500);
         res.send();
     }
@@ -191,7 +191,7 @@ const startContainer = async (req, res) => {
 const deleteContainer = async (req, res) => {
     // it should delete the container from the database as well, there is also a route in '../models/containers' to delete the container from the database
     const contId = req.params.containerId;
-    console.log(contId);
+    // console.log(contId);
     try {
         const container = docker.getContainer(contId);
         const containerDetails = await docker.getContainer(contId).inspect();
@@ -205,7 +205,7 @@ const deleteContainer = async (req, res) => {
             status: "deleted"
         });
     } catch (err) {
-        console.log(err);
+        // console.log(err);
         res.status(500);
     }
 }

@@ -1,9 +1,10 @@
-const { allTemplate, addTemplate, updateTemplates, deleteTemplates } = require('../models/template');
+const { allTemplate, addTemplate, updateTemplates, deleteTemplates, findTemplateById } = require('../models/template');
 const { allContainers } = require('../models/containers');
+const { getUserByEmail } = require('../models/user');
 
 const getAllTemplates = async (req, res) => {
     const data = await allTemplate();
-    console.log(data);
+    // console.log(data);
     if (!data) {
         res.status(500);
         res.send();
@@ -14,7 +15,7 @@ const getAllTemplates = async (req, res) => {
 const addNewTemplate = async (req, res) => {
     const dataToAdd = req.body;
     const data = await addTemplate(dataToAdd.name, dataToAdd.image, dataToAdd.phase, dataToAdd.description, dataToAdd.price);
-    console.log(data);
+    // console.log(data);
     if (!data) {
         res.status(500);
         res.send();
@@ -39,7 +40,7 @@ const updateTemplate = async (req, res) => {
 const deleteTemplate = async (req, res) => {
     const id = req.params.id;
     const data = await deleteTemplates(id);
-    console.log(data);
+    // console.log(data);
     if (!data) {
         res.status(500);
         res.send();
@@ -50,7 +51,6 @@ const deleteTemplate = async (req, res) => {
 
 const getAllContainers = async (req, res) => {
     const data = await allContainers();
-    console.log(data);
     if (!data) {
         res.status(500);
         res.send();
@@ -58,8 +58,23 @@ const getAllContainers = async (req, res) => {
     res.json(data);
 }
 
+const getUserTemplates = async (req, res) => {
+    try {
+        const userEmail = req.params.email;
+        const user = await getUserByEmail(userEmail);
+        const templateIds = user.assignedTemplates;
+        const templates = await Promise.all(templateIds.map(id => findTemplateById(id)));
+        res.json(templates);
+    } catch (err) {
+        console.log(err);
+        res.status(500);
+        res.send();
+    }
+}
+
 exports.getAllTemplates = getAllTemplates;
 exports.addNewTemplate = addNewTemplate;
 exports.updateTemplate = updateTemplate;
 exports.deleteTemplate = deleteTemplate;
 exports.getAllContainers = getAllContainers;
+exports.getUserTemplates = getUserTemplates;

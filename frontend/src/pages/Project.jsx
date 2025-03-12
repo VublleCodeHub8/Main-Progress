@@ -28,11 +28,11 @@ export default function Project() {
       );
       if (res.ok) {
         const data = await res.json();
-        console.log(data);
+        // console.log(data);
         const socket = io(`http://localhost:${data.port}`);
 
         socket.on("connect", () => {
-          console.log(socket);
+          // console.log(socket);
           setSoc(socket);
           dispatch(projectAction.setPort(data.port));
         });

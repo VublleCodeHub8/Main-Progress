@@ -60,7 +60,7 @@ const CreateContButton = ({ templateDefault = 1, className, children }) =>{
         }));
         templates = templates.filter((template) => template.phase === "Production");
         templates.unshift({ name: "Select Template", id: "", image: "undefined", price: 0, phase: "Production" });
-        console.log(" teok ", templates);
+        // console.log(" teok ", templates);
         setTemplates(templates);
       }
     }
@@ -75,7 +75,7 @@ const CreateContButton = ({ templateDefault = 1, className, children }) =>{
       .regex(/^[a-zA-Z0-9 ]*$/, "Title should only contain alphanumeric characters");
     const templateSchema = z.string().min(1, "Template should not be null");
 
-    console.log(title, template);
+    // console.log(title, template);
     try {
       titleSchema.parse(title);
       templateSchema.parse(template);
@@ -96,7 +96,7 @@ const CreateContButton = ({ templateDefault = 1, className, children }) =>{
 
     if (res.ok) {
       const data = await res.json();
-      console.log(data);
+      // console.log(data);
       navigate(`/project/${data.containerId}`);
     } else if (res.status === 401) {
       alert("Not Authenticated!!");

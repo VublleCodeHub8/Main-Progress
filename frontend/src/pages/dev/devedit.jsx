@@ -31,7 +31,9 @@ const DevEdit = () => {
 
   useEffect(() => {
     const fetchTemplates = async () => {
-      const response = await fetch("http://localhost:3000/dev/getAllTemplates", {
+      const currRole = token.role;
+      const endpoint = currRole === 'admin' ? "http://localhost:3000/dev/getAllTemplates" : `http://localhost:3000/dev/getUserTemplates/${token.email}`;
+      const response = await fetch(endpoint, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -100,7 +102,7 @@ const DevEdit = () => {
 
   const handleUpdateTemplate = async (e) => {
     e.preventDefault();
-    console.log(selectedTemplate)
+    // console.log(selectedTemplate)
     updateTemplate.id = selectedTemplate;
     try {
       const response = await fetch("http://localhost:3000/dev/updateTemplate", {

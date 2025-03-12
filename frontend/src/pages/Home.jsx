@@ -17,7 +17,7 @@ export default function Home() {
     });
     if (res.ok) {
       const data = await res.json();
-      console.log(data);
+      // console.log(data);
       navigate(`/project/${data.containerId}`);
     } else if (res.status === 401) {
       alert("Not Authenticated!!");

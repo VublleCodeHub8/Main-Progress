@@ -65,7 +65,7 @@ export function SignUpForm() {
       confirmPassword: "",
     },
   });
-  console.log(toast);
+  // console.log(toast);
 
   // 2. Define a submit handler.
   async function onSubmit(values) {
@@ -83,7 +83,7 @@ export function SignUpForm() {
         },
       });
       setLoading(false);
-      console.log(res);
+      // console.log(res);
 
       if (res.ok) {
         setMsg(null);
@@ -99,7 +99,7 @@ export function SignUpForm() {
     } catch (err) {
       console.log(err);
     }
-    console.log(values);
+    // console.log(values);
   }
 
   return (

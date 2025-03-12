@@ -43,11 +43,11 @@ function Sidebar () {
             name: "Profile",
             icon: <FaLightbulb />
         },
-        // {
-        //     path: "/about",
-        //     name: "About",
-        //     icon: <FaUserAlt />
-        // },
+        {
+            path: "/about",
+            name: "About",
+            icon: <FaUserAlt />
+        },
         {
             path: "/analytics",
             name: "Analytics",

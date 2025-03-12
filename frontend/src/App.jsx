@@ -9,7 +9,7 @@ import Home from "./pages/dashboard/Home";
 import DashboardLayout from "./pages/Dashboard";
 import Settings from "./pages/dashboard/Settings";  
 import Profile from "./pages/dashboard/Profile";
-// import AboutUs from "./pages/dashboard/About";
+import AboutUs from "./pages/dashboard/About";
 import Containers from "./pages/dashboard/Containers";
 import Templates from "./pages/dashboard/Templates";
 import AdminWrapper from "./pages/AdminWrapper";
@@ -37,10 +37,10 @@ const router = createBrowserRouter([
             path: "",
             element: <Home />,
           },
-          // {
-          //   path: "about",
-          //   element: <AboutUs />,
-          // },
+          {
+            path: "about",
+            element: <AboutUs />,
+          },
           {
             path: "containers",
             element: <Containers />,
@@ -108,7 +108,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const token = useSelector((state) => state.misc.token);
 
-  console.log(token);
+  // console.log(token);
 
   useEffect(() => {
     async function checkForLogin() {
@@ -130,7 +130,7 @@ function App() {
 
   async function logOut() {
     const tok = JSON.parse(localStorage.getItem("token"));
-    console.log(tok);
+    // console.log(tok);
     const res = await fetch("http://localhost:3000/auth/signout", {
       method: "GET",
       headers: {
@@ -150,6 +150,7 @@ function App() {
 
   async function logIn() {
     const userDetails = JSON.parse(localStorage.getItem("token"));
+    // console.log(userDetails);
     const res = await fetch("http://localhost:3000/auth/login", {
       method: "GET",
       headers: {
@@ -163,7 +164,7 @@ function App() {
       }
       const expiryTime =
         new Date(userDetails.expiry).getTime() - new Date().getTime();
-      console.log(expiryTime);
+      // console.log(expiryTime);
       timer = setTimeout(
         () => {
           logOut();

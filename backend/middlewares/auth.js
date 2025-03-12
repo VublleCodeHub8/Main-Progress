@@ -10,7 +10,7 @@ const isAuthenticated = async (req, res, next) => {
     try {
         let token;
         token = req.headers.authorization?.split(' ')[1];
-        console.log(token)
+        // console.log(token)
         if (token) {
             const payload = jwt.verify(token, process.env.JWT_SECRET);
             const result = await checkRecords(payload.email, token);
@@ -21,7 +21,7 @@ const isAuthenticated = async (req, res, next) => {
             res.send();
         }
     } catch (err) {
-        console.log(err);
+        // console.log(err);
         res.status(401);
         res.send()
     }
@@ -49,7 +49,7 @@ const isAdmin = async (req, res, next) => {
 }
 
 const isDev = async (req, res, next) => {
-    console.log(req.userData.role);
+    // console.log(req.userData.role);
     if (req.userData && (req.userData.role === "dev" || req.userData.role === "admin")) {
         next();
     } else {

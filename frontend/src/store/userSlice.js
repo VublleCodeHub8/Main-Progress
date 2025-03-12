@@ -40,14 +40,14 @@ export const updateUserData = createAsyncThunk(
       const formData = new FormData();
       formData.append("username", updatedUser.username.trim());
       if (updatedUser.bio && updatedUser.bio.trim()) {
-        console.log("mellooooo");
+        // console.log("mellooooo");
         formData.append("bio", updatedUser.bio.trim());
       }
-      console.log("mellooooo2");
+      // console.log("mellooooo2");
       if (selectedFile) {
         formData.append("profilePic", selectedFile);
       }
-      console.log("hkj : ", token.token);
+      // console.log("hkj : ", token.token);
       const response = await fetch("http://localhost:3000/user/addmoredata", {
         method: "PUT",
         headers: {
@@ -64,7 +64,7 @@ export const updateUserData = createAsyncThunk(
             "Unknown error"
         );
       }
-      console.log(responseData);
+      // console.log(responseData);
       return responseData;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -92,7 +92,7 @@ const userSlice = createSlice({
       })
       .addCase(fetchUserData.fulfilled, (state, action) => {
         state.status = "succeeded";
-        console.log(action.payload);
+        // console.log(action.payload);
         state.user = action.payload;
       })
       .addCase(fetchUserData.rejected, (state, action) => {

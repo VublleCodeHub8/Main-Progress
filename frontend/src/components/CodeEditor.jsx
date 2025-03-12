@@ -68,7 +68,7 @@ export default function CodeEditor({ socket }) {
       } else {
         setSave("unsaved");
       }
-      console.log(data);
+      // console.log(data);
     });
   });
 

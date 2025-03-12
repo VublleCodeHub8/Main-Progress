@@ -15,11 +15,95 @@ const AdminPage = () => {
   const [containers, setContainers] = useState([]);
   const [error, setError] = useState(null);
   const [expandedUserIds, setExpandedUserIds] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // Add search term state
+  const [searchTerm, setSearchTerm] = useState("");
   const token = useSelector((state) => state.misc.token);
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState("success"); // 'success' or 'error'
+  const [refreshTrigger, setRefreshTrigger] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeRole, setActiveRole] = useState('user');
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState('');
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+
+  const fetchTemplates = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/dev/getAllTemplates", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setTemplates(data);
+      }
+    } catch (error) {
+      console.error("Error fetching templates:", error);
+    }
+  };
+
+  // Add this new function to assign template to user
+  const assignTemplate = async (userEmail, templateId) => {
+    try {
+      setIsLoading(true); // Add loading state
+      console.log("Assigning template:", { userEmail, templateId }); // Debug log
+      
+      // Make sure both userEmail and templateId are present
+      if (!userEmail || !templateId) {
+        throw new Error("Email and template ID are required");
+      }
+  
+      const response = await fetch("http://localhost:3000/admin/addTemplate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.token}`,
+        },
+        body: JSON.stringify({
+          email: userEmail,
+          templateId: templateId
+        }),
+      });
+      
+      // Log the raw response for debugging
+      // console.log("Raw response:", response);
+      
+      // Handle non-OK responses
+      if (!response.ok) {
+        // console.log("Response not ok:", response.status);
+        const errorData = await response.text();
+        console.error("Server error:", errorData);
+        throw new Error(`Server error: ${response.status} ${errorData}`);
+      }
+      
+      // Parse the response data
+      const data = await response.json();
+      console.log("Assignment response:", data);
+      
+      setPopupMessage("Template assigned successfully");
+      setPopupType("success");
+      setPopupVisible(true);
+      setShowTemplateModal(false);
+      setRefreshTrigger(prev => !prev);
+    } catch (error) {
+      console.error("Error assigning template:", error);
+      setPopupMessage(error.message || "Error assigning template");
+      setPopupType("error");
+      setPopupVisible(true);
+    } finally {
+      setIsLoading(false); // Clear loading state
+    }
+  };
+
+  // Add useEffect to fetch templates
+  useEffect(() => {
+    fetchTemplates();
+  }, [token]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,7 +122,6 @@ const AdminPage = () => {
           containers: containersWithStatus.filter(container => container.email === user.email),
           isLoggedIn: authData.some(auth => auth.email === user.email && auth.noOfLogins > 0),
         }));
-        console.log(combinedData);
         setUsers(combinedData);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -47,7 +130,7 @@ const AdminPage = () => {
     };
 
     fetchData();
-  }, [token]);
+  }, [token, refreshTrigger]);
 
   const fetchUsers = async () => {
     const response = await fetch("http://localhost:3000/admin/getAllUsers", {
@@ -109,19 +192,14 @@ const AdminPage = () => {
     );
   };
 
-
   const toggleShowContainers = (userId) => {
-
-    setExpandedUserIds(prevUserIds => {
-      if (prevUserIds.includes(userId)) {
-        return prevUserIds.filter(id => id !== userId);
-      } else {
-        return [...prevUserIds, userId];
-      }
-    });
+    setExpandedUserIds(prevUserIds =>
+      prevUserIds.includes(userId) ? prevUserIds.filter(id => id !== userId) : [...prevUserIds, userId]
+    );
   };
 
   const handleStopContainer = async (containerId) => {
+    setIsLoading(true);
     try {
       const response = await fetch(`http://localhost:3000/container/stop/${containerId}`, {
         method: "GET",
@@ -130,12 +208,12 @@ const AdminPage = () => {
           Authorization: `Bearer ${token.token}`,
         },
       });
+      setIsLoading(false);
       if (response.ok) {
         setContainers(containers.map(container => container.id === containerId ? { ...container, status: "exited" } : container));
         setPopupMessage("Container stopped successfully");
         setPopupType("success");
         setPopupVisible(true);
-        console.log(response.ok);
       } else {
         console.error(`Failed to stop container ${containerId}`);
         setPopupMessage("Failed to stop container");
@@ -148,9 +226,11 @@ const AdminPage = () => {
       setPopupType("error");
       setPopupVisible(true);
     }
+    setRefreshTrigger(prevTrigger => !prevTrigger);
   };
 
   const handleStartContainer = async (containerId) => {
+    setIsLoading(true);
     try {
       const response = await fetch(`http://localhost:3000/container/start/${containerId}`, {
         method: "GET",
@@ -159,6 +239,7 @@ const AdminPage = () => {
           Authorization: `Bearer ${token.token}`,
         },
       });
+      setIsLoading(false);
       if (response.ok) {
         setContainers(containers.map(container => container.id === containerId ? { ...container, status: "running" } : container));
         setPopupMessage("Container started successfully");
@@ -176,28 +257,12 @@ const AdminPage = () => {
       setPopupType("error");
       setPopupVisible(true);
     }
-  };
-
-  const handleRestartContainer = async (containerId) => {
-    try {
-      const response = await fetch(`http://localhost:3000/container/restart/${containerId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token.token}`,
-        },
-      });
-      if (response.ok) {
-        await fetchData();
-      } else {
-        console.error(`Failed to restart container ${containerId}`);
-      }
-    } catch (error) {
-      console.error(`Error restarting container ${containerId}:`, error);
-    }
+    // setPopupMessage(true);
+    setRefreshTrigger(prevTrigger => !prevTrigger);
   };
 
   const handleDeleteContainer = async (containerId) => {
+    setIsLoading(true);
     try {
       const response = await fetch(`http://localhost:3000/container/delete/${containerId}`, {
         method: "DELETE",
@@ -206,9 +271,8 @@ const AdminPage = () => {
           Authorization: `Bearer ${token.token}`,
         },
       });
+      setIsLoading(false);
       if (response.ok) {
-        // await fetchData();
-        console.log(containers.filter(container => container.id !== containerId));
         setContainers(containers.filter(container => container.id !== containerId));
         setPopupMessage("Container deleted successfully");
         setPopupType("success");
@@ -225,9 +289,12 @@ const AdminPage = () => {
       setPopupType("error");
       setPopupVisible(true);
     }
+    // setPopupMessage(true);
+    setRefreshTrigger(prevTrigger => !prevTrigger);
   };
 
   const logoutUser = async (userEmail) => { // Rename parameter to avoid conflict
+    setIsLoading(true);
     try {
       const response = await fetch("http://localhost:3000/admin/adminLogout", {
         method: "POST",
@@ -237,9 +304,8 @@ const AdminPage = () => {
         },
         body: JSON.stringify({ email: userEmail }), // Use userEmail directly in the payload
       });
-
+      setIsLoading(false);
       if (response.ok) {
-        // await fetchData(); // Fetch updated data if logout was successful\
         setUsers(users.map(user => user.email === userEmail ? { ...user, isLoggedIn: false } : user));
         setPopupMessage("User logged out successfully");
         setPopupType("success");
@@ -256,9 +322,11 @@ const AdminPage = () => {
       setPopupType("error");
       setPopupVisible(true);
     }
+    setRefreshTrigger(prevTrigger => !prevTrigger);
   };
 
   const changeRole = async (userEmail) => {
+    setIsLoading(true);
     try {
       const response = await fetch("http://localhost:3000/admin/roleChange", {
         method: "POST",
@@ -268,8 +336,8 @@ const AdminPage = () => {
         },
         body: JSON.stringify({ email: userEmail }),
       });
+      setIsLoading(false);
       if (response.ok) {
-        // await fetchData();
         setUsers(users.map(user => user.email === userEmail ? { ...user, role: user.role === 'dev' ? 'user' : 'dev' } : user));
         setPopupMessage("Role changed successfully");
         setPopupType("success");
@@ -286,18 +354,22 @@ const AdminPage = () => {
       setPopupType("error");
       setPopupVisible(true);
     }
+    setRefreshTrigger(prevTrigger => !prevTrigger);
   };
 
 
-  const filteredUsers = users.map(user => ({
-    ...user,
-    containers: user.containers.filter(container =>
-      container.name.toLowerCase().includes(searchTerm.toLowerCase())
-    ),
-  })).filter(user =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.containers.length > 0
-  );
+  const filteredUsers = users
+    .filter(user => user.role === activeRole)
+    .map(user => ({
+      ...user,
+      containers: user.containers.filter(container =>
+        container.name.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    }))
+    .filter(user =>
+      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.containers.length > 0
+    );
 
   const getSystemHealthStatus = (containers) => {
     const runningContainers = containers.filter(container => container.status === 'running').length;
@@ -306,6 +378,9 @@ const AdminPage = () => {
     return runningPercentage >= 40 ? "Healthy" : "Unhealthy";
   };
 
+  const toggleRole = () => {
+    setActiveRole(activeRole === 'user' ? 'dev' : 'user');
+  };
 
   const userRoleData = {
     labels: ['Admin', 'Developer', 'User'],
@@ -352,122 +427,150 @@ const AdminPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="mb-8 flex items-center justify-between">
-        <Link to="/">
-          <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-        </Link>
-        <div className="flex gap-4">
-          <Link
-            to="/auth"
-            className="flex items-center gap-2 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-          >
-            <Power className="h-4 w-4" />
-            Logout
+    <>
+      {isLoading ? <div className='fixed top-0 left-0 w-full h-full bg-black/40 z-[9999] flex justify-center items-center'>
+        Loading...
+      </div> : null}
+      <div className="min-h-screen bg-gray-100 p-8">
+        <div className="mb-8 flex items-center justify-between">
+          <Link to="/">
+            <h1 className="text-4xl font-bold">Admin Dashboard</h1>
           </Link>
-          <Link
-            to="/dev"
-            className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-          >
-            <Edit className="h-4 w-4" />
-            Developer
-          </Link>
-        </div>
-      </div>
-
-      {/* Search Bar */}
-      <div className="mb-8 flex items-center rounded border border-gray-300 bg-white px-4 py-2 shadow-sm">
-        <Search className="h-5 w-5 text-gray-500" />
-        <input
-          type="text"
-          placeholder="Search by template name..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="ml-2 w-full border-none outline-none focus:ring-0"
-        />
-      </div>
-
-      {/* Stats Overview */}
-      <div className="mb-8 grid gap-4 md:grid-cols-3">
-        <StatCard title="Total Users" value={users.length} icon={<Users className="h-4 w-4 text-gray-500" />} />
-        <StatCard
-          title="Active Containers"
-          value={containers.filter(container => container.status === 'running').length}
-          icon={<Box className="h-4 w-4 text-gray-500" />}
-        />
-        <StatCard
-          title="System Status"
-          value={getSystemHealthStatus(containers)}
-          icon={<Activity className="h-4 w-4" />}
-          color={getSystemHealthStatus(containers) === "Healthy" ? "text-green-500" : "text-red-500"}
-        />
-      </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="mb-4 rounded bg-red-100 p-4 text-red-700">
-          {error}
-        </div>
-      )}
-
-      <div className="mb-8 grid gap-4 md:grid-cols-3">
-        {/* User Role Bar Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>User Roles Distribution</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Bar data={userRoleData} options={{ responsive: true, maintainAspectRatio: false }} />
-          </CardContent>
-        </Card>
-
-        {/* Container Status Pie Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Container Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Pie data={containerStatusData} options={{ responsive: true, maintainAspectRatio: false }} />
-
-          </CardContent>
-        </Card>
-        {/* Logged In user Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>User Login Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Pie data={userLoggedInData} options={{ responsive: true, maintainAspectRatio: false }} />
-          </CardContent>
-        </Card>
-
-      </div>
-      {/* Users Table */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Users and Containers</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <UserTable
-              setPopupVisible={setPopupVisible}
-              popupMessage={popupMessage}
-              popupType={popupType}
-              popupVisible={popupVisible}
-              users={filteredUsers}
-              toggleShowContainers={toggleShowContainers}
-              expandedUserIds={expandedUserIds}
-              onStopContainer={handleStopContainer}
-              onStartContainer={handleStartContainer}
-              onRestartContainer={handleRestartContainer}
-              onDeleteContainer={handleDeleteContainer}
-              onLogoutUser={logoutUser}
-              onChangeRole={changeRole} />
+          <div className="flex gap-4">
+            <Link
+              to="/auth"
+              className="flex items-center gap-2 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+            >
+              <Power className="h-4 w-4" />
+              Logout
+            </Link>
+            <Link
+              to="/dev"
+              className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+            >
+              <Edit className="h-4 w-4" />
+              Developer
+            </Link>
           </div>
+        </div>
 
-        </CardContent>
-      </Card>
-    </div>
+        {/* Search Bar */}
+        <div className="mb-8 flex items-center rounded border border-gray-300 bg-white px-4 py-2 shadow-sm">
+          <Search className="h-5 w-5 text-gray-500" />
+          <input
+            type="text"
+            placeholder="Search by template name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="ml-2 w-full border-none outline-none focus:ring-0"
+          />
+        </div>
+
+        {/* Stats Overview */}
+        <div className="mb-8 grid gap-4 md:grid-cols-3">
+          <StatCard title="Total Users" value={users.length} icon={<Users className="h-4 w-4 text-gray-500" />} />
+          <StatCard
+            title="Active Containers"
+            value={containers.filter(container => container.status === 'running').length}
+            icon={<Box className="h-4 w-4 text-gray-500" />}
+          />
+          <StatCard
+            title="System Status"
+            value={getSystemHealthStatus(containers)}
+            icon={<Activity className="h-4 w-4" />}
+            color={getSystemHealthStatus(containers) === "Healthy" ? "text-green-500" : "text-red-500"}
+          />
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 rounded bg-red-100 p-4 text-red-700">
+            {error}
+          </div>
+        )}
+
+        <div className="mb-8 grid gap-4 md:grid-cols-3">
+          {/* User Role Bar Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>User Roles Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Bar data={userRoleData} options={{ responsive: true, maintainAspectRatio: false }} />
+            </CardContent>
+          </Card>
+
+          {/* Container Status Pie Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Container Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Pie data={containerStatusData} options={{ responsive: true, maintainAspectRatio: false }} />
+
+            </CardContent>
+          </Card>
+          {/* Logged In user Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>User Login Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Pie data={userLoggedInData} options={{ responsive: true, maintainAspectRatio: false }} />
+            </CardContent>
+          </Card>
+
+        </div>
+        {/* Users Table */}
+        <Card className="mb-8">
+          <CardHeader>
+            <div className='flex justify-between items-center'>
+              <CardTitle>
+                {activeRole === 'user' ? 'Regular Users' : 'Developers'} and Containers
+              </CardTitle>
+              <button
+                onClick={toggleRole}
+                className="text-blue-500 hover:text-blue-800 flex items-center gap-2"
+              >
+                <span>View {activeRole === 'user' ? 'Developers' : 'Users'}</span>
+                <ArrowRight className="h-5 w-5" />
+              </button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <UserTable
+                setPopupVisible={setPopupVisible}
+                popupMessage={popupMessage}
+                popupType={popupType}
+                popupVisible={popupVisible}
+                users={filteredUsers}
+                toggleShowContainers={toggleShowContainers}
+                expandedUserIds={expandedUserIds}
+                onStopContainer={handleStopContainer}
+                onStartContainer={handleStartContainer}
+                onDeleteContainer={handleDeleteContainer}
+                onLogoutUser={logoutUser}
+                onChangeRole={changeRole}
+                activeRole={activeRole}
+                onAssignTemplate={(user) => {
+                  setSelectedUser(user);
+                  setShowTemplateModal(true);
+                }}
+              />
+            </div>
+
+          </CardContent>
+        </Card>
+        <TemplateModal
+          isOpen={showTemplateModal}
+          onClose={() => setShowTemplateModal(false)}
+          templates={templates}
+          onAssign={assignTemplate}
+          user={selectedUser}
+        />
+      </div>
+    </>
   );
 };
 
@@ -485,7 +588,7 @@ const StatCard = ({ title, value, icon, color = "text-gray-500" }) => (
 );
 
 // Reusable UserTable component
-const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, users, toggleShowContainers, expandedUserIds, onStopContainer, onStartContainer, onRestartContainer, onDeleteContainer, onLogoutUser, onChangeRole }) => (
+const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, users, toggleShowContainers, expandedUserIds, onStopContainer, onStartContainer, onDeleteContainer, onLogoutUser, onChangeRole, activeRole, onAssignTemplate }) => (
   <table className="w-full border-collapse">
     <thead>
       <tr className="border-b border-gray-200 text-left">
@@ -494,6 +597,7 @@ const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, use
         <TableHeader title="Role" />
         <TableHeader title="Login Status" />
         <TableHeader title="Containers" />
+        {activeRole === 'dev' && <TableHeader title="Templates" />}
         <TableHeader title="Actions" />
       </tr>
     </thead>
@@ -501,8 +605,7 @@ const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, use
       {users.map(user => (
         <React.Fragment key={user._id}>
           <tr className="border-b border-gray-200 cursor-pointer">
-            <td
-              className="px-4 py-3 font-medium flex items-center gap-2"
+            <td className="px-4 py-3 font-medium flex items-center gap-2"
               onClick={() => toggleShowContainers(user._id)}
             >
               <User className="h-4 w-4 text-gray-500" />
@@ -525,6 +628,17 @@ const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, use
               <StatusBadge status={user.isLoggedIn} />
             </td>
             <td className="px-4 py-3">{user.containers.length}</td>
+            {activeRole === 'dev' && (
+              <td className="px-4 py-3">
+                {user.assignedTemplates?.length || 0} assigned
+                <button
+                  onClick={() => onAssignTemplate(user)}
+                  className="ml-2 text-blue-500 hover:text-blue-700"
+                >
+                  <Edit className="h-4 w-4" />
+                </button>
+              </td>
+            )}
             <td className="px-4 py-3">
               <button onClick={() => onLogoutUser(user.email)} className="text-red-500 hover:text-red-800">
                 <LogOut className="h-4 w-4" />
@@ -546,7 +660,6 @@ const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, use
               container={container}
               onStopContainer={onStopContainer}
               onStartContainer={onStartContainer}
-              onRestartContainer={onRestartContainer}
               onDeleteContainer={onDeleteContainer}
               setPopupVisible={setPopupVisible} popupMessage={popupMessage} popupType={popupType} popupVisible={popupVisible}
             />
@@ -557,6 +670,52 @@ const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, use
   </table>
 );
 
+const TemplateModal = ({ isOpen, onClose, templates, onAssign, user }) => {
+  const [assignedStates, setAssignedStates] = useState({});
+  if (!isOpen || !user) return null;
+  const handleAssign = async (email, templateId) => {
+    try {
+      await onAssign(email, templateId);
+      setAssignedStates(prev => ({
+        ...prev,
+        [templateId]: true
+      }));
+    } catch (error) {
+      console.error("Error in handleAssign:", error);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg w-96">
+        <h2 className="text-xl font-bold mb-4">Assign Template to {user.username}</h2>
+        <div className="space-y-4">
+          {templates.map(template => (
+            <div key={template._id} className="flex items-center justify-between">
+              <span>{template.name}</span>
+              <button
+                onClick={() => handleAssign(user.email, template._id)}
+                className={`px-3 py-1 rounded text-white transition-colors ${
+                  assignedStates[template._id]
+                    ? 'bg-green-500 hover:bg-green-600'
+                    : 'bg-blue-500 hover:bg-blue-600'
+                }`}
+              >
+                {assignedStates[template._id] ? 'Assigned' : 'Assign'}
+              </button>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={onClose}
+          className="mt-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const TableHeader = ({ title }) => (
   <th className="px-4 py-3 text-sm font-medium text-gray-500">{title}</th>
@@ -568,7 +727,7 @@ const StatusBadge = ({ status }) => (
   </span>
 );
 
-const ContainerRow = ({ setPopupVisible, popupMessage, popupType, popupVisible, container, onStopContainer, onStartContainer, onRestartContainer, onDeleteContainer }) => (
+const ContainerRow = ({ setPopupVisible, popupMessage, popupType, popupVisible, container, onStopContainer, onStartContainer, onDeleteContainer }) => (
   <tr className="border-b border-gray-100 bg-gray-50">
     <td className="px-4 py-3 pl-12" colSpan={2}>{container.name}</td>
     <td className="px-4 py-3">{container.template}</td>

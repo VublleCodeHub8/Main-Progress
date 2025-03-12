@@ -21,6 +21,10 @@ const userSchema = mongoose.Schema({
     },
     role: {
         type: 'String'
+    },
+    assignedTemplates: {
+        type: 'Array',
+        required: false,
     }
 })
 
@@ -46,7 +50,7 @@ async function addUser(email, password, username, role) {
 async function allUsers() {
     try {
         const res = await User.find();
-        console.log(res);
+        // console.log(res);
         return res;
     } catch (err) {
         console.log(err);
@@ -98,11 +102,11 @@ async function changeRole(email) {
         const user = await User.findOne({ email: email });
         
         if (!user) {
-            console.log("User not found");
+            // console.log("User not found");
             return null;
         }
         if(user.role == 'admin'){
-            console.log("Cannot change role of admin");
+            // console.log("Cannot change role of admin");
             return null;
         }
         const newRole = user.role === 'user' ? 'dev' : 'user';
@@ -113,6 +117,25 @@ async function changeRole(email) {
         return null;
     }
 }
+
+async function addtemplate(email, templateId) {
+    try {
+        const user = await User.findOne({ email: email });
+        if (!user) {
+            throw new Error("User not found");
+        }
+        if (user.assignedTemplates.includes(templateId)) {
+            throw new Error("Template already assigned to the user");
+        }
+        user.assignedTemplates.push(templateId);
+        await user.save();
+        return user;
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+}
+
 
 
 const User = mongoose.model('User', userSchema);
@@ -125,3 +148,4 @@ exports.allUsers = allUsers;
 exports.editUser = editUser;
 exports.getUserByEmail = getUserByEmail;
 exports.changeRole = changeRole;
+exports.addtemplate = addtemplate;

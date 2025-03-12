@@ -19,13 +19,13 @@ const signUp = async (req, res) => {
             res.send();
         }
         catch (err) {
-            console.log(err);
+            // console.log(err);
             res.status(500);
             res.send();
         }
 
     }
-    console.log(req.body);
+    // console.log(req.body);
 }
 
 const signIn = async (req, res) => {
@@ -40,11 +40,11 @@ const signIn = async (req, res) => {
             if (bool) {
                 const doc = await findUserByEmail(email);
 
-                const userData = { userId: doc._id, email: doc.email, role: doc.role };
+                const userData = { userId: doc._id, email: doc.email, role: doc.role, email: doc.email };
                 const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: "30d" })
                 const expiryDate = new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 30).toISOString();
                 await userSignIn(email, { token: token, expiry: expiryDate })
-                res.status(200).json({ token: token, expiry: expiryDate, role: doc.role })
+                res.status(200).json({ token: token, expiry: expiryDate, role: doc.role, email: doc.email })
 
             } else {
                 res.status(400);
@@ -53,7 +53,7 @@ const signIn = async (req, res) => {
 
         }
         catch (err) {
-            console.log(err);
+            // console.log(err);
             res.status(500);
             res.send();
         }
@@ -63,14 +63,14 @@ const signIn = async (req, res) => {
 
 
     }
-    console.log(req.body);
+    // console.log(req.body);
 }
 
 const signOut = async (req, res) => {
     try {
         let token;
         token = req.headers.authorization?.split(' ')[1];
-        console.log("pu", token)
+        // console.log("put token", token)
         if (token) {
 
             const payload = jwt.verify(token, process.env.JWT_SECRET);
@@ -82,7 +82,7 @@ const signOut = async (req, res) => {
             res.send();
         }
     } catch (err) {
-        console.log(err);
+        // console.log(err);
         res.status(401);
         res.send()
     }
@@ -92,7 +92,7 @@ const logIn = async (req, res) => {
     try {
         let token;
         token = req.headers.authorization?.split(' ')[1];
-        console.log(token)
+        // console.log(token)
         if (token) {
             const payload = jwt.verify(token, process.env.JWT_SECRET);
             try {
@@ -100,7 +100,7 @@ const logIn = async (req, res) => {
             }
             catch (err) {
                 // changed to get rid of the delete token from browser-error
-                console.log(err);
+                // console.log(err);
                 res.status(401);
                 return res.send();
             }
@@ -111,7 +111,7 @@ const logIn = async (req, res) => {
             res.send();
         }
     } catch (err) {
-        console.log(err);
+        // console.log(err);
         res.status(401);
         res.send()
     }
