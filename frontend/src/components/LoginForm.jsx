@@ -68,20 +68,24 @@ export function LoginForm() {
         },
       });
       setLoading(false);
-      console.log(res);
+      // console.log(res);
 
       if (res.ok) {
         setMsg(null);
         const content = await res.json();
+        // console.log(content);
         const token = {
           token: content.token,
           expiry: content.expiry,
           role: content.role,
+          email: content.email,
         };
         localStorage.setItem("token", JSON.stringify(token));
-        console.log(content);
+        // console.log(content);
+        dispatch(miscActions.setEmail(content.email));
         dispatch(miscActions.setLogin(true));
         dispatch(miscActions.setToken(token));
+
         if (content.role === "admin") {
           navigate("/admin");
         } else if (content.role === "dev") {
@@ -97,7 +101,7 @@ export function LoginForm() {
     } catch (err) {
       console.log(err);
     }
-    console.log(values);
+    // console.log(values);
   }
 
   return (

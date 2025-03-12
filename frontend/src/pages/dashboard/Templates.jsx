@@ -50,7 +50,7 @@ const Templates = () => {
     const fetchTemplates = async () => {
       try {
         const tok = JSON.parse(localStorage.getItem("token"));
-        console.log(tok);
+        // console.log(tok);
         const response = await fetch("http://localhost:3000/getAllTemplates", {
           method: "GET",
           headers: {
@@ -67,10 +67,10 @@ const Templates = () => {
           image: container.image,
           price: container.price,
         }));
-        console.log(userContainers);
+        // console.log(userContainers);
         setProjects(userContainers);
         if (data === null) {
-          console.log("empytyjhbj");
+          // console.log("empytyjhbj");
         }
         setLoading(false);
       } catch (error) {

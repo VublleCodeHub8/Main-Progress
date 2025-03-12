@@ -17,7 +17,7 @@ export default function FileSystem({ socket }) {
   async function getFileTree() {
     const res = await fetch(`http://localhost:${port}/project/files`);
     const data = await res.json();
-    console.log(data);
+    // console.log(data);
     setFileTree(data);
   }
 

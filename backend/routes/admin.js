@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { getAllAuth, getAllUsers, getAllContainers , adminLogout , roleChange } = require('../controllers/admin')
+const { getAllAuth, getAllUsers, getAllContainers , adminLogout , roleChange, addTemplate } = require('../controllers/admin')
 
 
 
@@ -15,6 +15,6 @@ router.post('/adminLogout', adminLogout)
 
 router.post('/roleChange', roleChange)
 
-
+router.post('/addTemplate', addTemplate)
 
 exports.adminRouter = router

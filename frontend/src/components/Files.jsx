@@ -16,10 +16,10 @@ export default function Files({ tree }) {
 
   function fileClick(file) {
     dispatch(filesAction.setSelected(file));
-    console.log(file);
+    // console.log(file);
   }
 
-  console.log(openedFiles);
+  // console.log(openedFiles);
 
   return (
     <div className="flex flex-col space-y-[1px]">

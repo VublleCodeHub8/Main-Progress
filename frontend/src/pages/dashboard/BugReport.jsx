@@ -15,7 +15,7 @@ function BugReportForm(){
       message: message.trim(),
     };
 
-    console.log("Bug Report Submitted:", report);
+    // console.log("Bug Report Submitted:", report);
 
     // Uncomment and configure API endpoint to send the report
     // fetch('/api/bug-report', {

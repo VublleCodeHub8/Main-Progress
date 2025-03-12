@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from 'react-router-dom';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Power, Edit, Search, Sliders, Trash, Shield } from "lucide-react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import Popup from '@/components/Popup';
+import { fetchUserData, updateUserData, setEditMode } from "../../store/userSlice";
+
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const DevPage = () => {
+  const dispatch = useDispatch();
   const [templates, setTemplates] = useState([]);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState(""); // Add search term state
@@ -17,6 +20,14 @@ const DevPage = () => {
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState("success"); // 'success' or 'error'
+  const { user, status, isEditMode } = useSelector((state) => state.user);
+
+
+  useEffect(() => {
+    if (token) {
+      dispatch(fetchUserData(token));
+    }
+  }, [dispatch, token]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,16 +49,24 @@ const DevPage = () => {
     fetchData();
   }, [token]);
 
+
   const fetchTemplate = async () => {
-    const response = await fetch("http://localhost:3000/dev/getAllTemplates", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token.token}`,
-      },
-    });
-    return response.ok ? await response.json() : Promise.reject(response);
+    try {
+      const currRole = token.role;
+      const endpoint = currRole === 'admin' ? "http://localhost:3000/dev/getAllTemplates" : `http://localhost:3000/dev/getUserTemplates/${token.email}`;
+      const response = await fetch(endpoint, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.token}`,
+        },
+      });
+      return response.ok ? await response.json() : Promise.reject(response);
+    } catch (err) {
+      setError(err.message);
+    }
   }
+
   const fetchContainers = async () => {
     const response = await fetch("http://localhost:3000/dev/getAllContainers", {
       method: "GET",
@@ -212,7 +231,7 @@ const DevPage = () => {
         </CardHeader>
         <CardContent>
           <div className='overflow-x-auto'>
-            <TempTable setPopupVisible={setPopupVisible} popupMessage={popupMessage} popupType={popupType} popupVisible={popupVisible} templates={filteredTemplates} deleteTemplate={deleteTemplate} />
+            <TempTable token={token} setPopupVisible={setPopupVisible} popupMessage={popupMessage} popupType={popupType} popupVisible={popupVisible} templates={filteredTemplates} deleteTemplate={deleteTemplate} />
           </div>
         </CardContent>
       </Card>
@@ -227,7 +246,7 @@ const DevPage = () => {
   );
 };
 
-const TempTable = ({ setPopupVisible, popupMessage, popupType,popupVisible, templates, deleteTemplate }) => (
+const TempTable = ({ token, setPopupVisible, popupMessage, popupType, popupVisible, templates, deleteTemplate }) => (
   <table className='w-full border-collapse'>
     <thead>
       <tr className="border-b border-gray-200 text-left">
@@ -237,7 +256,9 @@ const TempTable = ({ setPopupVisible, popupMessage, popupType,popupVisible, temp
         <TableHeader title="Description" className="text-lg font-semibold" />
         <TableHeader title="Price" className="text-lg font-semibold" />
         <TableHeader title="Uses" className="text-lg font-semibold" />
-        <TableHeader title="Action" className="text-lg font-semibold" />
+        {token.role === 'admin' && (
+          <TableHeader title="Action" className="text-lg font-semibold" />
+        )}
       </tr>
 
     </thead>
@@ -271,21 +292,24 @@ const TempTable = ({ setPopupVisible, popupMessage, popupType,popupVisible, temp
             </td>
             <td className='px-4 py-3 text-green-500 font-bold' >${template.price} / hour</td>
             <td className='px-4 py-3' >{template.uses}</td>
-            <td className='px-4 py-3' >
-              <button
-                onClick={() => deleteTemplate(template._id)}
-                className='flex items-center text-red-700 hover:text-red-900'
-              >
-                <Trash className='h-5 w-5' />
-              </button>
-              {/* Reusable Popup */}
-              <Popup
-                visible={popupVisible}
-                message={popupMessage}
-                onClose={() => setPopupVisible(false)}
-                type={popupType}
-              />
-            </td>
+            {token.role === 'admin' && (
+
+              <td className='px-4 py-3' >
+                <button
+                  onClick={() => deleteTemplate(template._id)}
+                  className='flex items-center text-red-700 hover:text-red-900'
+                >
+                  <Trash className='h-5 w-5' />
+                </button>
+                {/* Reusable Popup */}
+                <Popup
+                  visible={popupVisible}
+                  message={popupMessage}
+                  onClose={() => setPopupVisible(false)}
+                  type={popupType}
+                />
+              </td>
+            )}
           </tr>
         </React.Fragment>
       ))}

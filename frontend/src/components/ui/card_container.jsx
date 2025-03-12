@@ -77,7 +77,7 @@ export const HoverEffect = ({
     
     if (window.confirm('Are you sure you want to delete this item?')) {
       // Perform the delete action here
-      console.log(`Delete item at index ${index} with title ${items[index].id} `);
+      // console.log(`Delete item at index ${index} with title ${items[index].id} `);
       handleDeleteContainer(items[index].id);
       items.splice(index, 1);
       alert('Item deleted successfully');
@@ -87,17 +87,17 @@ export const HoverEffect = ({
   const handleStop = (index) => {
     // Implement stop functionality here
     if (window.confirm('Are you sure you want to stop this item?')) {
-      console.log(`status item at index ${index} with title ${items[index].id} `);
+      // console.log(`status item at index ${index} with title ${items[index].id} `);
       handleStopContainer(items[index].id);
       alert('Item stopped successfully');
       items[index].Status = "stopped";
-      console.log(items[index].Status);
+      // console.log(items[index].Status);
     }
   };
 
   const handleSave = (index) => {
     // Implement edit functionality here
-    console.log(`Save item at index ${index} with title ${editTitle} `);
+    // console.log(`Save item at index ${index} with title ${editTitle} `);
     setEditIndex(null);
   };
 

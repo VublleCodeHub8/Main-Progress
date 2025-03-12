@@ -32,6 +32,20 @@ async function findTemplateByName(name) {
     }
 }
 
+async function findTemplateById(id) {
+    try {
+        const res = await Template.findById(id);
+        if(res){
+            return res;
+        }
+        return null;
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
+}
+
+
 async function addTemplate(name, image, phase, description, price) {
     try {
         const newTemplate = new Template({ name: name, image: image, phase: phase, description: description, price: price });
@@ -58,7 +72,7 @@ async function updateTemplates(id, { name, phase, description, price }) {
         if (!result) {
             throw new Error("Template not found.");
         }
-        console.log("Template updated successfully:", result);
+        // console.log("Template updated successfully:", result);
         return result;
     } catch (error) {
         console.error("Error updating template:", error.message);
@@ -75,7 +89,7 @@ async function deleteTemplates(id) {
         if (!result) {
             throw new Error("Template not found.");
         }
-        console.log("Template deleted successfully:", result);
+        // console.log("Template deleted successfully:", result);
         return result;
     } catch (error) {
         console.error("Error deleting template:", error.message);
@@ -88,10 +102,10 @@ async function deleteTemplates(id) {
 async function allTemplate() {
     try {
         const res = await Template.find();
-        console.log(res);
+        // console.log(res);
         return res;
     } catch (err) {
-        console.log(err);
+        // console.log(err);
         return null;
     }
 }
@@ -105,3 +119,4 @@ exports.allTemplate = allTemplate;
 exports.addTemplate = addTemplate;
 exports.updateTemplates = updateTemplates;
 exports.deleteTemplates = deleteTemplates;
+exports.findTemplateById = findTemplateById;

@@ -67,7 +67,7 @@ useEffect(() => {
   const fetchContainers = async () => {
     try {
       const tok = JSON.parse(localStorage.getItem("token"));
-      console.log(tok);
+      // console.log(tok);
       const response = await fetch("http://localhost:3000/container/listcontainers", {
         method: "GET",
         headers: {
@@ -88,10 +88,10 @@ useEffect(() => {
         };
       }));
       // userContainers = addContainerDetails(userContainers);
-      console.log(userContainers);
+      // console.log(userContainers);
       setProjects(userContainers);
       if (data === null) {
-        console.log("empytyjhbj")
+        // console.log("empytyjhbj")
       }
       setLoading(false);
     } catch (error) {

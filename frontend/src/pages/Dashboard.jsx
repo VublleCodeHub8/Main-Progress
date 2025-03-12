@@ -45,7 +45,7 @@ function DashboardLayout() {
     const fetchUserData = async () => {
       try {
         const tok = JSON.parse(localStorage.getItem("token"));
-        console.log(tok);
+        // console.log(tok);
         const response = await fetch("http://localhost:3000/getuser", {
           method: "GET",
           headers: {
@@ -53,7 +53,7 @@ function DashboardLayout() {
           },
         });
         const data = await response.json();
-        console.log(data);
+        // console.log(data);
         setUserData(data);
         setLoading(false);
       } catch (error) {

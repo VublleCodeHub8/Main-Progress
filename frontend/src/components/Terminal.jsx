@@ -17,12 +17,12 @@ export default function Terminal({ socket }) {
     newTerminal.open(terminalRef.current);
 
     newTerminal.onData((data) => {
-      console.log(data);
+      // console.log(data);
       socket.emit("terminal:write", data);
     });
 
     socket.on("terminal:data", (data) => {
-      console.log(data);
+      // console.log(data);
       newTerminal.write(data);
     });
 

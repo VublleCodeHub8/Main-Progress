@@ -7,6 +7,7 @@ const initialMiscState = {
     token: { token: null, expiry: null },
     fallback: false,
     role: "user",
+    email: null,
 };
 
 const miscSlice = createSlice({
@@ -27,6 +28,9 @@ const miscSlice = createSlice({
         },
         setRole(state, action) {
             state.role = action.payload;
+        },
+        setEmail(state, action) {
+            state.email = action.payload;
         }
     },
 });

@@ -44,7 +44,7 @@ app.get("/getuser", async (req, res) => {
 
 app.get('/getAllTemplates', async (req, res) => {
     const data = await allTemplate();
-    console.log(data);
+    // console.log(data);
     if (!data) {
         res.status(500);
         res.send();
