@@ -41,7 +41,7 @@ morgan.token('user-email', (req) => {
 });
 const customLogFormat = ':custom-date [:method] :url :status :response-time ms - User::user-email - :res[content-length]';
 const accessLogStream = rfs.createStream('access.log', {
-    interval: '1m', // rotate every hour
+    interval: '10m', // rotate every hour
     path: logsDir,
     size: '10M', // rotate if size exceeds 10 MB
 });

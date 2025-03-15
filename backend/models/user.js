@@ -136,6 +136,23 @@ async function addtemplate(email, templateId) {
     }
 }
 
+async function removetemplate(email, templateId) {
+    try {
+        const user = await User.findOne({ email: email });
+        if(!user){
+            throw new Error("User not found");
+        }
+        if(!user.assignedTemplates.includes(templateId)){
+            throw new Error("Template not assigned to the user");
+        }
+        user.assignedTemplates = user.assignedTemplates.filter(id => id.toString() !== templateId.toString()); // 
+        await user.save();
+        return user;
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+}
 
 
 const User = mongoose.model('User', userSchema);
@@ -149,3 +166,4 @@ exports.editUser = editUser;
 exports.getUserByEmail = getUserByEmail;
 exports.changeRole = changeRole;
 exports.addtemplate = addtemplate;
+exports.removetemplate = removetemplate;
