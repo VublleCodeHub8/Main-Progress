@@ -47,7 +47,7 @@ async function getAllBugReports() {
 async function deleteBugReport(id) {
     try {
         const bugReport = await BugReport.findByIdAndDelete(id);
-        console.log(bugReport);
+        // console.log(bugReport);
         if (!bugReport) {
             throw new Error('Bug report not found');
         }

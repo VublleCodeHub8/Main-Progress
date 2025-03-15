@@ -16,6 +16,7 @@ const BugReports = () => {
     const [popupVisible, setPopupVisible] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
     const [popupType, setPopupType] = useState("success");
+    const [refreshTrigger, setRefreshTrigger] = useState(false);
 
 
     useEffect(() => {
@@ -35,7 +36,7 @@ const BugReports = () => {
             }
         };
         fetchBugReports();
-    }, [token]);
+    }, [token, refreshTrigger]);
 
     const bugReportType = {
         labels: ['UI', 'Functionality', 'Performance', 'UI/UX', 'Security', 'Crash', 'Other'],
@@ -113,7 +114,7 @@ const BugReports = () => {
                 </CardHeader>
                 <CardContent>
                     <div className='overflow-x-auto'>
-                        <BugReportTable token={token} bugReports={filteredBugReports} setPopupVisible={setPopupVisible} setPopupMessage={setPopupMessage} setPopupType={setPopupType} popupMessage={popupMessage} popupType={popupType} popupVisible={popupVisible} />
+                        <BugReportTable token={token} bugReports={filteredBugReports} setBugReports={setBugReports} refreshTrigger={refreshTrigger} setRefreshTrigger={setRefreshTrigger} setPopupVisible={setPopupVisible} setPopupMessage={setPopupMessage} setPopupType={setPopupType} popupMessage={popupMessage} popupType={popupType} popupVisible={popupVisible} />
                     </div>
                 </CardContent>
             </Card>
@@ -139,7 +140,7 @@ const DateCell = ({ date }) => {
     return <td className="px-4 py-3">{formattedDate}</td>
 }
 
-const BugReportTable = ({ token, bugReports, setPopupVisible, setPopupMessage, setPopupType, popupMessage, popupType, popupVisible }) => {
+const BugReportTable = ({ token, bugReports, refreshTrigger, setBugReports, setRefreshTrigger,  setPopupVisible, setPopupMessage, setPopupType, popupMessage, popupType, popupVisible }) => {
 
     const handleDeleteBugReport = async (id) => {
         try {
@@ -151,23 +152,23 @@ const BugReportTable = ({ token, bugReports, setPopupVisible, setPopupMessage, s
                 },
                 body: JSON.stringify({ id })
             });
+
             if (responce.ok) {
                 setBugReports(bugReports.filter((report) => report._id !== id));
                 setPopupMessage("Bug report deleted successfully");
                 setPopupType("success");
                 setPopupVisible(true);
             } else {
-                console.error("Failed to delete bug report");
                 setPopupMessage("Failed to delete bug report");
                 setPopupType("error");
                 setPopupVisible(true);
             }
         } catch (error) {
-            console.error("Error deleting bug report:", error);
             setPopupMessage("Error deleting bug report");
             setPopupType("error");
             setPopupVisible(true);
         }
+        setRefreshTrigger(!refreshTrigger);
     };
 
     return (
