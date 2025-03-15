@@ -3,8 +3,10 @@ const multer = require('multer');
 const mongoose = require('mongoose');
 const { getUserByEmail } = require('../models/user');
 const User = require('../models/user').userModel;
+const { addBugReport } = require('../models/bugReport');
 
 const storage = multer.memoryStorage();
+
 const upload = multer({
     storage: storage,
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file limit
@@ -101,7 +103,21 @@ const getUserData = async (req, res) => {
         });
     }
 };
+
+const addBugReportController = async (req, res) => {
+    const { name, email, type, description } = req.body;
+    if (!name || !email || !type || !description) {
+        return res.status(400).json({ error: "All fields are required" });
+    }
+    const result = await addBugReport(name, email, type, description);
+    if (!result) {
+        return res.status(500).json({ error: "Failed to add bug report" });
+    }
+    res.status(200).json({ message: "Bug report added successfully" });
+}
+
 module.exports = {
     addMoreData,
     getUserData,
+    addBugReportController
 };

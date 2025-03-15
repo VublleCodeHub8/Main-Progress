@@ -224,7 +224,7 @@ const DevEdit = () => {
               >
                 <option value="" disabled>Select Phase</option>
                 <option value="Development">Development</option>
-                <option value="Production">Production</option>
+                {/* <option value="Production">Production</option> */}
                 <option value="Testing">Testing</option>
               </select>
             </div>
@@ -298,7 +298,7 @@ const DevEdit = () => {
                 >
                   <option value="" disabled>Select Phase</option>
                   <option value="Development">Development</option>
-                  <option value="Production">Production</option>
+                  {/* <option value="Production">Production</option> */}
                   <option value="Testing">Testing</option>
                 </select>
               </div>

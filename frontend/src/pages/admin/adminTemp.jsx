@@ -20,14 +20,13 @@ const AdminTemp = () => {
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState("success"); // 'success' or 'error'
-  const { user, status, isEditMode } = useSelector((state) => state.user);
 
 
-  useEffect(() => {
-    if (token) {
-      dispatch(fetchUserData(token));
-    }
-  }, [dispatch, token]);
+  // useEffect(() => {
+  //   if (token) {
+  //     dispatch(fetchUserData(token));
+  //   }
+  // }, [dispatch, token]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -164,7 +163,6 @@ const AdminTemp = () => {
             Editor
           </Link>
           {/* Admin Page Button */}
-          {token.role === 'admin' && (
             <Link
               to="/admin"
               className="flex items-center gap-2 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
@@ -172,7 +170,6 @@ const AdminTemp = () => {
               <Shield className="h-4 w-4" />
               Admin Page
             </Link>
-          )}
         </div>
       </div>
 
@@ -315,8 +312,8 @@ const TempTable = ({ token, setPopupVisible, popupMessage, popupType, popupVisib
   </table>
 );
 
-const TableHeader = ({ title }) => (
-  <th className="px-4 py-3 text-lg font-medium text-gray-500">{title}</th>
+const TableHeader = ({ title}) => (
+  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{title}</th>
 );
 
 const StatCard = ({ title, value, icon, color = "text-gray-500" }) => (

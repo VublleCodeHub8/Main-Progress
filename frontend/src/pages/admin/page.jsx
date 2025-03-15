@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { useSelector } from 'react-redux';
-import { Activity, Users, User, Box, Power, StopCircle, Trash, Search, Play, Edit, ToggleRight, ArrowRight, LogOut } from "lucide-react";
+import { Activity, Users, User, Box, Power, StopCircle, Trash, Search, Play, Edit, ToggleRight, ArrowRight, LogOut, Bug} from "lucide-react";
 import { Link } from 'react-router-dom';
 import Popup from '@/components/Popup';
 import { set } from 'react-hook-form';
@@ -479,6 +479,13 @@ const AdminPage = () => {
             >
               <Edit className="h-4 w-4" />
               Templates
+            </Link>
+            <Link
+              to="/admin/bugreports"
+              className="flex items-center gap-2 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
+            >
+              <Bug className="h-4 w-4" />
+              Bug Reports
             </Link>
           </div>
         </div>

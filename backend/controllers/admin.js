@@ -2,6 +2,7 @@ const { allUsers, changeRole } = require('../models/user');
 const { allContainers } = require('../models/containers');
 const { allAuth , deleteToken } = require('../models/auth');
 const { addtemplate, removetemplate } = require('../models/user');
+const { getAllBugReports, deleteBugReport } = require('../models/bugReport');
 
 const getAllUsers = async (req, res) => {
     const data = await allUsers();
@@ -79,6 +80,21 @@ const removeTemplate = async (req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 }
+const getAllBugReportsController = async (req, res) => {
+    const bugReports = await getAllBugReports();
+    if (!bugReports) {
+        return res.status(500).json({ error: "Failed to get bug reports" });
+    }
+    res.status(200).json(bugReports);
+}
+const deleteBugReportController = async (req, res) => {
+    const { id } = req.body;
+    if (!id) {
+        return res.status(400).json({ error: "ID is required" });
+    }
+    const data = await deleteBugReport(id);
+    res.status(200).json({ message: "Bug report deleted successfully", data });
+}
 
 
 
@@ -89,3 +105,5 @@ exports.adminLogout = adminLogout;
 exports.roleChange = roleChange;
 exports.addTemplate = addTemplate;
 exports.removeTemplate = removeTemplate;
+exports.getAllBugReportsController = getAllBugReportsController;
+exports.deleteBugReportController = deleteBugReportController;

@@ -3,94 +3,167 @@ import "./AboutUs.css";
 
 const AboutUs = () => {
   return (
-    <div className="about-us">
-      <h1>About Us</h1>
-      <p>
-        Welcome to <strong>Cloud IDE</strong>, your ultimate platform for
-        collaborative and cloud-based software development. Our platform is
-        designed to empower developers by providing a seamless, efficient, and
-        accessible Integrated Development Environment (IDE) that works directly
-        from the cloud. With cutting-edge technology and innovative features,
-        we aim to make development faster, smarter, and collaborative.
-      </p>
-      <h2>Our Mission</h2>
-      <p>
-        Our mission is to break the barriers of traditional software
-        development. By leveraging cloud technology, we strive to provide a
-        platform where teams can work together in real-time, no matter where
-        they are in the world. We focus on:
-      </p>
-      <ul>
-        <li>Seamless collaboration tools for developers.</li>
-        <li>Real-time coding and debugging across teams.</li>
-        <li>High performance and scalability for any project size.</li>
-        <li>Accessibility from any device, anywhere, anytime.</li>
-      </ul>
+    <div className="bg-white">
+      {/* Hero Section */}
+      <div className="relative bg-gradient-to-r from-gray-800 to-black py-20">
+        <div className="container mx-auto px-6">
+          <div className="text-center">
+            <h1 className="text-5xl font-bold text-white mb-4">
+              Welcome to Terminus
+            </h1>
+            <p className="text-xl text-purple-100 max-w-2xl mx-auto">
+              Your Ultimate Container Management Platform
+            </p>
+          </div>
+        </div>
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg className="w-full h-12 text-white" viewBox="0 0 1440 48" fill="currentColor" preserveAspectRatio="none">
+            <path d="M0,48 L1440,48 L1440,0 C1440,0 1140,48 720,48 C300,48 0,0 0,0 L0,48 Z"></path>
+          </svg>
+        </div>
+      </div>
 
-      <h2>Why Choose Cloud IDE?</h2>
-      <p>
-        Cloud IDE provides developers with the tools they need to code smarter.
-        Some of our key features include:
-      </p>
-      <ul>
-        <li>Multi-language support, including JavaScript, Python, Java, and more.</li>
-        <li>Real-time collaborative editing.</li>
-        <li>Built-in terminal and debugging tools.</li>
-        <li>Cloud storage for your projects.</li>
-        <li>Secure access and version control integration.</li>
-      </ul>
+      {/* Mission Section */}
+      <div className="py-16">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold text-gray-800 mb-8">Our Mission</h2>
+            <p className="text-lg text-gray-600 mb-8">
+              Terminus is dedicated to revolutionizing container management by providing a powerful, 
+              user-friendly platform that enables developers and organizations to deploy, manage, 
+              and scale their containerized applications with unprecedented ease and efficiency.
+            </p>
+          </div>
+        </div>
+      </div>
 
-      <h2>Meet Our Team</h2>
-      <p>
-        Behind Cloud IDE is a passionate team of developers, designers, and
-        innovators committed to making software development more efficient and
-        enjoyable.
-      </p>
-      <ul>
-        <li>
-          <strong>John Doe</strong> - Founder & CEO: A visionary leader with
-          over 15 years of experience in software engineering and a passion for
-          transforming the way people code.
-        </li>
-        <li>
-          <strong>Jane Smith</strong> - Lead Developer: The technical
-          mastermind behind our platform, Jane specializes in cloud-based
-          applications and scalable architecture.
-        </li>
-        <li>
-          <strong>Michael Brown</strong> - Product Manager: With a sharp focus
-          on user experience, Michael ensures that our platform meets the
-          evolving needs of developers.
-        </li>
-        <li>
-          <strong>Sophia Lee</strong> - UI/UX Designer: Responsible for the
-          intuitive and clean design of our platform, making it both powerful
-          and easy to use.
-        </li>
-        <li>
-          <strong>Rajesh Kumar</strong> - DevOps Engineer: Ensures the
-          reliability, scalability, and security of our platform for global
-          users.
-        </li>
-      </ul>
+      {/* Features Section */}
+      <div className="bg-gray-50 py-16">
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Why Choose Terminus</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Feature 1 */}
+            <div className="bg-white rounded-lg p-8 shadow-md hover:shadow-lg transition-shadow duration-300">
+              <div className="text-black mb-4">
+                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Simplified Management</h3>
+              <p className="text-gray-600">
+                Intuitive interface for managing containers, making deployment and scaling effortless.
+              </p>
+            </div>
 
-      <h2>Our Achievements</h2>
-      <p>
-        Since our inception, Cloud IDE has achieved several milestones:
-      </p>
-      <ul>
-        <li>Trusted by over 50,000 developers worldwide.</li>
-        <li>Implemented in over 1,000 companies for team projects.</li>
-        <li>Recipient of the "Best Cloud Development Platform" award in 2023.</li>
-        <li>Partnered with leading organizations to revolutionize remote development.</li>
-      </ul>
+            {/* Feature 2 */}
+            <div className="bg-white rounded-lg p-8 shadow-md hover:shadow-lg transition-shadow duration-300">
+              <div className="text-black mb-4">
+                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Advanced Security</h3>
+              <p className="text-gray-600">
+                Enterprise-grade security features to protect your containers and applications.
+              </p>
+            </div>
 
-      <h2>Join Us</h2>
-      <p>
-        Whether you're a developer looking for a better way to code, or a
-        company searching for efficient team solutions, Cloud IDE is here for
-        you. Join us in shaping the future of software development.
-      </p>
+            {/* Feature 3 */}
+            <div className="bg-white rounded-lg p-8 shadow-md hover:shadow-lg transition-shadow duration-300">
+              <div className="text-black mb-4">
+                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Real-time Monitoring</h3>
+              <p className="text-gray-600">
+                Comprehensive monitoring and analytics for your containerized applications.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Key Benefits Section */}
+      <div className="py-16">
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Key Benefits</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">For Developers</h3>
+              <ul className="space-y-3 text-gray-600">
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-black mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  Streamlined deployment process
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-black mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  Automated scaling capabilities
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-black mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  Integrated development tools
+                </li>
+              </ul>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">For Organizations</h3>
+              <ul className="space-y-3 text-gray-600">
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-black mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  Cost-effective scaling
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-black mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  Enhanced security controls
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-black mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  Comprehensive monitoring
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Contact Section */}
+      <div className="bg-gray-50 py-16">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold text-gray-800 mb-8">Start Your Journey with Terminus</h2>
+            <p className="text-lg text-gray-600 mb-8">
+              Ready to transform your container management experience? Get in touch with our team today.
+            </p>
+            <div className="space-x-4">
+              <a 
+                href="/contact" 
+                className="inline-block bg-black text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-800 transition duration-300"
+              >
+                Contact Us
+              </a>
+              <a 
+                href="/documentation" 
+                className="inline-block bg-white text-black border border-black px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300"
+              >
+                View Documentation
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

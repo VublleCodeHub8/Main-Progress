@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-const { getAllAuth, getAllUsers, getAllContainers , adminLogout , roleChange, addTemplate, removeTemplate } = require('../controllers/admin')
+const { getAllAuth, getAllUsers, getAllContainers , adminLogout , roleChange, addTemplate, removeTemplate,
+    getAllBugReportsController, deleteBugReportController
+ } = require('../controllers/admin')
 
 
 
@@ -18,5 +20,9 @@ router.post('/roleChange', roleChange)
 router.post('/addTemplate', addTemplate)
 
 router.post('/removeTemplate', removeTemplate)
+
+router.get('/getAllBugReports', getAllBugReportsController)
+
+router.delete('/deleteBugReport', deleteBugReportController)
 
 exports.adminRouter = router

@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Wrapper from "./pages/Wrapper";
 import Auth from "./pages/Auth";
+import { Toaster } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { miscActions } from "./store/main";
 import Project from "./pages/Project";
 import Home from "./pages/dashboard/Home";
 import DashboardLayout from "./pages/Dashboard";
-import Settings from "./pages/dashboard/Settings";  
+import Settings from "./pages/dashboard/Settings";
 import Profile from "./pages/dashboard/Profile";
 import AboutUs from "./pages/dashboard/About";
 import Containers from "./pages/dashboard/Containers";
@@ -20,8 +21,10 @@ import Analytics from "./pages/dashboard/Analytics";
 import DevEdit from "./pages/dev/devedit";
 import AdminTemp from "./pages/admin/adminTemp";
 import AdminTempEdit from "./pages/admin/adminTempEdit";
-import  BugReportForm  from "./pages/dashboard/BugReport";
-
+import BugReportForm from "./pages/dashboard/BugReport";
+import ContactUs from "./pages/dashboard/ContactUs";
+import Documentation from "./pages/dashboard/Documentation";
+import BugReports from "./pages/admin/bugReports";
 const router = createBrowserRouter([
   {
     path: "auth",
@@ -44,6 +47,14 @@ const router = createBrowserRouter([
             element: <AboutUs />,
           },
           {
+            path: "contact",
+            element: <ContactUs />,
+          },
+          {
+            path: "documentation",
+            element: <Documentation />,
+          },
+          {
             path: "containers",
             element: <Containers />,
           },
@@ -56,8 +67,8 @@ const router = createBrowserRouter([
             element: <Profile />,
           },
           {
-            path : "analytics",
-            element : <Analytics/>
+            path: "analytics",
+            element: <Analytics />
           },
           // {
           //   path : "settings",
@@ -90,6 +101,10 @@ const router = createBrowserRouter([
             path: "templates/edit",
             element: <AdminTempEdit />,
           },
+          {
+            path: "bugreports",
+            element: <BugReports />,
+          }
         ],
       },
       {
@@ -191,9 +206,12 @@ function App() {
   }
   if (loading === true) {
     return (
-      <div className="flex h-screen w-screen  justify-center items-center">
-        Checking Authentication....
-      </div>
+      <>
+        <Toaster position="top-right" />
+        <div className="flex h-screen w-screen  justify-center items-center">
+          Checking Authentication....
+        </div>
+      </>
     );
   } else {
     return <RouterProvider router={router} />;
