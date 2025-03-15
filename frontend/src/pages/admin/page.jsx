@@ -731,32 +731,23 @@ const TemplateModal = ({ isOpen, onClose, templates, onAssign, user, onRemove })
 
   if (!isOpen || !user) return null;
 
-  // console.log(user.assignedTemplates);
   const isTemplateAssigned = (templateId) => {
     return user.assignedTemplates?.some(assignedId => assignedId.toString() === templateId.toString());
   };
 
-  const handleAssign = async (email, templateId) => {
+  const handleToggle = async (email, templateId, currentState) => {
     try {
-      await onAssign(email, templateId);
+      if (!currentState) {
+        await onAssign(email, templateId);
+      } else {
+        await onRemove(email, templateId);
+      }
       setAssignedStates(prev => ({
         ...prev,
-        [templateId]: true 
+        [templateId]: !currentState
       }));
     } catch (error) {
-      console.error("Error in handleAssign:", error);
-    }
-  };
-
-  const handleRemove = async (email, templateId) => {
-    try{
-      await onRemove(email, templateId);
-      setAssignedStates(prev => ({
-        ...prev,
-        [templateId]: false
-      }));
-    } catch (error) {
-      console.error("Error in handleRemove:", error);
+      console.error("Error in handleToggle:", error);
     }
   };
 
@@ -768,22 +759,24 @@ const TemplateModal = ({ isOpen, onClose, templates, onAssign, user, onRemove })
           {templates.map(template => (
             <div key={template._id} className="flex items-center justify-between">
               <span>{template.name}</span>
-              <button
-                onClick={() => handleAssign(user.email, template._id)}
-                className={`px-3 py-1 rounded text-white transition-colors ${
-                  isTemplateAssigned(template._id)
-                    ? 'bg-green-500 hover:bg-green-600'
-                    : 'bg-blue-500 hover:bg-blue-600'
-                }`}
-              >
-                {isTemplateAssigned(template._id) ? 'Assigned' : 'Assign'}
-              </button>
-                <button
-                  onClick={() => handleRemove(user.email, template._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                >
-                  Remove
-                </button>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={isTemplateAssigned(template._id)}
+                  onChange={() => handleToggle(user.email, template._id, isTemplateAssigned(template._id))}
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 
+                              dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 
+                              peer-checked:after:translate-x-full peer-checked:after:border-white 
+                              after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+                              after:bg-white after:border-gray-300 after:border after:rounded-full 
+                              after:h-5 after:w-5 after:transition-all dark:border-gray-600 
+                              peer-checked:bg-blue-600"></div>
+                <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+                  {isTemplateAssigned(template._id) ? 'Assigned' : 'Not Assigned'}
+                </span>
+              </label>
             </div>
           ))}
         </div>

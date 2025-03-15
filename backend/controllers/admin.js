@@ -76,7 +76,6 @@ const removeTemplate = async (req, res) => {
         const data = await removetemplate(email, templateId);
         res.status(200).json({ message: "Template removed successfully", data });
     } catch (error) {
-        console.error("Error removing template:", error);
         return res.status(500).json({ error: "Internal server error" });
     }
 }
