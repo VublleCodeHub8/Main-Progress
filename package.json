@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "morgan": "^1.10.0",
-    "react-query": "^3.39.3",
-    "rotating-file-stream": "^3.2.6"
-  }
-}
