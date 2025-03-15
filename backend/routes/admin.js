@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const { getAllAuth, getAllUsers, getAllContainers , adminLogout , roleChange, addTemplate, removeTemplate,
-    getAllBugReportsController, deleteBugReportController
+    getAllBugReportsController, deleteBugReportController, getAllContainerHistoryController
  } = require('../controllers/admin')
 
 
@@ -21,8 +21,10 @@ router.post('/addTemplate', addTemplate)
 
 router.post('/removeTemplate', removeTemplate)
 
-router.get('/getAllBugReports', getAllBugReportsController)
+router.get('/getAllBugReports', getAllBugReportsController  )
 
 router.delete('/deleteBugReport', deleteBugReportController)
+
+router.get('/getAllContainerHistory', getAllContainerHistoryController)
 
 exports.adminRouter = router

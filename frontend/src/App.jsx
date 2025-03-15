@@ -25,6 +25,7 @@ import BugReportForm from "./pages/dashboard/BugReport";
 import ContactUs from "./pages/dashboard/ContactUs";
 import Documentation from "./pages/dashboard/Documentation";
 import BugReports from "./pages/admin/bugReports";
+import ContainerHistory from "./pages/admin/containerHistory";
 const router = createBrowserRouter([
   {
     path: "auth",
@@ -104,6 +105,10 @@ const router = createBrowserRouter([
           {
             path: "bugreports",
             element: <BugReports />,
+          },
+          {
+            path: "containerhistory",
+            element: <ContainerHistory />,
           }
         ],
       },

@@ -1,6 +1,8 @@
 const Docker = require('dockerode')
 const net = require('net');
 const { getContainerById, getContainerByPort, getContainersByEmail, createNewContainer, deleteOneContainer } = require('../models/containers')
+const { addContainerHistory } = require('../models/containerHistory');
+const { findUserByEmail } = require('../models/user');
 
 const docker = new Docker();
 
@@ -12,7 +14,6 @@ const mappingOfImages = {
 const createContainer = async (req, res) => {
     const cont_Name = req.headers['title'];
     const cont_Image = req.headers['template'];
-    // console.log("my tera ", req.headers['template']);
     let thePort;
     for (let i = 5000; i <= 8000; ++i) {
         const doc = await getContainerByPort(i);
@@ -24,10 +25,6 @@ const createContainer = async (req, res) => {
             }
         }
     }
-
-    // let image;
-    // image = mappingOfImages[template];
-    // console.log(template, image);
 
     const container = await docker.createContainer({
         Image: cont_Image,
@@ -189,26 +186,46 @@ const startContainer = async (req, res) => {
 }
 
 const deleteContainer = async (req, res) => {
-    // it should delete the container from the database as well, there is also a route in '../models/containers' to delete the container from the database
     const contId = req.params.containerId;
-    // console.log(contId);
     try {
         const container = docker.getContainer(contId);
-        const containerDetails = await docker.getContainer(contId).inspect();
+        const containerDetails = await container.inspect();
         if (containerDetails.State.Running) {
             await container.stop();
         }
+        const contDetails = await getContainerById(contId);
+        if (!contDetails) {
+            return res.status(404).json({ error: "Container details not found" });
+        }
+        const deletedAt = new Date();
+        const user = await findUserByEmail(contDetails.email);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        try {
+            const addedToHistory = await addContainerHistory(
+                contDetails.name, contId, contDetails.port, contDetails.createdAt, 
+                deletedAt, user.username, user.email, contDetails.template
+            );
+            // if (!addedToHistory) {
+            //     console.log("Failed to add container history");
+            // } else {
+            //     console.log("Container history added successfully");
+            // }
+        } catch (historyErr) {
+            console.error("Error adding container history:", historyErr);
+        }
         await container.remove();
-
         await deleteOneContainer(contId);
-        res.json({
-            status: "deleted"
-        });
+
+        res.json({ status: "deleted" });
+
     } catch (err) {
-        // console.log(err);
-        res.status(500);
+        console.error("Error deleting container:", err);
+        res.status(500).json({ error: "Internal server error" });
     }
-}
+};
+
 
 const getContainerCPUandMemoryStats = async (req, res) => {
     const { containerId } = req.params;

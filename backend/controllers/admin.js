@@ -3,6 +3,7 @@ const { allContainers } = require('../models/containers');
 const { allAuth , deleteToken } = require('../models/auth');
 const { addtemplate, removetemplate } = require('../models/user');
 const { getAllBugReports, deleteBugReport } = require('../models/bugReport');
+const { getAllContainerHistory } = require('../models/containerHistory');
 
 const getAllUsers = async (req, res) => {
     const data = await allUsers();
@@ -96,6 +97,13 @@ const deleteBugReportController = async (req, res) => {
     res.status(200).json({ message: "Bug report deleted successfully", data });
 }
 
+const getAllContainerHistoryController = async (req, res) => {
+    const containerHistory = await getAllContainerHistory();
+    if (!containerHistory) {
+        return res.status(500).json({ error: "Failed to get container history" });
+    }
+    res.status(200).json(containerHistory);
+}
 
 
 exports.getAllAuth = getAllAuth;
@@ -107,3 +115,4 @@ exports.addTemplate = addTemplate;
 exports.removeTemplate = removeTemplate;
 exports.getAllBugReportsController = getAllBugReportsController;
 exports.deleteBugReportController = deleteBugReportController;
+exports.getAllContainerHistoryController = getAllContainerHistoryController;

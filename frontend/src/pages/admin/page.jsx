@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { useSelector } from 'react-redux';
-import { Activity, Users, User, Box, Power, StopCircle, Trash, Search, Play, Edit, ToggleRight, ArrowRight, LogOut, Bug} from "lucide-react";
+import { Activity, Users, User, Box, Power, StopCircle, Trash, Search, Play, Edit, ToggleRight, ArrowRight, LogOut, Bug, History} from "lucide-react";
 import { Link } from 'react-router-dom';
 import Popup from '@/components/Popup';
 import { set } from 'react-hook-form';
@@ -421,205 +421,512 @@ const AdminPage = () => {
           users.filter(user => user.role === 'dev').length,
           users.filter(user => user.role === 'user').length,
         ],
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.8)',
+          'rgba(54, 162, 235, 0.8)',
+          'rgba(255, 206, 86, 0.8)'
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)'
+        ],
+        borderWidth: 1,
+        borderRadius: 8,
+        maxBarThickness: 50,
       },
     ],
   };
 
   const containerStatusData = {
     labels: ['Running', 'Stopped'],
-    datasets: [
-      {
-        label: 'Container Status',
-        data: [
-          containers.filter(container => container.status === 'running').length,
-          containers.filter(container => container.status === 'exited').length,
-        ],
-        backgroundColor: ['#4CAF50', '#F44336'],
-      },
-    ],
+    datasets: [{
+      label: 'Container Status',
+      data: [
+        containers.filter(container => container.status === 'running').length,
+        containers.filter(container => container.status === 'exited').length,
+      ],
+      backgroundColor: [
+        'rgba(76, 175, 80, 0.8)',
+        'rgba(244, 67, 54, 0.8)'
+      ],
+      borderColor: [
+        'rgba(76, 175, 80, 1)',
+        'rgba(244, 67, 54, 1)'
+      ],
+      borderWidth: 2,
+      hoverOffset: 4,
+      hoverBorderWidth: 3,
+    }],
   };
 
   const userLoggedInData = {
     labels: ['Logged In', 'Logged Out'],
-    datasets: [
-      {
-        label: 'User Login Status',
-        data: [
-          users.filter(user => user.isLoggedIn).length,
-          users.filter(user => !user.isLoggedIn).length
-        ],
-        backgroundColor: ['#4CAF50', '#F44336']
-      },
-    ],
+    datasets: [{
+      label: 'User Login Status',
+      data: [
+        users.filter(user => user.isLoggedIn).length,
+        users.filter(user => !user.isLoggedIn).length
+      ],
+      backgroundColor: [
+        'rgba(76, 175, 80, 0.8)',
+        'rgba(244, 67, 54, 0.8)'
+      ],
+      borderColor: [
+        'rgba(76, 175, 80, 1)',
+        'rgba(244, 67, 54, 1)'
+      ],
+      borderWidth: 2,
+      hoverOffset: 4,
+      hoverBorderWidth: 3,
+    }],
   };
 
 
   return (
-    <>
-      {isLoading ? <div className='fixed top-0 left-0 w-full h-full bg-black/40 z-[9999] flex justify-center items-center'>
-        Loading...
-      </div> : null}
-      <div className="min-h-screen bg-gray-100 p-8">
-        <div className="mb-8 flex items-center justify-between">
-          <Link to="/">
-            <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-          </Link>
-          <div className="flex gap-4">
-            <Link
-              to="/auth"
-              className="flex items-center gap-2 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-            >
-              <Power className="h-4 w-4" />
-              Logout
-            </Link>
-            <Link
-              to="/admin/templates"
-              className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-            >
-              <Edit className="h-4 w-4" />
-              Templates
-            </Link>
-            <Link
-              to="/admin/bugreports"
-              className="flex items-center gap-2 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
-            >
-              <Bug className="h-4 w-4" />
-              Bug Reports
-            </Link>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-8">
+      {/* Enhanced Header Section */}
+      <div className="mb-8">
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          {/* Title and Actions Section */}
+          <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
+            <div className="flex items-center gap-5">
+              {/* Single Prominent Icon */}
+              <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-gray-900 to-gray-700 
+                           flex items-center justify-center shadow-lg transform 
+                           hover:rotate-3 transition-all duration-300">
+                <Users className="h-8 w-8 text-white" />
+              </div>
+              
+              {/* Title and Subtitle */}
+              <div>
+                <Link to="/" className="hover:opacity-80 transition-opacity">
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                    Admin Dashboard
+                  </h1>
+                </Link>
+                <p className="text-gray-500 flex items-center gap-2 mt-1">
+                  <Activity className="h-4 w-4" />
+                  Monitor and manage system resources, users, and containers
+                </p>
+              </div>
+            </div>
 
-        {/* Search Bar */}
-        <div className="mb-8 flex items-center rounded border border-gray-300 bg-white px-4 py-2 shadow-sm">
-          <Search className="h-5 w-5 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search by template name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="ml-2 w-full border-none outline-none focus:ring-0"
-          />
-        </div>
-
-        {/* Stats Overview */}
-        <div className="mb-8 grid gap-4 md:grid-cols-3">
-          <StatCard title="Total Users" value={users.length} icon={<Users className="h-4 w-4 text-gray-500" />} />
-          <StatCard
-            title="Active Containers"
-            value={containers.filter(container => container.status === 'running').length}
-            icon={<Box className="h-4 w-4 text-gray-500" />}
-          />
-          <StatCard
-            title="System Status"
-            value={getSystemHealthStatus(containers)}
-            icon={<Activity className="h-4 w-4" />}
-            color={getSystemHealthStatus(containers) === "Healthy" ? "text-green-500" : "text-red-500"}
-          />
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-4 rounded bg-red-100 p-4 text-red-700">
-            {error}
-          </div>
-        )}
-
-        <div className="mb-8 grid gap-4 md:grid-cols-3">
-          {/* User Role Bar Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>User Roles Distribution</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Bar data={userRoleData} options={{ responsive: true, maintainAspectRatio: false }} />
-            </CardContent>
-          </Card>
-
-          {/* Container Status Pie Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Container Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Pie data={containerStatusData} options={{ responsive: true, maintainAspectRatio: false }} />
-
-            </CardContent>
-          </Card>
-          {/* Logged In user Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>User Login Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Pie data={userLoggedInData} options={{ responsive: true, maintainAspectRatio: false }} />
-            </CardContent>
-          </Card>
-
-        </div>
-        {/* Users Table */}
-        <Card className="mb-8">
-          <CardHeader>
-            <div className='flex justify-between items-center'>
-              <CardTitle>
-                {activeRole === 'user' ? 'Regular Users' : 'Developers'} and Containers
-              </CardTitle>
-              <button
-                onClick={toggleRole}
-                className="text-blue-500 hover:text-blue-800 flex items-center gap-2"
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3">
+              <Link
+                to="/admin/templates"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 
+                         bg-white border border-gray-200 rounded-lg hover:bg-gray-50 
+                         transition-all duration-200 shadow-sm"
               >
-                <span>View {activeRole === 'user' ? 'Developers' : 'Users'}</span>
-                <ArrowRight className="h-5 w-5" />
-              </button>
+                <Edit className="h-4 w-4" />
+                Templates
+              </Link>
+              <Link
+                to="/admin/bugreports"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 
+                         bg-white border border-gray-200 rounded-lg hover:bg-gray-50 
+                         transition-all duration-200 shadow-sm"
+              >
+                <Bug className="h-4 w-4" />
+                Bug Reports
+              </Link>
+              <Link
+                to="/admin/containerhistory"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 
+                         bg-white border border-gray-200 rounded-lg hover:bg-gray-50 
+                         transition-all duration-200 shadow-sm"
+              >
+                <History className="h-4 w-4" />
+                Container History
+              </Link>
+              <Link
+                to="/auth"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white 
+                         bg-black rounded-lg hover:bg-gray-800 
+                         transition-all duration-200 shadow-sm"
+              >
+                <Power className="h-4 w-4" />
+                Logout
+              </Link>
+            </div>
+          </div>
+
+          {/* Enhanced Search Bar with top margin */}
+          <div className="max-w-2xl mt-6 border-t pt-1 border-gray-100">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search users or containers... (Press '/' to focus)"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2.5 text-sm
+                         border border-gray-200 rounded-lg
+                         focus:ring-2 focus:ring-black focus:border-transparent
+                         placeholder-gray-400 transition-all duration-200
+                         bg-gray-50 hover:bg-white focus:bg-white"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Enhanced Stats Cards */}
+      <div className="mb-8 grid gap-4 md:grid-cols-3">
+        <StatCard
+          title="Total Users"
+          value={users.length}
+          icon={<Users className="h-5 w-5" />}
+          description="Active users in the system"
+          trend="+5% from last week"
+          trendUp={true}
+        />
+        <StatCard
+          title="Active Containers"
+          value={containers.filter(container => container.status === 'running').length}
+          icon={<Box className="h-5 w-5" />}
+          description="Currently running containers"
+          trend="-2% from yesterday"
+          trendUp={false}
+        />
+        <StatCard
+          title="System Status"
+          value={getSystemHealthStatus(containers)}
+          icon={<Activity className="h-5 w-5" />}
+          description="Overall system health"
+          color={getSystemHealthStatus(containers) === "Healthy" ? "text-green-500" : "text-red-500"}
+        />
+      </div>
+
+      {/* Enhanced Charts Section */}
+      <div className="mb-8 grid gap-6 md:grid-cols-3">
+        <Card className="overflow-hidden">
+          <CardHeader className="border-b border-gray-100 bg-gray-50/50 p-6">
+            <div className="space-y-1">
+              <CardTitle className="text-lg font-semibold">User Roles Distribution</CardTitle>
+              <p className="text-sm text-gray-500">Overview of user types in the system</p>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <UserTable
-                setPopupVisible={setPopupVisible}
-                popupMessage={popupMessage}
-                popupType={popupType}
-                popupVisible={popupVisible}
-                users={filteredUsers}
-                toggleShowContainers={toggleShowContainers}
-                expandedUserIds={expandedUserIds}
-                onStopContainer={handleStopContainer}
-                onStartContainer={handleStartContainer}
-                onDeleteContainer={handleDeleteContainer}
-                onLogoutUser={logoutUser}
-                onChangeRole={changeRole}
-                activeRole={activeRole}
-                onAssignTemplate={(user) => {
-                  setSelectedUser(user);
-                  setShowTemplateModal(true);
+          <CardContent className="p-6">
+            <div className="h-[240px]">
+              <Bar
+                data={userRoleData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  animation: {
+                    duration: 1000,
+                    easing: 'easeInOutQuart'
+                  },
+                  plugins: {
+                    legend: {
+                      display: false
+                    },
+                    tooltip: {
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      titleFont: {
+                        size: 13,
+                        family: 'Inter'
+                      },
+                      bodyFont: {
+                        size: 12,
+                        family: 'Inter'
+                      },
+                      padding: 12,
+                      cornerRadius: 8,
+                      displayColors: true,
+                      usePointStyle: true,
+                      callbacks: {
+                        label: function(context) {
+                          return `${context.parsed.y} Users`;
+                        }
+                      }
+                    }
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      grid: {
+                        display: true,
+                        color: 'rgba(0,0,0,0.05)',
+                        drawBorder: false
+                      },
+                      ticks: {
+                        font: {
+                          size: 12,
+                          family: 'Inter'
+                        },
+                        color: 'rgba(0,0,0,0.6)',
+                        padding: 8
+                      }
+                    },
+                    x: {
+                      grid: {
+                        display: false,
+                        drawBorder: false
+                      },
+                      ticks: {
+                        font: {
+                          size: 12,
+                          family: 'Inter'
+                        },
+                        color: 'rgba(0,0,0,0.6)',
+                        padding: 8
+                      }
+                    }
+                  },
+                  layout: {
+                    padding: {
+                      top: 20,
+                      bottom: 0,
+                      left: 0,
+                      right: 0
+                    }
+                  },
+                  hover: {
+                    mode: 'index',
+                    intersect: false
+                  }
                 }}
               />
             </div>
-
           </CardContent>
         </Card>
-        <TemplateModal
-          isOpen={showTemplateModal}
-          onClose={() => setShowTemplateModal(false)}
-          templates={templates}
-          onAssign={assignTemplate}
-          onRemove={removeTemplate}
-          user={selectedUser}
-        />
+
+        <Card className="overflow-hidden">
+          <CardHeader className="border-b border-gray-100 bg-gray-50/50 p-6">
+            <div className="space-y-1">
+              <CardTitle className="text-lg font-semibold">Container Status</CardTitle>
+              <p className="text-sm text-gray-500">Current state of all containers</p>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="h-[240px]">
+              <Pie
+                data={containerStatusData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  animation: {
+                    duration: 1000,
+                    easing: 'easeInOutQuart',
+                    animateRotate: true,
+                    animateScale: true
+                  },
+                  plugins: {
+                    legend: {
+                      position: 'bottom',
+                      labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: {
+                          size: 12,
+                          family: 'Inter'
+                        }
+                      }
+                    },
+                    tooltip: {
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      titleFont: {
+                        size: 13,
+                        family: 'Inter'
+                      },
+                      bodyFont: {
+                        size: 12,
+                        family: 'Inter'
+                      },
+                      padding: 12,
+                      cornerRadius: 8,
+                      callbacks: {
+                        label: function(context) {
+                          const value = context.raw;
+                          const total = context.dataset.data.reduce((acc, curr) => acc + curr, 0);
+                          const percentage = ((value / total) * 100).toFixed(1);
+                          return `${context.label}: ${value} (${percentage}%)`;
+                        }
+                      }
+                    }
+                  },
+                  elements: {
+                    arc: {
+                      borderWidth: 2
+                    }
+                  },
+                  cutout: '60%',
+                  radius: '90%'
+                }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="overflow-hidden">
+          <CardHeader className="border-b border-gray-100 bg-gray-50/50 p-6">
+            <div className="space-y-1">
+              <CardTitle className="text-lg font-semibold">User Login Status</CardTitle>
+              <p className="text-sm text-gray-500">Active vs. inactive user sessions</p>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="h-[240px]">
+              <Pie
+                data={userLoggedInData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  animation: {
+                    duration: 1000,
+                    easing: 'easeInOutQuart',
+                    animateRotate: true,
+                    animateScale: true
+                  },
+                  plugins: {
+                    legend: {
+                      position: 'bottom',
+                      labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: {
+                          size: 12,
+                          family: 'Inter'
+                        }
+                      }
+                    },
+                    tooltip: {
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      titleFont: {
+                        size: 13,
+                        family: 'Inter'
+                      },
+                      bodyFont: {
+                        size: 12,
+                        family: 'Inter'
+                      },
+                      padding: 12,
+                      cornerRadius: 8,
+                      callbacks: {
+                        label: function(context) {
+                          const value = context.raw;
+                          const total = context.dataset.data.reduce((acc, curr) => acc + curr, 0);
+                          const percentage = ((value / total) * 100).toFixed(1);
+                          return `${context.label}: ${value} (${percentage}%)`;
+                        }
+                      }
+                    }
+                  },
+                  elements: {
+                    arc: {
+                      borderWidth: 2
+                    }
+                  },
+                  cutout: '60%',
+                  radius: '90%'
+                }}
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </>
+
+      {/* Enhanced Users Table */}
+      <Card className="overflow-hidden">
+        <CardHeader className="border-b border-gray-100 bg-gray-50/50 p-6">
+          <div className="flex justify-between items-center">
+            <div className="space-y-1">
+              <CardTitle className="text-xl font-semibold">
+                {activeRole === 'user' ? 'Regular Users' : 'Developers'} and Containers
+              </CardTitle>
+              <p className="text-sm text-gray-500">
+                Manage users and their associated containers
+              </p>
+            </div>
+            <button
+              onClick={toggleRole}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 
+                       bg-white border border-gray-200 rounded-lg hover:bg-gray-50 
+                       transition-all duration-200 shadow-sm"
+            >
+              <span>View {activeRole === 'user' ? 'Developers' : 'Users'}</span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <UserTable
+              setPopupVisible={setPopupVisible}
+              popupMessage={popupMessage}
+              popupType={popupType}
+              popupVisible={popupVisible}
+              users={filteredUsers}
+              toggleShowContainers={toggleShowContainers}
+              expandedUserIds={expandedUserIds}
+              onStopContainer={handleStopContainer}
+              onStartContainer={handleStartContainer}
+              onDeleteContainer={handleDeleteContainer}
+              onLogoutUser={logoutUser}
+              onChangeRole={changeRole}
+              activeRole={activeRole}
+              onAssignTemplate={(user) => {
+                setSelectedUser(user);
+                setShowTemplateModal(true);
+              }}
+              className="w-full border-collapse [&_td]:px-6 [&_td]:py-4 [&_th]:px-6 [&_th]:py-4"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Enhanced Template Modal */}
+      <TemplateModal
+        isOpen={showTemplateModal}
+        onClose={() => setShowTemplateModal(false)}
+        templates={templates}
+        onAssign={assignTemplate}
+        onRemove={removeTemplate}
+        user={selectedUser}
+      />
+
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 shadow-xl">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            <p className="mt-2 text-sm font-medium text-gray-600">Loading...</p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
-// Reusable StatCard component
-const StatCard = ({ title, value, icon, color = "text-gray-500" }) => (
-  <Card>
-    <CardHeader className="flex flex-row items-center justify-between pb-2">
-      <CardTitle className="text-sm font-medium">{title}</CardTitle>
-      <div className={color}>{icon}</div>
+// Enhanced StatCard component
+const StatCard = ({ title, value, icon, description, trend, trendUp, color = "text-gray-500" }) => (
+  <Card className="overflow-hidden hover:shadow-md transition-shadow duration-200">
+    <CardHeader className="p-6">
+      <div className="flex items-center justify-between">
+        <CardTitle className="text-sm font-medium text-gray-500">{title}</CardTitle>
+        <div className={`${color} p-2 bg-gray-50 rounded-full`}>{icon}</div>
+      </div>
     </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
+    <CardContent className="p-6 pt-0">
+      <div className="space-y-2">
+        <div className="text-2xl font-bold">{value}</div>
+        {description && (
+          <p className="text-sm text-gray-500">{description}</p>
+        )}
+        {trend && (
+          <div className={`text-xs font-medium ${trendUp ? 'text-green-500' : 'text-red-500'}`}>
+            {trend}
+          </div>
+        )}
+      </div>
     </CardContent>
   </Card>
 );
@@ -628,7 +935,7 @@ const StatCard = ({ title, value, icon, color = "text-gray-500" }) => (
 const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, users, toggleShowContainers, expandedUserIds, onStopContainer, onStartContainer, onDeleteContainer, onLogoutUser, onChangeRole, activeRole, onAssignTemplate }) => (
   <table className="w-full border-collapse">
     <thead>
-      <tr className="border-b text-left">
+      <tr className="bg-gray-50/80 border-b border-gray-200">
         <TableHeader title="User" />
         <TableHeader title="Email" />
         <TableHeader title="Role" />
@@ -638,51 +945,110 @@ const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, use
         <TableHeader title="Actions" />
       </tr>
     </thead>
-    <tbody>
+    <tbody className="divide-y divide-gray-100">
       {users.map(user => (
         <React.Fragment key={user._id}>
-          <tr className="border-b border-gray-200 cursor-pointer">
-            <td className="px-4 py-3 font-medium flex items-center gap-2"
-              onClick={() => toggleShowContainers(user._id)}
-            >
-              <User className="h-4 w-4 text-gray-500" />
-              <span>{user.username}</span>
+          <tr className="border-b border-gray-100 hover:bg-gray-50/50 transition-all duration-200">
+            <td className="px-4 py-4">
+              <div className="flex items-center gap-3 group cursor-pointer"
+                onClick={() => toggleShowContainers(user._id)}>
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 
+                              flex items-center justify-center text-sm font-semibold text-gray-700
+                              shadow-sm group-hover:shadow-md transition-all duration-200">
+                    {user.username.charAt(0).toUpperCase()}
+                  </div>
+                  {user.isLoggedIn && (
+                    <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 
+                                border-2 border-white shadow-sm"></div>
+                  )}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-gray-900 group-hover:text-gray-700">
+                    {user.username}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {user.containers.length} container{user.containers.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div className={`ml-2 transform transition-transform duration-200 
+                              ${expandedUserIds.includes(user._id) ? 'rotate-90' : ''}`}>
+                  <ArrowRight className="h-4 w-4 text-gray-400" />
+                </div>
+              </div>
             </td>
 
-            <td className="px-4 py-3" onClick={() => toggleShowContainers(user._id)}>{user.email}</td>
-            <td className="px-4 py-3" onClick={() => toggleShowContainers(user._id)}>
-              <span
-                className={
-                  user.role === 'admin' ? 'text-red-500 font-bold' :
-                    user.role === 'dev' ? 'text-blue-500 font-bold' :
-                      user.role === 'user' ? 'text-green-500 font-bold' : ''
-                }
-              >
+            <td className="px-4 py-4">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gray-300"></div>
+                <span className="text-sm text-gray-600">{user.email}</span>
+              </div>
+            </td>
+
+            <td className="px-4 py-4">
+              <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium
+                ${user.role === 'admin' 
+                  ? 'bg-red-50 text-red-700 ring-1 ring-red-600/20' 
+                  : user.role === 'dev'
+                  ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-600/20'
+                  : 'bg-green-50 text-green-700 ring-1 ring-green-600/20'}`}>
                 {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
               </span>
             </td>
-            <td className="px-4 py-3">
+
+            <td className="px-4 py-4">
               <StatusBadge status={user.isLoggedIn} />
             </td>
-            <td className="px-4 py-3">{user.containers.length}</td>
+
+            <td className="px-4 py-4">
+              <div className="flex items-center gap-2">
+                <Box className="h-4 w-4 text-gray-400" />
+                <span className="text-sm font-medium text-gray-900">
+                  {user.containers.length}
+                </span>
+              </div>
+            </td>
+
             {activeRole === 'dev' && (
-              <td className="px-4 py-3">
-                {user.assignedTemplates?.length || 0} assigned
-                <button
-                  onClick={() => onAssignTemplate(user)}
-                  className="ml-2 text-blue-500 hover:text-blue-700"
-                >
-                  <Edit className="h-4 w-4" />
-                </button>
+              <td className="px-4 py-4">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => onAssignTemplate(user)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium
+                             text-blue-700 bg-blue-50 rounded-md hover:bg-blue-100 
+                             transition-colors duration-200"
+                  >
+                    <Edit className="h-3.5 w-3.5" />
+                    {user.assignedTemplates?.length || 0} Templates
+                  </button>
+                </div>
               </td>
             )}
-            <td className="px-4 py-3">
-              <button onClick={() => onLogoutUser(user.email)} className="text-red-500 hover:text-red-800">
-                <LogOut className="h-4 w-4" />
-              </button>
-              <button onClick={() => onChangeRole(user.email)} className="px-4 text-blue-500 hover:text-blue-800">
-                <ToggleRight className="h-4 w-4" />
-              </button>
+
+            <td className="px-4 py-4">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onLogoutUser(user.email)}
+                  className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium
+                           text-red-700 bg-red-50 rounded-md hover:bg-red-100 
+                           transition-colors duration-200"
+                  title="Logout User"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  Logout
+                </button>
+
+                <button
+                  onClick={() => onChangeRole(user.email)}
+                  className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium
+                           text-blue-700 bg-blue-50 rounded-md hover:bg-blue-100 
+                           transition-colors duration-200"
+                  title="Change Role"
+                >
+                  <ToggleRight className="h-3.5 w-3.5" />
+                  Role
+                </button>
+              </div>
               <Popup
                 visible={popupVisible}
                 message={popupMessage}
@@ -691,23 +1057,25 @@ const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, use
               />
             </td>
           </tr>
+
+          {/* Container Details Section */}
           {expandedUserIds.includes(user._id) && (
             <>
-              <tr className="bg-gray-50">
-                <th scope="col" colSpan={activeRole == 'dev' ? 3 : 2} className="py-3.5 pl-12 pr-3 text-left text-sm font-semibold text-gray-900">
+              <tr className="bg-gray-50/60">
+                <th scope="col" colSpan={activeRole == 'dev' ? 3 : 2} 
+                    className="py-3 pl-12 pr-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Container Name
                 </th>
-                {/* <TableHeader title="Container Name" /> */}
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Template
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Resources
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -725,6 +1093,16 @@ const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, use
                   activeRole={activeRole}
                 />
               ))}
+              {user.containers.length === 0 && (
+                <tr className="bg-gray-50/60">
+                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-gray-500">
+                    <div className="flex flex-col items-center gap-2">
+                      <Box className="h-5 w-5 text-gray-400" />
+                      <p>No containers found for this user</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
             </>
           )}
         </React.Fragment>
@@ -733,8 +1111,30 @@ const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, use
   </table>
 );
 
+// Update TableHeader component
+const TableHeader = ({ title }) => (
+  <th className="px-4 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    {title}
+  </th>
+);
+
+// Update StatusBadge component
+const StatusBadge = ({ status }) => (
+  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium
+    ${status 
+      ? 'bg-green-50 text-green-700 ring-1 ring-green-600/20' 
+      : 'bg-gray-50 text-gray-600 ring-1 ring-gray-500/10'}`}
+  >
+    <span className={`h-1.5 w-1.5 rounded-full ${
+      status ? 'bg-green-600 animate-pulse' : 'bg-gray-500'
+    }`} />
+    {status ? 'Active' : 'Inactive'}
+  </span>
+);
+
 const TemplateModal = ({ isOpen, onClose, templates, onAssign, user, onRemove }) => {
   const [assignedStates, setAssignedStates] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
 
   if (!isOpen || !user) return null;
 
@@ -758,76 +1158,210 @@ const TemplateModal = ({ isOpen, onClose, templates, onAssign, user, onRemove })
     }
   };
 
+  const filteredTemplates = templates.filter(template =>
+    template.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg w-96">
-        <h2 className="text-xl font-bold mb-4">Assign Template to {user.username}</h2>
-        <div className="space-y-4">
-          {templates.map(template => (
-            <div key={template._id} className="flex items-center justify-between">
-              <span>{template.name}</span>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="sr-only peer"
-                  checked={isTemplateAssigned(template._id)}
-                  onChange={() => handleToggle(user.email, template._id, isTemplateAssigned(template._id))}
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 
-                              dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 
-                              peer-checked:after:translate-x-full peer-checked:after:border-white 
-                              after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
-                              after:bg-white after:border-gray-300 after:border after:rounded-full 
-                              after:h-5 after:w-5 after:transition-all dark:border-gray-600 
-                              peer-checked:bg-blue-600"></div>
-                <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
-                  {isTemplateAssigned(template._id) ? 'Assigned' : 'Not Assigned'}
-                </span>
-              </label>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md transform transition-all">
+        {/* Header */}
+        <div className="border-b border-gray-100 p-6">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-gray-800 to-black 
+                          flex items-center justify-center shadow-md">
+              <Edit className="h-6 w-6 text-white" />
             </div>
-          ))}
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Template Access</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Manage template permissions for {user.username}
+              </p>
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <div className="mt-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search templates..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg
+                         focus:ring-2 focus:ring-black focus:border-transparent
+                         placeholder-gray-400 transition-all duration-200
+                         bg-gray-50 hover:bg-white focus:bg-white"
+              />
+            </div>
+          </div>
         </div>
-        <button
-          onClick={onClose}
-          className="mt-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-        >
-          Close
-        </button>
+
+        {/* Template List */}
+        <div className="p-6 max-h-[400px] overflow-y-auto">
+          <div className="space-y-3">
+            {filteredTemplates.length > 0 ? (
+              filteredTemplates.map(template => (
+                <div key={template._id} 
+                     className="flex items-center justify-between p-3 rounded-lg
+                              border border-gray-100 hover:border-gray-200 
+                              hover:bg-gray-50/50 transition-all duration-200">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-gray-100 flex items-center justify-center">
+                      <Box className="h-4 w-4 text-gray-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{template.name}</p>
+                      <p className="text-xs text-gray-500">
+                        Phase: {template.phase || 'Not specified'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={isTemplateAssigned(template._id)}
+                      onChange={() => handleToggle(user.email, template._id, isTemplateAssigned(template._id))}
+                    />
+                    <div className="w-11 h-6 bg-gray-200 rounded-full peer 
+                                peer-focus:ring-4 peer-focus:ring-black/10
+                                peer-checked:after:translate-x-full 
+                                peer-checked:after:border-white
+                                after:content-[''] after:absolute 
+                                after:top-[2px] after:left-[2px]
+                                after:bg-white after:border-gray-300 
+                                after:border after:rounded-full
+                                after:h-5 after:w-5 after:transition-all
+                                peer-checked:bg-black">
+                    </div>
+                  </label>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <Box className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500 text-sm">No templates found</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-gray-100 p-6 bg-gray-50/50 rounded-b-xl">
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-gray-700 
+                       bg-white border border-gray-300 rounded-lg 
+                       hover:bg-gray-50 transition-all duration-200 
+                       focus:outline-none focus:ring-2 focus:ring-black/10"
+            >
+              Close
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-const TableHeader = ({ title}) => (
-  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{title}</th>
-);
- 
-const StatusBadge = ({ status }) => (
-  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-    {status ? 'Logged In' : 'Logged Out'}
-  </span>
-);
-
 const ContainerRow = ({ setPopupVisible, popupMessage, popupType, popupVisible, container, onStopContainer, onStartContainer, onDeleteContainer, activeRole }) => (
-  <tr className="border-b border-gray-100 bg-gray-50">
-    <td className="px-4 py-3 pl-12" colSpan={activeRole == 'dev' ? 3 : 2}>{container.name}</td>
-    <td className="px-4 py-3">{container.template}</td>
+  <tr className="border-b border-gray-100 bg-gray-50/80 hover:bg-gray-50 transition-colors duration-200">
+    <td className="px-4 py-3 pl-12" colSpan={activeRole == 'dev' ? 3 : 2}>
+      <div className="flex items-center gap-3">
+        <div className="h-8 w-8 rounded-lg bg-gray-200/70 flex items-center justify-center">
+          <Box className="h-4 w-4 text-gray-600" />
+        </div>
+        <div>
+          <span className="font-medium text-gray-900">{container.name}</span>
+          <p className="text-xs text-gray-500 mt-0.5">ID: {container.id.slice(0, 12)}</p>
+        </div>
+      </div>
+    </td>
+
     <td className="px-4 py-3">
-      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${container.status === 'running' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-        {container.status}
+      <div className="flex items-center gap-2">
+        <div className="h-2 w-2 rounded-full bg-blue-400"></div>
+        <span className="text-sm font-medium text-gray-600">{container.template}</span>
+      </div>
+    </td>
+
+    <td className="px-4 py-3">
+      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium 
+        ${container.status === 'running' 
+          ? 'bg-green-100 text-green-700 ring-1 ring-green-600/20' 
+          : 'bg-red-100 text-red-700 ring-1 ring-red-600/20'}`}
+      >
+        <span className={`h-1.5 w-1.5 rounded-full ${
+          container.status === 'running' ? 'bg-green-600 animate-pulse' : 'bg-red-600'
+        }`} />
+        {container.status === 'running' ? 'Running' : 'Stopped'}
       </span>
     </td>
-    <td className="px-4 py-3">CPU: {container.cpu} | Memory: {container.memory}</td>
+
     <td className="px-4 py-3">
-      <button onClick={() => onStopContainer(container.id)} className="mr-2 text-red-500 hover:text-red-700">
-        <StopCircle className="h-4 w-4" />
-      </button>
-      <button onClick={() => onStartContainer(container.id)} className="ml-2 text-green-500 hover:text-green-700">
-        <Play className="h-4 w-4" />
-      </button>
-      <button onClick={() => onDeleteContainer(container.id)} className="ml-2 text-red-700 hover:text-red-900">
-        <Trash className="h-4 w-4" />
-      </button>
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500">CPU:</span>
+          <div className="flex-1 h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-blue-500 rounded-full transition-all duration-500"
+              style={{ width: `${container.cpu}%` }}
+            />
+          </div>
+          <span className="text-xs font-medium text-gray-600">{container.cpu}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500">RAM:</span>
+          <div className="flex-1 h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-purple-500 rounded-full transition-all duration-500"
+              style={{ width: `${container.memory}%` }}
+            />
+          </div>
+          <span className="text-xs font-medium text-gray-600">{container.memory}</span>
+        </div>
+      </div>
+    </td>
+
+    <td className="px-4 py-3">
+      <div className="flex items-center gap-2">
+        {container.status === 'running' ? (
+          <button
+            onClick={() => onStopContainer(container.id)}
+            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-700 
+                     bg-red-50 rounded-md hover:bg-red-100 transition-colors duration-200"
+            title="Stop Container"
+          >
+            <StopCircle className="h-3.5 w-3.5" />
+            Stop
+          </button>
+        ) : (
+          <button
+            onClick={() => onStartContainer(container.id)}
+            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-700 
+                     bg-green-50 rounded-md hover:bg-green-100 transition-colors duration-200"
+            title="Start Container"
+          >
+            <Play className="h-3.5 w-3.5" />
+            Start
+          </button>
+        )}
+
+        <button
+          onClick={() => onDeleteContainer(container.id)}
+          className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-700 
+                   bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200"
+          title="Delete Container"
+        >
+          <Trash className="h-3.5 w-3.5" />
+          Delete
+        </button>
+      </div>
+
       <Popup
         visible={popupVisible}
         message={popupMessage}
