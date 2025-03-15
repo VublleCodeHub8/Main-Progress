@@ -50,12 +50,11 @@ const AdminPage = () => {
   const assignTemplate = async (userEmail, templateId) => {
     try {
       setIsLoading(true); // Add loading state
-      console.log("Assigning template:", { userEmail, templateId }); // Debug log
-      
+
       if (!userEmail || !templateId) {
         throw new Error("Email and template ID are required");
       }
-  
+
       const response = await fetch("http://localhost:3000/admin/addTemplate", {
         method: "POST",
         headers: {
@@ -67,16 +66,13 @@ const AdminPage = () => {
           templateId: templateId
         }),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.text();
         console.error("Server error:", errorData);
         throw new Error(`Server error: ${response.status} ${errorData}`);
       }
-      
-      const data = await response.json();
-      console.log("Assignment response:", data);
-      
+
       setPopupMessage("Template assigned successfully");
       setPopupType("success");
       setPopupVisible(true);
@@ -89,6 +85,47 @@ const AdminPage = () => {
       setPopupVisible(true);
     } finally {
       setIsLoading(false); // Clear loading state
+    }
+  };
+
+  const removeTemplate = async (userEmail, templateId) => {
+    try{
+      setIsLoading(true);
+      if(!userEmail || !templateId){
+        throw new Error("Email and template ID are required");
+      }
+      
+      const response = await fetch("http://localhost:3000/admin/removeTemplate", 
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token.token}`,
+          },
+          body: JSON.stringify({
+            email: userEmail,
+            templateId: templateId
+          }),
+        });
+
+      if(!response.ok){
+        const errorData = await response.text();
+        console.error("Server error:", errorData);
+        throw new Error(`Server error: ${response.status} ${errorData}`);
+      }
+
+      setPopupMessage("Template removed successfully");
+      setPopupType("success");
+      setPopupVisible(true);
+      setShowTemplateModal(false);
+      setRefreshTrigger(prev => !prev);
+    } catch (error) {
+      console.error("Error removing template:", error);
+      setPopupMessage(error.message || "Error removing template");
+      setPopupType("error");
+      setPopupVisible(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -122,6 +159,7 @@ const AdminPage = () => {
 
     fetchData();
   }, [token, refreshTrigger]);
+
 
   const fetchUsers = async () => {
     const response = await fetch("http://localhost:3000/admin/getAllUsers", {
@@ -558,6 +596,7 @@ const AdminPage = () => {
           onClose={() => setShowTemplateModal(false)}
           templates={templates}
           onAssign={assignTemplate}
+          onRemove={removeTemplate}
           user={selectedUser}
         />
       </div>
@@ -582,7 +621,7 @@ const StatCard = ({ title, value, icon, color = "text-gray-500" }) => (
 const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, users, toggleShowContainers, expandedUserIds, onStopContainer, onStartContainer, onDeleteContainer, onLogoutUser, onChangeRole, activeRole, onAssignTemplate }) => (
   <table className="w-full border-collapse">
     <thead>
-      <tr className="border-b border-gray-200 text-left">
+      <tr className="border-b text-left">
         <TableHeader title="User" />
         <TableHeader title="Email" />
         <TableHeader title="Role" />
@@ -645,34 +684,79 @@ const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, use
               />
             </td>
           </tr>
-          {expandedUserIds.includes(user._id) && user.containers.map(container => (
-            <ContainerRow
-              key={container.id}
-              container={container}
-              onStopContainer={onStopContainer}
-              onStartContainer={onStartContainer}
-              onDeleteContainer={onDeleteContainer}
-              setPopupVisible={setPopupVisible} popupMessage={popupMessage} popupType={popupType} popupVisible={popupVisible}
-            />
-          ))}
+          {expandedUserIds.includes(user._id) && (
+            <>
+              <tr className="bg-gray-50">
+                <th scope="col" colSpan={activeRole == 'dev' ? 3 : 2} className="py-3.5 pl-12 pr-3 text-left text-sm font-semibold text-gray-900">
+                  Container Name
+                </th>
+                {/* <TableHeader title="Container Name" /> */}
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  Template
+                </th>
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  Status
+                </th>
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  Resources
+                </th>
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  Actions
+                </th>
+              </tr>
+              {user.containers.map(container => (
+                <ContainerRow
+                  key={container.id}
+                  container={container}
+                  onStopContainer={onStopContainer}
+                  onStartContainer={onStartContainer}
+                  onDeleteContainer={onDeleteContainer}
+                  setPopupVisible={setPopupVisible}
+                  popupMessage={popupMessage}
+                  popupType={popupType}
+                  popupVisible={popupVisible}
+                  activeRole={activeRole}
+                />
+              ))}
+            </>
+          )}
         </React.Fragment>
       ))}
     </tbody>
   </table>
 );
 
-const TemplateModal = ({ isOpen, onClose, templates, onAssign, user }) => {
+const TemplateModal = ({ isOpen, onClose, templates, onAssign, user, onRemove }) => {
   const [assignedStates, setAssignedStates] = useState({});
+
   if (!isOpen || !user) return null;
+
+  // console.log(user.assignedTemplates);
+  const isTemplateAssigned = (templateId) => {
+    return user.assignedTemplates?.some(assignedId => assignedId.toString() === templateId.toString());
+  };
+
   const handleAssign = async (email, templateId) => {
     try {
       await onAssign(email, templateId);
       setAssignedStates(prev => ({
         ...prev,
-        [templateId]: true
+        [templateId]: true 
       }));
     } catch (error) {
       console.error("Error in handleAssign:", error);
+    }
+  };
+
+  const handleRemove = async (email, templateId) => {
+    try{
+      await onRemove(email, templateId);
+      setAssignedStates(prev => ({
+        ...prev,
+        [templateId]: false
+      }));
+    } catch (error) {
+      console.error("Error in handleRemove:", error);
     }
   };
 
@@ -687,13 +771,19 @@ const TemplateModal = ({ isOpen, onClose, templates, onAssign, user }) => {
               <button
                 onClick={() => handleAssign(user.email, template._id)}
                 className={`px-3 py-1 rounded text-white transition-colors ${
-                  assignedStates[template._id]
+                  isTemplateAssigned(template._id)
                     ? 'bg-green-500 hover:bg-green-600'
                     : 'bg-blue-500 hover:bg-blue-600'
                 }`}
               >
-                {assignedStates[template._id] ? 'Assigned' : 'Assign'}
+                {isTemplateAssigned(template._id) ? 'Assigned' : 'Assign'}
               </button>
+                <button
+                  onClick={() => handleRemove(user.email, template._id)}
+                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                >
+                  Remove
+                </button>
             </div>
           ))}
         </div>
@@ -708,19 +798,19 @@ const TemplateModal = ({ isOpen, onClose, templates, onAssign, user }) => {
   );
 };
 
-const TableHeader = ({ title }) => (
-  <th className="px-4 py-3 text-sm font-medium text-gray-500">{title}</th>
+const TableHeader = ({ title}) => (
+  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{title}</th>
 );
-
+ 
 const StatusBadge = ({ status }) => (
   <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
     {status ? 'Logged In' : 'Logged Out'}
   </span>
 );
 
-const ContainerRow = ({ setPopupVisible, popupMessage, popupType, popupVisible, container, onStopContainer, onStartContainer, onDeleteContainer }) => (
+const ContainerRow = ({ setPopupVisible, popupMessage, popupType, popupVisible, container, onStopContainer, onStartContainer, onDeleteContainer, activeRole }) => (
   <tr className="border-b border-gray-100 bg-gray-50">
-    <td className="px-4 py-3 pl-12" colSpan={2}>{container.name}</td>
+    <td className="px-4 py-3 pl-12" colSpan={activeRole == 'dev' ? 3 : 2}>{container.name}</td>
     <td className="px-4 py-3">{container.template}</td>
     <td className="px-4 py-3">
       <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${container.status === 'running' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
@@ -745,7 +835,6 @@ const ContainerRow = ({ setPopupVisible, popupMessage, popupType, popupVisible, 
         type={popupType}
       />
     </td>
-
   </tr>
 );
 

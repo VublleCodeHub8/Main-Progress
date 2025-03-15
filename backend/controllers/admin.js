@@ -1,7 +1,7 @@
 const { allUsers, changeRole } = require('../models/user');
 const { allContainers } = require('../models/containers');
 const { allAuth , deleteToken } = require('../models/auth');
-const { addtemplate } = require('../models/user');
+const { addtemplate, removetemplate } = require('../models/user');
 
 const getAllUsers = async (req, res) => {
     const data = await allUsers();
@@ -67,6 +67,20 @@ const adminLogout = async (req, res) => {
     res.json(data);
 }
 
+const removeTemplate = async (req, res) => {
+    try{
+        const { email, templateId } = req.body;
+        if(!email || !templateId){
+            return res.status(400).json({ error: "Email and Template ID are required" });
+        }
+        const data = await removetemplate(email, templateId);
+        res.status(200).json({ message: "Template removed successfully", data });
+    } catch (error) {
+        console.error("Error removing template:", error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+}
+
 
 
 exports.getAllAuth = getAllAuth;
@@ -75,3 +89,4 @@ exports.getAllUsers = getAllUsers;
 exports.adminLogout = adminLogout;
 exports.roleChange = roleChange;
 exports.addTemplate = addTemplate;
+exports.removeTemplate = removeTemplate;
