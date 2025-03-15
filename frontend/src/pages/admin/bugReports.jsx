@@ -4,9 +4,10 @@ import { Link } from 'react-router-dom';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Power, Edit, Search, Sliders, Trash, Shield } from "lucide-react";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import Popup from '@/components/Popup';
 
-
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const BugReports = () => {
     const token = useSelector((state) => state.misc.token);
@@ -17,8 +18,46 @@ const BugReports = () => {
     const [popupType, setPopupType] = useState("success");
 
 
+    useEffect(() => {
+        const fetchBugReports = async () => {
+            try {
+                const response = await fetch("http://localhost:3000/admin/getAllBugReports", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token.token}`
+                    }
+                });
+                const data = await response.json();
+                setBugReports(data);
+            } catch (error) {
+                console.error("Error fetching bug reports:", error);
+            }
+        };
+        fetchBugReports();
+    }, [token]);
+
+    const bugReportType = {
+        labels: ['UI', 'Functionality', 'Performance', 'UI/UX', 'Security', 'Crash', 'Other'],
+        datasets: [
+            {
+                label: 'Bug Report Type',
+                data: [
+                    bugReports.filter((bugReport) => bugReport.type === 'ui').length,
+                    bugReports.filter((bugReport) => bugReport.type === 'functional').length,
+                    bugReports.filter((bugReport) => bugReport.type === 'performance').length,
+                    bugReports.filter((bugReport) => bugReport.type === 'security').length,
+                    bugReports.filter((bugReport) => bugReport.type === 'crash').length,
+                    bugReports.filter((bugReport) => bugReport.type === 'other').length
+                ],
+                backgroundColor: ['#bfdbfe', '#fef08a', '#bbf7d0', '#f97316', '#fb7185', '#f43f5e', '#f3e8ff']
+            },
+        ],
+
+    };
+
     const filteredBugReports = bugReports.filter((bugReport) => {
-        return bugReport.name.toLowerCase().includes(searchTerm.toLowerCase());
+        return bugReport.name.toLowerCase().includes(searchTerm.toLowerCase()) || bugReport.type.toLowerCase().includes(searchTerm.toLowerCase());
     })
 
     return (
@@ -55,6 +94,18 @@ const BugReports = () => {
                 />
             </div>
 
+            {/* bar chart for bug report type wise */}
+            <div className='mb-8 grid gap-4 md:grid-cols-1'>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Bug Report Type</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Bar data={bugReportType} options={{ responsive: true, maintainAspectRatio: false }} />
+                    </CardContent>
+                </Card>
+            </div>
+
             {/* Bug Reports Table */}
             <Card className='mb-8'>
                 <CardHeader>
@@ -62,7 +113,7 @@ const BugReports = () => {
                 </CardHeader>
                 <CardContent>
                     <div className='overflow-x-auto'>
-                        <BugReportTable token={token} setPopupVisible={setPopupVisible} setPopupMessage={setPopupMessage} setPopupType={setPopupType} popupMessage={popupMessage} popupType={popupType} popupVisible={popupVisible} />
+                        <BugReportTable token={token} bugReports={filteredBugReports} setPopupVisible={setPopupVisible} setPopupMessage={setPopupMessage} setPopupType={setPopupType} popupMessage={popupMessage} popupType={popupType} popupVisible={popupVisible} />
                     </div>
                 </CardContent>
             </Card>
@@ -88,27 +139,7 @@ const DateCell = ({ date }) => {
     return <td className="px-4 py-3">{formattedDate}</td>
 }
 
-const BugReportTable = ({ token, setPopupVisible, setPopupMessage, setPopupType, popupMessage, popupType, popupVisible }) => {
-    const [bugReports, setBugReports] = useState([]);
-
-    useEffect(() => {
-        const fetchBugReports = async () => {
-            try {
-                const response = await fetch("http://localhost:3000/admin/getAllBugReports", {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token.token}`
-                    }
-                });
-                const data = await response.json();
-                setBugReports(data);
-            } catch (error) {
-                console.error("Error fetching bug reports:", error);
-            }
-        };
-        fetchBugReports();
-    }, [token]);
+const BugReportTable = ({ token, bugReports, setPopupVisible, setPopupMessage, setPopupType, popupMessage, popupType, popupVisible }) => {
 
     const handleDeleteBugReport = async (id) => {
         try {
@@ -187,5 +218,17 @@ const BugReportTable = ({ token, setPopupVisible, setPopupMessage, setPopupType,
         </table>
     )
 }
+
+const StatCard = ({ title, value, icon, color = "text-gray-500" }) => (
+    <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">{title}</CardTitle>
+            <div className={color}>{icon}</div>
+        </CardHeader>
+        <CardContent>
+            <div className="text-3xl font-bold">{value}</div>
+        </CardContent>
+    </Card>
+);
 
 export default BugReports;
