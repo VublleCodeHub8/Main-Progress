@@ -119,13 +119,6 @@ function DashboardLayout() {
                     </DropdownMenuItem>
                   )
                 }
-                {token.role === "dev" && (
-                
-                  <DropdownMenuItem onSelect={() => navigate("/dev")} className="text-lg">
-                    Dev Dashboard
-                  </DropdownMenuItem>
-                
-                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

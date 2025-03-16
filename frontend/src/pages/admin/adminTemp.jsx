@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Power, Edit, Search, Sliders, Trash, Shield, Box, CheckCircle, Code, Activity } from "lucide-react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import Popup from '@/components/Popup';
-import { fetchUserData, updateUserData, setEditMode } from "../../store/userSlice";
 
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
@@ -661,7 +660,6 @@ const TempTable = ({ token, setPopupVisible, popupMessage, popupType, popupVisib
             </td>
 
             {/* Actions Cell */}
-            {token.role === 'admin' && (
               <td className="px-6 py-4">
                 <button
                   onClick={() => deleteTemplate(template._id)}
@@ -672,8 +670,13 @@ const TempTable = ({ token, setPopupVisible, popupMessage, popupType, popupVisib
                   <Trash className="h-3.5 w-3.5" />
                   Delete
                 </button>
+                <Popup
+                  message={popupMessage}
+                  type={popupType}
+                  visible={popupVisible}
+                  onClose={() => setPopupVisible(false)}
+                />
               </td>
-            )}
           </tr>
         ))
       )}
