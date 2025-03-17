@@ -87,11 +87,17 @@ const getUserData = async (req, res) => {
         // Create a copy of user to avoid modifying the original document
         const userResponse = user.toObject();
         
+        // Handle profile picture
         if (userResponse.profilePic && userResponse.profilePic.data) {
             userResponse.profilePic = {
                 contentType: userResponse.profilePic.contentType,
                 data: userResponse.profilePic.data.toString('base64')
             };
+        }
+
+        // Ensure billingInfo exists and has amount
+        if (!userResponse.billingInfo) {
+            userResponse.billingInfo = { amount: 0 };
         }
 
         res.json(userResponse);

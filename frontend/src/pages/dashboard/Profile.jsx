@@ -4,7 +4,7 @@ import { fetchUserData, updateUserData, setEditMode } from "@/store/userSlice";
 import { 
   User, Mail, Edit, Camera, X, Save, Loader2, UserCircle, FileEdit,
   Github, Twitter, Linkedin, Link2, Calendar, Activity, Container,
-  Clock, MapPin, Briefcase, Globe, Plus
+  Clock, MapPin, Briefcase, Globe, Plus, DollarSign
 } from "lucide-react";
 import Popup from "@/components/Popup";
 import { Link } from 'react-router-dom';
@@ -191,11 +191,16 @@ const Profile = () => {
     joinedDate: user?.joinedDate || new Date().toISOString()
   });
 
-  // Mock data for user stats and activity
+  // Modify userStats to include billing
   const userStats = [
+    {
+      label: "Total Bill",
+      value: user?.billingInfo?.amount ? `$${user.billingInfo.amount.toFixed(2)}` : "$0.00",
+      icon: <DollarSign className="h-4 w-4 text-green-500" />,
+      color: "bg-green-50"  // Add a subtle background color
+    },
     { label: "Total Containers", value: 12, icon: <Container className="h-4 w-4" /> },
     { label: "Active Time", value: "127h", icon: <Clock className="h-4 w-4" /> },
-    { label: "Templates Used", value: 5, icon: <Activity className="h-4 w-4" /> }
   ];
 
   const recentActivity = [
@@ -396,12 +401,22 @@ const Profile = () => {
             {/* User Stats */}
             <div className="grid grid-cols-3 gap-4">
               {userStats.map((stat, index) => (
-                <div key={index} className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-shadow">
+                <div 
+                  key={index} 
+                  className={`${stat.color || 'bg-white'} rounded-xl p-4 shadow-md 
+                             hover:shadow-lg transition-all duration-200 transform hover:scale-105`}
+                >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-500">{stat.icon}</span>
-                    <span className="text-2xl font-bold text-gray-900">{stat.value}</span>
+                    <span className={`text-gray-500 ${index === 0 ? 'text-green-500' : ''}`}>
+                      {stat.icon}
+                    </span>
+                    <span className={`text-2xl font-bold ${index === 0 ? 'text-green-600' : 'text-gray-900'}`}>
+                      {stat.value}
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-600">{stat.label}</p>
+                  <p className={`text-sm ${index === 0 ? 'text-green-600' : 'text-gray-600'}`}>
+                    {stat.label}
+                  </p>
                 </div>
               ))}
             </div>
