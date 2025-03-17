@@ -377,6 +377,9 @@ function Analytics() {
                       <div className="mt-2 text-sm">
                         Current usage: {containerCounts[index].data[selectedMonth]} containers
                       </div>
+                      <div className="mt-2 text-sm text-gray-600">
+                        Monthly cost: ${(template.price * containerCounts[index].data[selectedMonth]).toFixed(2)}
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
