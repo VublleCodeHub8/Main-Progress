@@ -29,7 +29,7 @@ const CreateContButton = ({ templateDefault = 1, className, children }) =>{
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [template, setTemplate] = useState(templateDefault);
-
+  const [isLoading, setIsLoading] = useState(false);
   const handleTemplateChange = (value) => {
     setTemplate(value);
   };
@@ -59,48 +59,56 @@ const CreateContButton = ({ templateDefault = 1, className, children }) =>{
           phase: template.phase,
         }));
         templates = templates.filter((template) => template.phase === "Production");
-        templates.unshift({ name: "Select Template", id: "", image: "undefined", price: 0, phase: "Production" });
+        // templates.unshift({ name: "Select Template", id: "", image: "undefined", price: 0, phase: "Production" });
         // console.log(" teok ", templates);
         setTemplates(templates);
       }
     }
     fetchTemplates();
-  }, [token, navigate]);
+  }, [token]);
 
   async function newProject() {
-    const titleSchema = z
-      .string()
-      .min(3)
-      .regex(/^[^\d]/, "Title should not start with a number")
-      .regex(/^[a-zA-Z0-9 ]*$/, "Title should only contain alphanumeric characters");
-    const templateSchema = z.string().min(1, "Template should not be null");
-
-    // console.log(title, template);
     try {
-      titleSchema.parse(title);
-      templateSchema.parse(template);
-    } catch (e) {
-      alert(e.errors[0].message);
-      return;
-    }
+      const titleSchema = z
+        .string()
+        .min(3)
+        .regex(/^[^\d]/, "Title should not start with a number")
+        .regex(/^[a-zA-Z0-9 ]*$/, "Title should only contain alphanumeric characters");
+      const templateSchema = z.string().min(1, "Template should not be null");
 
-    const res = await fetch("http://localhost:3000/container/createcontainer", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token?.token,
-        title: title,
-        template: template,
-      },
-    });
+      try {
+        titleSchema.parse(title);
+        templateSchema.parse(template);
 
-    if (res.ok) {
-      const data = await res.json();
-      // console.log(data);
-      navigate(`/project/${data.containerId}`);
-    } else if (res.status === 401) {
-      alert("Not Authenticated!!");
-      navigate("/login");
+      } catch (e) {
+        alert(e.errors[0].message);
+        return;
+      }
+
+      const res = await fetch("http://localhost:3000/container/createcontainer", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token?.token,
+          title: title,
+          template: template,
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        navigate(`/project/${data.containerId}`);
+      } else if (res.status === 401) {
+        alert("Not Authenticated!!");
+        navigate("/login");
+      } else {
+        alert("Error creating container");
+      }
+    } catch (error) {
+      console.error("Error creating project:", error);
+      alert("Error creating container");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -158,8 +166,19 @@ const CreateContButton = ({ templateDefault = 1, className, children }) =>{
           </div>
         </div>
         <DialogFooter>
-          <TailwindcssButtons idx={2} onClick={newProject}>
-            Create
+          <TailwindcssButtons 
+            idx={2} 
+            onClick={()=>{setIsLoading(true); newProject();}}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <span className="animate-pulse">Creating</span>
+                <span className="animate-[bounce_1s_infinite]">...</span>
+              </>
+            ) : (
+              "Create"
+            )}
           </TailwindcssButtons>
         </DialogFooter>
       </DialogContent>

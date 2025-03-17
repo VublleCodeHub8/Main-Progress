@@ -315,7 +315,58 @@ async function isPortAvailable(port) {
         });
     });
 }
+const editContainer = async (req, res) => {
+    try {
+        const { containerId } = req.params;
+        const { title } = req.body;
 
+        // Validate inputs
+        if (!containerId || !title) {
+            return res.status(400).json({ error: 'Missing required parameters' });
+        }
+
+        // Get container
+        const container = docker.getContainer(containerId);
+        if (!container) {
+            return res.status(404).json({ error: 'Container not found' });
+        }
+
+        // Get container info to validate it exists
+        await container.inspect();
+
+        // Update container name if changed
+        const containerInfo = await container.inspect();
+        const currentName = containerInfo.Name.slice(1); // Remove leading slash
+        if (currentName !== title) {
+            await container.rename({name: title});
+        }
+
+        // Update container in database
+        const updated = await getContainerById(containerId);
+        if (!updated) {
+            return res.status(404).json({ error: 'Container not found in database' });
+        }
+
+        updated.name = title;
+        await updated.save();
+
+        res.json({ 
+            status: "success",
+            message: "Container updated successfully",
+            container: {
+                id: containerId,
+                title: title,
+            }
+        });
+
+    } catch (error) {
+        console.error('Error updating container:', error);
+        res.status(500).json({ 
+            error: 'Failed to update container',
+            message: error.message 
+        });
+    }
+}
 
 
 
@@ -329,3 +380,4 @@ exports.startContainer = startContainer;
 exports.deleteContainer = deleteContainer;
 exports.getContainerCPUandMemoryStats = getContainerCPUandMemoryStats;
 exports.getContainerDetails = getContainerDetails;
+exports.editContainer = editContainer;

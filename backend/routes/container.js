@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { runContainer, createContainer, listAllContainers, continerInspects, stopContainer, restartContainer, startContainer, deleteContainer, getContainerCPUandMemoryStats, getContainerDetails} = require('../controllers/container')
+const { runContainer, createContainer, listAllContainers, continerInspects, stopContainer, restartContainer, startContainer, deleteContainer, getContainerCPUandMemoryStats, getContainerDetails, editContainer} = require('../controllers/container')
 
 router.get('/createcontainer', createContainer)
 
@@ -23,6 +23,7 @@ router.get('/stats/:containerId', getContainerCPUandMemoryStats)
 
 router.get('/details/:containerId', getContainerDetails)
 
+router.put('/edit/:containerId', editContainer)
 
 
 exports.containerRouter = router;
