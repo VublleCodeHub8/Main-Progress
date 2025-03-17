@@ -6,9 +6,11 @@ import { useNavigate } from 'react-router-dom';
 import { Trash, Edit  } from "lucide-react";
 import { useSelector } from 'react-redux';
 import { 
-  FaStar, FaStop, FaTrash
+  FaStar, FaStop, FaTrash, FaPlay, FaEdit
 }from "react-icons/fa";
 import Popup from 'reactjs-popup';
+
+
 
 export const HoverEffect = ({
   items,
@@ -53,8 +55,8 @@ export const HoverEffect = ({
       });
       // console.log(response);
       if (response.ok) {
-        // Fetch the latest data to refresh the page 
-        // await fetchData();
+        alert("Container stopped successfully");
+        items[index].Status = "stopped";
       } else {
         console.error(`Failed to stop container ${containerId}`);
       }
@@ -67,9 +69,10 @@ export const HoverEffect = ({
     window.location.href = link;
   };
 
-  const handleEdit = (index) => {
+  const handleEdit = async (index) => {
     setEditIndex(index);
     setEditTitle(items[index].title);
+
   };
 
   const handleDelete = (index) => {
@@ -84,6 +87,26 @@ export const HoverEffect = ({
     }
   };
 
+  const handleStartContainer = async (containerId) => {
+    try {
+      const response = await fetch(`http://localhost:3000/container/start/${containerId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.token}`,
+        },
+      });
+      if (response.ok) {
+        alert("Container started successfully");
+        items[index].Status = "running";
+      } else {
+        console.error(`Failed to start container ${containerId}`);
+      }
+    } catch (error) {
+      console.error(`Error starting container ${containerId}:`, error);
+    }
+  };
+
   const handleStop = (index) => {
     // Implement stop functionality here
     if (window.confirm('Are you sure you want to stop this item?')) {
@@ -95,9 +118,33 @@ export const HoverEffect = ({
     }
   };
 
-  const handleSave = (index) => {
-    // Implement edit functionality here
-    // console.log(`Save item at index ${index} with title ${editTitle} `);
+  const handleStart = (index) => {
+    // Implement start functionality here
+    if (window.confirm('Are you sure you want to start this item?')) {
+      // console.log(`status item at index ${index} with title ${items[index].id} `);
+      handleStartContainer(items[index].id);
+    }
+  };
+
+  const handleSave =  async (index) => {
+    console.log(editTitle);
+    const response = await fetch(`http://localhost:3000/container/edit/${items[index].id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.token}`,
+      },
+      body: JSON.stringify({
+        title: editTitle
+      }),
+    });
+
+    if (response.ok) {
+      alert("Container updated successfully");
+      items[index].title = editTitle;
+    } else {
+      alert("Failed to update container");
+    }
     setEditIndex(null);
   };
 
@@ -168,7 +215,7 @@ export const HoverEffect = ({
                   </div>
                   <div
                   onMouseEnter={() => setHoveronAction(true)}
-                  onMouseLeave={() => setHoveronAction(false)}><CardActions contStatus={item.Status} onEdit={() => handleEdit(hoveredIndex)} onDelete={() => handleDelete(hoveredIndex)} onStop={()=> handleStop(hoveredIndex)} />
+                  onMouseLeave={() => setHoveronAction(false)}><CardActions contStatus={item.Status} onEdit={() => handleEdit(hoveredIndex)} onDelete={() => handleDelete(hoveredIndex)} onStop={()=> handleStop(hoveredIndex)} onStart={()=> handleStart(hoveredIndex)} />
                     </div>
                   </div>
                 </>
@@ -220,9 +267,15 @@ export const CardDescription = ({
   );
 };
 
-const CardActions = ({ onEdit, onDelete, onStop, contStatus }) => {
+const CardActions = ({ onEdit, onDelete, onStop, contStatus, onStart }) => {
   return (
     <div className="flex justify-end m-2 p-1">
+      <button
+        onClick={onEdit}
+        className="text-slate-600 hover:text-slate-900 p-1 mr-3 rounded transform transition-transform duration-200 hover:scale-125"
+      >
+        <FaEdit className="w-6 h-6" />
+      </button>
       {contStatus === "running" ? (
         <button
           onClick={onStop}
@@ -230,7 +283,14 @@ const CardActions = ({ onEdit, onDelete, onStop, contStatus }) => {
         >
           <FaStop className="w-6 h-6" />
         </button>
-      ) : null}
+      ) : (
+        <button
+          onClick={onStart}
+          className="text-slate-600 hover:text-slate-900 p-1 mr-3 rounded transform transition-transform duration-200 hover:scale-125"
+        >
+          <FaPlay className="w-6 h-6" />
+        </button>
+      )}
       <button
         onClick={onDelete}
         className="text-red-600 hover:text-red-900 p-1 rounded transform transition-transform duration-200 hover:scale-125"

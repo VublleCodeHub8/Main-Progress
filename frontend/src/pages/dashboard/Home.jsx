@@ -122,25 +122,64 @@ useEffect(() => {
       {/* Add recent activity content */}
       </div>
     <div>
-      <div className="mt-8 flex justify-between">
+      {(projects && projects.length > 0 && (
         <div>
-        <h2 className="text-xl bg-transparent font-bold">Recent Containers</h2>
+          <div className="mt-8 flex justify-between">
+            <div>
+              <h2 className="text-xl bg-transparent font-bold">Recent Containers</h2>
+            </div>
+            <div>
+              <TailwindcssButtons idx={1} onClick={() => navigate("/containers")}>
+                Show all
+              </TailwindcssButtons>
+            </div>
+          </div>
+          
+          <div className="rounded-sm h-auto overflow-auto">
+            <div className="justify-center content-center text-black border-2">
+              <HoverEffect items={projects.slice().reverse().slice(0,5)} />
+            </div>
+            {/* Add more containers as needed */}
+          </div>
         </div>
-        <div>
-        <TailwindcssButtons idx={1} onClick={() => navigate("/containers")}>
-          Show all
-        </TailwindcssButtons>
+      )) || (
+        <div className="flex flex-col items-center justify-center h-[400px] rounded-lg m-12">
+          <svg
+            className="w-32 h-32 text-gray-400 mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+            />
+          </svg>
+          <h3 className="text-2xl font-semibold text-gray-700 mb-4">Welcome to Container Management!</h3>
+          <p className="text-gray-600 text-center mb-6 max-w-md">
+            Get started by creating your first container. Click the "Create Container" button above to begin your journey.
+          </p>
+          <div className="space-y-4 text-gray-600">
+            <div className="flex items-center">
+              <span className="mr-2">1.</span>
+              <p>Click on "+ Create Container" at the top of the page</p>
+            </div>
+            <div className="flex items-center">
+              <span className="mr-2">2.</span>
+              <p>Choose your preferred container template</p>
+            </div>
+            <div className="flex items-center">
+              <span className="mr-2">3.</span>
+              <p>Configure your container settings</p>
+            </div>
+          </div>
         </div>
-      </div>
-      
-      <div className="rounded-sm h-auto overflow-auto">
-        <div className="justify-center content-center text-black border-2">
-        <HoverEffect items={projects.slice().reverse().slice(0,5)} />
-        </div>
-        {/* Add more containers as needed */}
+      )}
       </div>
       </div>
-    </div>
     );
 }
 

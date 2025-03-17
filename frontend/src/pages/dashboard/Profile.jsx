@@ -128,7 +128,7 @@ const ContributionHeatmap = ({ contributions }) => {
               <div>Wed</div>
               <div>Fri</div>
             </div>
-            <div className="flex-1 grid grid-cols-[repeat(52,1fr)] gap-1">
+            <div className="flex-1 grid grid-cols-[repeat(53,1fr)] gap-1">
               {weeks.map((week, weekIndex) => (
                 <div key={weekIndex} className="grid grid-rows-7 gap-1">
                   {week.map(({ date, count }, dayIndex) => (
@@ -147,9 +147,6 @@ const ContributionHeatmap = ({ contributions }) => {
           </div>
 
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-            <div className="text-xs text-gray-500">
-              Learn more about <span className="text-emerald-500 hover:underline cursor-pointer">contribution levels</span>
-            </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500">Less</span>
               {[0, 2, 4, 6, 8, 10].map((level) => (
@@ -268,7 +265,7 @@ const Profile = () => {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="flex items-center gap-2">
           <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
           <span className="text-gray-600 font-medium">Loading profile...</span>

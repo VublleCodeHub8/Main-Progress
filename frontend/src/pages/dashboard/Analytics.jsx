@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Chart } from "@/components/ui/chart";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -8,112 +8,217 @@ const months = ["January", "February", "March", "April", "May", "June", "July", 
 const currentMonth = new Date().getMonth();
 const lastSixMonths = months.slice(Math.max(0, currentMonth - 5), currentMonth + 1);
 
-// Different container templates with varying pricing
-const templates = [
-  { name: "Basic Web Server", price: 5, color: "rgba(75, 192, 192, 0.7)" },
-  { name: "Database Server", price: 10, color: "rgba(54, 162, 235, 0.7)" },
-  { name: "ML Computing", price: 20, color: "rgba(153, 102, 255, 0.7)" },
-  { name: "Video Processing", price: 75, color: "rgba(255, 159, 64, 0.7)" },
-];
-
-// Generate realistic usage data for containers based on templates
-const generateContainerData = () => {
-  // Container counts per template over the last 6 months
-  const containerCounts = templates.map(template => ({
-    label: template.name,
-    data: lastSixMonths.map(() => Math.floor(Math.random() * 10) + 1),
-    backgroundColor: template.color,
-    borderColor: template.color.replace("0.7", "1"),
-    borderWidth: 1,
-  }));
-
-  // Calculate bills based on container counts and template prices
-  const billData = lastSixMonths.map((_, monthIndex) => {
-    return containerCounts.reduce((total, template, templateIndex) => {
-      return total + (template.data[monthIndex] * templates[templateIndex].price);
-    }, 0);
-  });
-
-  return {
-    containerCounts,
-    billData,
-  };
-};
-
-const { containerCounts, billData } = generateContainerData();
-
-// Data for bar chart showing monthly container usage by template
-const barData = {
-  labels: lastSixMonths,
-  datasets: containerCounts,
-};
-
-// Data for line chart showing monthly bills
-const lineData = {
-  labels: lastSixMonths,
-  datasets: [
-    {
-      label: "Total Monthly Bill ($)",
-      data: billData,
-      fill: true,
-      backgroundColor: "rgba(59, 130, 246, 0.1)",
-      borderColor: "rgba(59, 130, 246, 0.8)",
-      tension: 0.3,
-    },
-  ],
-};
-
-// Data for pie chart showing container distribution for selected month
-const generatePieData = (selectedMonthIndex) => {
-  return {
-    labels: templates.map(t => t.name),
-    datasets: [
-      {
-        data: containerCounts.map(template => template.data[selectedMonthIndex]),
-        backgroundColor: templates.map(t => t.color),
-        borderColor: templates.map(t => t.color.replace("0.7", "1")),
-        borderWidth: 1,
-      },
-    ],
-  };
-};
-
-// Calculate consumption metrics
-const calculateMetrics = (selectedMonthIndex) => {
-  const totalContainers = containerCounts.reduce(
-    (sum, template) => sum + template.data[selectedMonthIndex], 0
-  );
-  
-  const totalBill = billData[selectedMonthIndex];
-  
-  const avgCostPerContainer = totalContainers > 0 
-    ? (totalBill / totalContainers).toFixed(2) 
-    : 0;
-    
-  const mostUsedTemplate = containerCounts.reduce(
-    (max, current, index) => 
-      current.data[selectedMonthIndex] > max.count 
-        ? { name: templates[index].name, count: current.data[selectedMonthIndex] }
-        : max,
-    { name: "", count: 0 }
-  );
-
-  return {
-    totalContainers,
-    totalBill,
-    avgCostPerContainer,
-    mostUsedTemplate,
-  };
+// Generate colors for templates
+const generateColors = (count) => {
+  const colors = [
+    "rgba(75, 192, 192, 0.7)",
+    "rgba(54, 162, 235, 0.7)",
+    "rgba(153, 102, 255, 0.7)",
+    "rgba(255, 159, 64, 0.7)",
+    "rgba(255, 99, 132, 0.7)",
+    "rgba(75, 192, 192, 0.7)",
+    "rgba(54, 162, 235, 0.7)",
+    "rgba(153, 102, 255, 0.7)",
+  ];
+  return colors.slice(0, count);
 };
 
 function Analytics() {
   const [selectedMonth, setSelectedMonth] = useState(lastSixMonths.length - 1);
+  const [templates, setTemplates] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [containerData, setContainerData] = useState(null);
+
+  // Fetch templates
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        const tok = JSON.parse(localStorage.getItem("token"));
+        const res = await fetch("http://localhost:3000/getAllTemplates", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + tok?.token,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          let templates = data
+            .filter((template) => template.phase === "Production")
+            .map((template, index) => ({
+              name: template.name,
+              id: template?.id === null ? index : template.id,
+              image: template.image,
+              price: template.price,
+              phase: template.phase,
+            }));
+          setTemplates(templates);
+        }
+      } catch (error) {
+        setError(error);
+      }
+    };
+
+    fetchTemplates();
+  }, []);
+
+  // Fetch containers
+  useEffect(() => {
+    const fetchContainers = async () => {
+      try {
+        const tok = JSON.parse(localStorage.getItem("token"));
+        const response = await fetch("http://localhost:3000/container/listcontainers", {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + tok.token,
+          },
+        });
+        let data = await response.json();
+        const userContainers = await Promise.all(data.map(async (container) => {
+          return {
+            id: container.id,
+            title: container.name,
+            First_used: container.createdAt,
+            Last_used: container.lastUsed,
+            container_id: container.id,
+            template: container.template,
+          };
+        }));
+        setProjects(userContainers);
+        setLoading(false);
+      } catch (error) {
+        setError(error);
+        setLoading(false);
+      }
+    };
+
+    fetchContainers();
+  }, []);
+
+  // Generate container data when templates and projects are loaded
+  useEffect(() => {
+    if (templates.length > 0 && projects.length > 0) {
+      const colors = generateColors(templates.length);
+      
+      // Group containers by template and month
+      const containerCounts = templates.map((template, index) => {
+        const templateContainers = projects.filter(p => p.template === template.image);
+        const monthlyCounts = lastSixMonths.map(month => {
+          const monthIndex = months.indexOf(month);
+          return templateContainers.filter(container => {
+            const containerDate = new Date(container.First_used);
+            return containerDate.getMonth() === monthIndex;
+          }).length;
+        });
+
+        return {
+          label: template.name,
+          data: monthlyCounts,
+          backgroundColor: colors[index],
+          borderColor: colors[index].replace("0.7", "1"),
+          borderWidth: 1,
+        };
+      });
+
+      // Calculate bills based on container counts and template prices
+      const billData = lastSixMonths.map((_, monthIndex) => {
+        return containerCounts.reduce((total, template, templateIndex) => {
+          return total + (template.data[monthIndex] * templates[templateIndex].price);
+        }, 0);
+      });
+
+      setContainerData({
+        containerCounts,
+        billData,
+      });
+    }
+  }, [templates, projects]);
+
+  if (loading) {
+    return <div className="w-full h-full flex items-center justify-center">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="w-full h-full flex items-center justify-center text-red-500">Error: {error.message}</div>;
+  }
+
+  if (!containerData) {
+    return <div className="w-full h-full flex items-center justify-center">No data available</div>;
+  }
+
+  const { containerCounts, billData } = containerData;
   
+  // Data for bar chart showing monthly container usage by template
+  const barData = {
+    labels: lastSixMonths,
+    datasets: containerCounts,
+  };
+
+  // Data for line chart showing monthly bills
+  const lineData = {
+    labels: lastSixMonths,
+    datasets: [
+      {
+        label: "Total Monthly Bill ($)",
+        data: billData,
+        fill: true,
+        backgroundColor: "rgba(59, 130, 246, 0.1)",
+        borderColor: "rgba(59, 130, 246, 0.8)",
+        tension: 0.3,
+      },
+    ],
+  };
+
+  // Data for pie chart showing container distribution for selected month
+  const generatePieData = (selectedMonthIndex) => {
+    return {
+      labels: templates.map(t => t.name),
+      datasets: [
+        {
+          data: containerCounts.map(template => template.data[selectedMonthIndex]),
+          backgroundColor: templates.map((_, index) => generateColors(templates.length)[index]),
+          borderColor: templates.map((_, index) => generateColors(templates.length)[index].replace("0.7", "1")),
+          borderWidth: 1,
+        },
+      ],
+    };
+  };
+
+  // Calculate consumption metrics
+  const calculateMetrics = (selectedMonthIndex) => {
+    const totalContainers = containerCounts.reduce(
+      (sum, template) => sum + template.data[selectedMonthIndex], 0
+    );
+    
+    const totalBill = billData[selectedMonthIndex];
+    
+    const avgCostPerContainer = totalContainers > 0 
+      ? (totalBill / totalContainers).toFixed(2) 
+      : 0;
+      
+    const mostUsedTemplate = containerCounts.reduce(
+      (max, current, index) => 
+        current.data[selectedMonthIndex] > max.count 
+          ? { name: templates[index].name, count: current.data[selectedMonthIndex] }
+          : max,
+      { name: "", count: 0 }
+    );
+
+    return {
+      totalContainers,
+      totalBill,
+      avgCostPerContainer,
+      mostUsedTemplate,
+    };
+  };
+
   const metrics = calculateMetrics(selectedMonth);
   const pieData = generatePieData(selectedMonth);
 
   return (
-    <div className="w-full space-y-4 ">
+    <div className="w-full space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
       </div>
