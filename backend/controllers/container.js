@@ -1,8 +1,9 @@
 const Docker = require('dockerode')
 const net = require('net');
-const { getContainerById, getContainerByPort, getContainersByEmail, createNewContainer, deleteOneContainer } = require('../models/containers')
+const { getContainerById, getContainerByPort, getContainersByEmail, createNewContainer, deleteOneContainer, setStartedAt } = require('../models/containers')
 const { addContainerHistory } = require('../models/containerHistory');
-const { findUserByEmail } = require('../models/user');
+const { findUserByEmail, billIncrement } = require('../models/user');
+const { findTemplateByImage } = require('../models/template');
 
 const docker = new Docker();
 
@@ -73,6 +74,7 @@ const runContainer = async (req, res) => {
         }
 
         await container.start();
+        await setStartedAt(contId);
         // console.log(contId, " started");
 
         const doc = await getContainerById(contId);
@@ -122,9 +124,21 @@ const continerInspects = async (req, res) => {
 const stopContainer = async (req, res) => {
     try {
         const contId = req.params.containerId;
+        const contDetails = await getContainerById(contId);
         const container = docker.getContainer(contId);
         const containerDetails = await docker.getContainer(contId).inspect();
         if (containerDetails.State.Running) {
+            const user = await findUserByEmail(contDetails.email);
+            if (!user) {
+                return res.status(404).json({ error: "User not found" });
+            }
+            const timeDiff = Date.now() - contDetails.startedAt;
+            const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+            const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+            const template = await findTemplateByImage(contDetails.template);
+            const amount = hours * template.price + minutes * (template.price / 60) + seconds * (template.price / 3600);
+            await billIncrement(user.email, amount);
             await container.stop();
             res.json({
                 status: "stopped"
@@ -174,6 +188,7 @@ const startContainer = async (req, res) => {
             });
         } else {
             await container.start();
+            await setStartedAt(contId);
             res.json({
                 status: "started"
             });
@@ -188,37 +203,60 @@ const startContainer = async (req, res) => {
 const deleteContainer = async (req, res) => {
     const contId = req.params.containerId;
     try {
-        const container = docker.getContainer(contId);
-        const containerDetails = await container.inspect();
-        if (containerDetails.State.Running) {
-            await container.stop();
-        }
         const contDetails = await getContainerById(contId);
         if (!contDetails) {
             return res.status(404).json({ error: "Container details not found" });
         }
-        const deletedAt = new Date();
         const user = await findUserByEmail(contDetails.email);
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
+        let containerExists = true;
         try {
-            const addedToHistory = await addContainerHistory(
-                contDetails.name, contId, contDetails.port, contDetails.createdAt, 
-                deletedAt, user.username, user.email, contDetails.template
+            const container = docker.getContainer(contId);
+            await container.inspect();
+        } catch (dockerErr) {
+            containerExists = false;
+        }
+        if (containerExists) {
+            const container = docker.getContainer(contId);
+            const containerDetails = await container.inspect();
+            
+            if (containerDetails.State.Running) {
+                await container.stop();
+            }
+            await container.remove();
+        }
+        const deletedAt = new Date();
+        try {
+            await addContainerHistory(
+                contDetails.name,
+                contId,
+                contDetails.port,
+                contDetails.createdAt,
+                deletedAt,
+                user.username,
+                user.email,
+                contDetails.template
             );
-            // if (!addedToHistory) {
-            //     console.log("Failed to add container history");
-            // } else {
-            //     console.log("Container history added successfully");
-            // }
         } catch (historyErr) {
             console.error("Error adding container history:", historyErr);
         }
-        await container.remove();
+        if (containerExists && contDetails.startedAt) {
+            const timeDiff = Date.now() - contDetails.startedAt;
+            const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+            const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+            
+            const template = await findTemplateByImage(contDetails.template);
+            const amount = hours * template.price + minutes * (template.price / 60) + seconds * (template.price / 3600);
+            await billIncrement(user.email, amount);
+        }
         await deleteOneContainer(contId);
-
-        res.json({ status: "deleted" });
+        res.json({ 
+            status: "deleted",
+            containerExistedInDocker: containerExists
+        });
 
     } catch (err) {
         console.error("Error deleting container:", err);

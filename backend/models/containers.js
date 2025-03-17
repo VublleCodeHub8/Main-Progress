@@ -24,6 +24,10 @@ const containerSchema = mongoose.Schema({
     },
     template: {
         type: String
+    },
+    startedAt: {
+        type: Date,
+        default: Date.now
     }
 
 });
@@ -62,7 +66,7 @@ const getContainersByEmail = async (email) => {
 const createNewContainer = async (email, userId, id, name, port, image) => {
     try {
         const date = new Date().toISOString();
-        const newContainer = new Container({ email: email, userId: userId, id: id, name: name, port: port, createdAt: date, lastUsed: date, template: image });
+        const newContainer = new Container({ email: email, userId: userId, id: id, name: name, port: port, createdAt: date, lastUsed: date, template: image, startedAt: date });
         await newContainer.save();
         return true
     } catch (err) {
@@ -90,6 +94,14 @@ const deleteOneContainer = async (id) => {
     }
 }
 
+const setStartedAt = async (id) => {
+    try {
+        await Container.updateOne({ id: id }, { $set: { startedAt: Date.now() } });
+    } catch (err) {
+        console.log(err);
+    }
+}
+
 
 
 
@@ -103,3 +115,4 @@ exports.getContainersByEmail = getContainersByEmail;
 exports.createNewContainer = createNewContainer;
 exports.allContainers = allContainers;
 exports.deleteOneContainer = deleteOneContainer; 
+exports.setStartedAt = setStartedAt;

@@ -32,6 +32,19 @@ async function findTemplateByName(name) {
     }
 }
 
+async function findTemplateByImage(image) {
+    try {
+        const res = await Template.exists({ image: image });
+        if (res) {
+            const doc = await Template.findById(res);
+            return doc;
+        }
+        return null;
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
+}
 async function findTemplateById(id) {
     try {
         const res = await Template.findById(id);
@@ -120,3 +133,4 @@ exports.addTemplate = addTemplate;
 exports.updateTemplates = updateTemplates;
 exports.deleteTemplates = deleteTemplates;
 exports.findTemplateById = findTemplateById;
+exports.findTemplateByImage = findTemplateByImage;

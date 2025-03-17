@@ -25,6 +25,12 @@ const userSchema = mongoose.Schema({
     assignedTemplates: {
         type: 'Array',
         required: false,
+    },
+    billingInfo: {
+        amount: {
+            type: 'Number',
+            default: 0,
+        }
     }
 })
 
@@ -55,6 +61,24 @@ async function allUsers() {
     } catch (err) {
         console.log(err);
         return null;
+    }
+}
+
+async function billIncrement(email, amount) {
+    try {
+        const user = await User.findOne({ email: email });
+        if(!user){
+            throw new Error("User not found");
+        }
+        // console.log(user.billingInfo.amount);
+        // console.log(amount);
+        user.billingInfo.amount += amount;
+        // console.log(user.billingInfo.amount);
+        await user.save();
+        return user;
+    } catch (err) {
+        console.error(err);
+        throw err;
     }
 }
 
@@ -167,3 +191,4 @@ exports.getUserByEmail = getUserByEmail;
 exports.changeRole = changeRole;
 exports.addtemplate = addtemplate;
 exports.removetemplate = removetemplate;
+exports.billIncrement = billIncrement;
