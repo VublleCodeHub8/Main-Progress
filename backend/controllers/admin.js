@@ -4,6 +4,7 @@ const { allAuth , deleteToken } = require('../models/auth');
 const { addtemplate, removetemplate } = require('../models/user');
 const { getAllBugReports, deleteBugReport } = require('../models/bugReport');
 const { getAllContainerHistory } = require('../models/containerHistory');
+const { getAllContactUs, deleteContactUs } = require('../models/contactUs');
 
 const getAllUsers = async (req, res) => {
     const data = await allUsers();
@@ -105,14 +106,34 @@ const getAllContainerHistoryController = async (req, res) => {
     res.status(200).json(containerHistory);
 }
 
+const getAllContactUsController = async (req, res) => {
+    const contactUs = await getAllContactUs();
+    if (!contactUs) {
+        return res.status(500).json({ error: "Failed to get contact us" });
+    }
+    res.status(200).json(contactUs);
+}
 
-exports.getAllAuth = getAllAuth;
-exports.getAllContainers = getAllContainers;
-exports.getAllUsers = getAllUsers;
-exports.adminLogout = adminLogout;
-exports.roleChange = roleChange;
-exports.addTemplate = addTemplate;
-exports.removeTemplate = removeTemplate;
-exports.getAllBugReportsController = getAllBugReportsController;
-exports.deleteBugReportController = deleteBugReportController;
-exports.getAllContainerHistoryController = getAllContainerHistoryController;
+const deleteContactUsController = async (req, res) => {
+    const { id } = req.body;
+    if (!id) {
+        return res.status(400).json({ error: "ID is required" });
+    }
+    const data = await deleteContactUs(id);
+    res.status(200).json({ message: "Contact us deleted successfully", data });
+}
+
+module.exports = {
+    getAllUsers,
+    getAllAuth,
+    getAllContainers,
+    adminLogout,
+    roleChange,
+    addTemplate,
+    removeTemplate,
+    getAllBugReportsController,
+    deleteBugReportController,
+    getAllContainerHistoryController,
+    getAllContactUsController,
+    deleteContactUsController
+}

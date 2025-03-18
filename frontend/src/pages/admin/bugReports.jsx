@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from 'react-router-dom';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Power, Edit, Search, Sliders, Trash, Shield, ClipboardList, Layout, AlertTriangle, Activity } from "lucide-react";
+import { Power, Edit, Search, Sliders, Trash, Shield, ClipboardList, Layout, AlertTriangle, Activity, MessageCircle, Eye, ScrollText } from "lucide-react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import Popup from '@/components/Popup';
 
@@ -199,6 +199,15 @@ const BugReports = () => {
 
                         {/* Action Buttons */}
                         <div className="flex items-center gap-3">
+                            <Link
+                                to="/admin/contactus"
+                                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium
+                                         bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 
+                                         transition-all duration-200 shadow-sm hover:shadow group"
+                            >
+                                <MessageCircle className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                                Contact Messages
+                            </Link>
                             <Link
                                 to="/admin"
                                 className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium
@@ -428,19 +437,43 @@ const BugReportTable = ({ token, bugReports, refreshTrigger, setBugReports, setR
 
                                 {/* Description Cell */}
                                 <td className="px-6 py-4">
-                                    <div className="group relative">
-                                        <div className="max-w-xs">
-                                            <p className="line-clamp-1 group-hover:line-clamp-none
-                                                      bg-gray-50/80 p-2 rounded-lg text-gray-600
-                                                      group-hover:bg-white group-hover:shadow-md 
-                                                      transition-all duration-200">
-                                                {bugReport.description}
-                                            </p>
+                                    <div className="group relative max-w-md">
+                                        <div className="relative">
+                                            <div className={`text-sm text-gray-600 bg-gray-50/80 p-3 rounded-lg
+                                                         transition-all duration-200 hover:bg-white hover:shadow-md`}>
+                                                {bugReport.description.length > 100 ? (
+                                                    <>
+                                                        <div className="line-clamp-2 group-hover:hidden">
+                                                            {bugReport.description}
+                                                        </div>
+                                                        <div className="hidden group-hover:block">
+                                                            {bugReport.description}
+                                                        </div>
+                                                        <div className="absolute bottom-0 right-0 px-2 py-1 text-xs
+                                                                    bg-white/90 text-gray-500 rounded-md shadow-sm
+                                                                    group-hover:hidden">
+                                                            <div className="flex items-center gap-1">
+                                                                <Eye className="h-3 w-3" />
+                                                                Hover to expand
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    bugReport.description
+                                                )}
+                                            </div>
                                         </div>
-                                        {bugReport.description.length > 50 && (
-                                            <div className="absolute hidden group-hover:block bottom-0 right-0 
-                                                        text-xs text-gray-400 pr-2">
-                                                Hover to expand
+                                        {bugReport.description.length > 100 && (
+                                            <div className="absolute top-0 left-0 w-full h-full opacity-0 
+                                                        group-hover:opacity-100 transition-opacity duration-200">
+                                                <div className="absolute -right-2 -top-2">
+                                                    <div className="bg-gray-900 text-white text-xs px-2 py-1 rounded-md shadow-lg">
+                                                        <div className="flex items-center gap-1">
+                                                            <ScrollText className="h-3 w-3" />
+                                                            Full description
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         )}
                                     </div>

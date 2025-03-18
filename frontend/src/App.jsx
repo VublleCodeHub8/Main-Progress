@@ -26,6 +26,7 @@ import ContactUs from "./pages/dashboard/ContactUs";
 import Documentation from "./pages/dashboard/Documentation";
 import BugReports from "./pages/admin/bugReports";
 import ContainerHistory from "./pages/admin/containerHistory";
+import AdminContactUs from "./pages/admin/adminContactUs";
 const router = createBrowserRouter([
   {
     path: "auth",
@@ -109,6 +110,10 @@ const router = createBrowserRouter([
           {
             path: "containerhistory",
             element: <ContainerHistory />,
+          },
+          {
+            path: "contactus",
+            element: <AdminContactUs />,
           }
         ],
       },

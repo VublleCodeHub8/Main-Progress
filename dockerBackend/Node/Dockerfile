@@ -9,6 +9,6 @@ COPY /util /server/util
 COPY /public /server/public
 COPY /user /user
 
-RUN cd /server
+RUN cd /server && npm install
 
 ENTRYPOINT ["node","/server/index.js"]
