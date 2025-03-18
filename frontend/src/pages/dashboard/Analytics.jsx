@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Chart } from "@/components/ui/chart";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-
+import { useDispatch, useSelector } from "react-redux";
 // More realistic container usage and billing data
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const currentMonth = new Date().getMonth();
@@ -23,6 +23,19 @@ const generateColors = (count) => {
   return colors.slice(0, count);
 };
 
+const getContainerStatus = async (containerId) => { 
+  const tok = JSON.parse(localStorage.getItem("token"));
+  const response = await fetch(`http://localhost:3000/container/details/${containerId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${tok.token}`,
+    },
+  });
+  const details = await response.json();
+  return {status : details.status} ;
+};
+
 function Analytics() {
   const [selectedMonth, setSelectedMonth] = useState(lastSixMonths.length - 1);
   const [templates, setTemplates] = useState([]);
@@ -30,6 +43,7 @@ function Analytics() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [containerData, setContainerData] = useState(null);
+  const { user } = useSelector((state) => state.user);
 
   // Fetch templates
   useEffect(() => {
@@ -250,11 +264,20 @@ const barData = {
       { name: "", count: 0 }
     );
 
+    const activeContainers = containerCounts.reduce((count, template) => {
+      const status = getContainerStatus(template.id);
+      if (status.Status === "running") {
+        return count + template.data[selectedMonthIndex];
+      }
+      return count;
+    }, 0);
+
     return {
       totalContainers,
       totalBill,
       avgCostPerContainer,
       mostUsedTemplate,
+      activeContainers,
     };
   };
 
@@ -276,7 +299,7 @@ const barData = {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.totalContainers}</div>
+            <div className="text-2xl font-bold">{metrics.activeContainers}</div>
             <p className="text-xs text-gray-500 mt-1">
               Total containers for {lastSixMonths[selectedMonth]}
             </p>
@@ -286,11 +309,11 @@ const barData = {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">
-              Monthly Bill
+              Total Bill
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${metrics.totalBill}</div>
+            <div className="text-2xl font-bold">${user?.billingInfo?.amount ? `${user.billingInfo.amount.toFixed(2)}` : "0.00"}</div>
             <p className="text-xs text-gray-500 mt-1">
               For {lastSixMonths[selectedMonth]}
             </p>
