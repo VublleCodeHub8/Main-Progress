@@ -1,5 +1,8 @@
 import React from "react";
 import "./AboutUs.css";
+import { Mail } from 'lucide-react';
+import HimanshuPhoto from '../../assets/Him.png';
+import AdarshPhoto from '../../assets/adarsh.jpeg';
 
 const AboutUs = () => {
   return (
@@ -134,6 +137,70 @@ const AboutUs = () => {
                   Comprehensive monitoring
                 </li>
               </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Team Section */}
+      <div className="py-16 bg-white">
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Our Team</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+            {/* Team Member 1 */}
+            <div className="flex flex-col items-center">
+              <div className="relative group">
+                <div className="w-48 h-48 rounded-full overflow-hidden mb-4 border-4 border-gray-200 shadow-lg 
+                              transform transition-transform duration-300 group-hover:scale-105">
+                  <img 
+                    src={HimanshuPhoto}
+                    alt="Himanshu Saraswat"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = `https://ui-avatars.com/api/?name=Himanshu+Saraswat&background=random&size=200`;
+                    }}
+                  />
+                </div>
+                <div className="absolute inset-0 rounded-full bg-black bg-opacity-0 group-hover:bg-opacity-10 
+                              transition-opacity duration-300"></div>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">Himanshu Saraswat</h3>
+              <p className="text-gray-600 mb-3">Full Stack Developer</p>
+              <a 
+                href="mailto:himanshu.saraswat@example.com" // Replace with actual email
+                className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors duration-200"
+              >
+                <Mail className="h-4 w-4" />
+                himanshu.s22@iiits.in
+              </a>
+            </div>
+
+            {/* Team Member 2 */}
+            <div className="flex flex-col items-center">
+              <div className="relative group">
+                <div className="w-48 h-48 rounded-full overflow-hidden mb-4 border-4 border-gray-200 shadow-lg 
+                              transform transition-transform duration-300 group-hover:scale-105">
+                  <img 
+                    src={AdarshPhoto}
+                    alt="Adarsh Singh"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = `https://ui-avatars.com/api/?name=Adarsh+Singh&background=random&size=200`;
+                    }}
+                  />
+                </div>
+                <div className="absolute inset-0 rounded-full bg-black bg-opacity-0 group-hover:bg-opacity-10 
+                              transition-opacity duration-300"></div>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">Adarsh Singh</h3>
+              <p className="text-gray-600 mb-3">Full Stack Developer</p>
+              <a 
+                href="mailto:adarsh.singh@example.com" // Replace with actual email
+                className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors duration-200"
+              >
+                <Mail className="h-4 w-4" />
+                adarsh.s22@iiits.in
+              </a>
             </div>
           </div>
         </div>
