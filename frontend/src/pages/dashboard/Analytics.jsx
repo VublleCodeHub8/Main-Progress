@@ -145,13 +145,57 @@ function Analytics() {
   }
 
   if (!containerData) {
-    return <div className="w-full h-full flex items-center justify-center">No data available</div>;
-  }
+    return (
+      <div className="grid gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                <line x1="7" y1="2" x2="7" y2="22"></line>
+                <line x1="17" y1="2" x2="17" y2="22"></line>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <line x1="2" y1="7" x2="7" y2="7"></line>
+                <line x1="2" y1="17" x2="7" y2="17"></line>
+                <line x1="17" y1="17" x2="22" y2="17"></line>
+                <line x1="17" y1="7" x2="22" y2="7"></line>
+              </svg>
+              No Container Usage Data
+            </CardTitle>
+            <p className="text-sm text-gray-500">You haven't deployed any containers yet. Here are the available templates:</p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {templates.map((template) => (
+                <Card key={template.name} className="">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                      </svg>
+                      {template.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-baseline space-x-2">
+                      <div className="text-2xl font-bold">${template.price}</div>
+                      <div className="text-sm text-gray-500">per container/month</div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>)
+  };
 
   const { containerCounts, billData } = containerData;
   
   // Data for bar chart showing monthly container usage by template
-  const barData = {
+const barData = {
     labels: lastSixMonths,
     datasets: containerCounts,
   };
@@ -159,31 +203,31 @@ function Analytics() {
   // Data for line chart showing monthly bills
   const lineData = {
     labels: lastSixMonths,
-    datasets: [
-      {
+  datasets: [
+    {
         label: "Total Monthly Bill ($)",
         data: billData,
         fill: true,
         backgroundColor: "rgba(59, 130, 246, 0.1)",
         borderColor: "rgba(59, 130, 246, 0.8)",
         tension: 0.3,
-      },
-    ],
-  };
+    },
+  ],
+};
 
   // Data for pie chart showing container distribution for selected month
   const generatePieData = (selectedMonthIndex) => {
     return {
       labels: templates.map(t => t.name),
-      datasets: [
-        {
+  datasets: [
+    {
           data: containerCounts.map(template => template.data[selectedMonthIndex]),
           backgroundColor: templates.map((_, index) => generateColors(templates.length)[index]),
           borderColor: templates.map((_, index) => generateColors(templates.length)[index].replace("0.7", "1")),
-          borderWidth: 1,
-        },
-      ],
-    };
+      borderWidth: 1,
+    },
+  ],
+};
   };
 
   // Calculate consumption metrics
@@ -284,7 +328,7 @@ function Analytics() {
 
       {/* Main Content with Tabs */}
       <Card className="overflow-hidden">
-        <CardHeader className="pb-0">
+        <CardHeader className="pb-4">
           <CardTitle>Usage & Billing Analysis</CardTitle>
         </CardHeader>
         <CardContent>
@@ -301,9 +345,9 @@ function Analytics() {
                   type="line" 
                   data={lineData} 
                   options={{
-                    plugins: {
-                      title: {
-                        display: true,
+  plugins: {
+    title: {
+      display: true,
                         text: 'Billing Trend Over Time',
                       },
                     },
@@ -313,21 +357,21 @@ function Analytics() {
             </TabsContent>
             
             <TabsContent value="monthly" className="space-y-4">
-              <div className="mb-4">
+      <div className="mb-4">
                 <label htmlFor="month-select" className="text-sm font-medium mr-2">Select Month:</label>
-                <select
-                  id="month-select"
-                  value={selectedMonth}
+        <select
+          id="month-select"
+          value={selectedMonth}
                   onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
                   className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                >
+        >
                   {lastSixMonths.map((month, index) => (
                     <option key={month} value={index}>
-                      {month}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {month}
+            </option>
+          ))}
+        </select>
+      </div>
               
               <div className="h-[400px]">
                 <Chart 
@@ -362,34 +406,40 @@ function Analytics() {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-                {templates.map((template, index) => (
-                  <Card key={template.name}>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">
-                        {template.name}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-baseline space-x-2">
-                        <div className="text-2xl font-bold">${template.price}</div>
-                        <div className="text-sm text-gray-500">per container/month</div>
-                      </div>
-                      <div className="mt-2 text-sm">
-                        Current usage: {containerCounts[index].data[selectedMonth]} containers
-                      </div>
-                      <div className="mt-2 text-sm text-gray-600">
-                        Monthly cost: ${(template.price * containerCounts[index].data[selectedMonth]).toFixed(2)}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                {templates.map((template, index) => {
+                  // Only show template if it has at least one container in selected month
+                  if (containerCounts[index].data[selectedMonth] > 0) {
+                    return (
+                      <Card key={template.name}>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium">
+                            {template.name}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-baseline space-x-2">
+                            <div className="text-2xl font-bold">${template.price}</div>
+                            <div className="text-sm text-gray-500">per container/month</div>
+                          </div>
+                          <div className="mt-2 text-sm">
+                            Current usage: {containerCounts[index].data[selectedMonth]} containers
+                          </div>
+                          <div className="mt-2 text-sm text-gray-600">
+                            Monthly cost: ${(template.price * containerCounts[index].data[selectedMonth]).toFixed(2)}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  }
+                  return null;
+                })}
               </div>
             </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
-    </div>
-  );
+  </div>
+);
 }
 
 export default Analytics;
