@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const { getUserByEmail } = require('../models/user');
 const User = require('../models/user').userModel;
 const { addBugReport } = require('../models/bugReport');
-
+const { addContactUs } = require('../models/contactUs');
 const storage = multer.memoryStorage();
 
 const upload = multer({
@@ -19,6 +19,20 @@ const upload = multer({
         }
     },
 });
+
+const addContactUsController = async (req, res) => {
+    const { name, email, subject, message } = req.body;
+    // console.log(name, email, subject, message);
+    if (!name || !email || !subject || !message) {
+        return res.status(400).json({ error: "All fields are required" });
+    }
+    const result = await addContactUs(name, email, subject, message);
+    if (!result) {
+        return res.status(500).json({ error: "Failed to add contact us" });
+    }
+    res.status(200).json({ message: "Contact us added successfully" });
+}
+
 
 const addMoreData = async ({email, username, bio, file}) => {
     
@@ -125,5 +139,6 @@ const addBugReportController = async (req, res) => {
 module.exports = {
     addMoreData,
     getUserData,
-    addBugReportController
+    addBugReportController,
+    addContactUsController
 };

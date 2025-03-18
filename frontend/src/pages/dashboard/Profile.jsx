@@ -89,27 +89,27 @@ const ContributionHeatmap = ({ contributions }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
           <Activity className="h-5 w-5 text-emerald-500" />
           Contribution Activity
         </h3>
         <div className="flex items-center gap-4 text-sm">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-emerald-500"></div>
-            <span className="text-gray-600">{totalContributions} contributions</span>
+            <span className="text-gray-600 dark:text-gray-400">{totalContributions} contributions</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-emerald-500"></div>
-            <span className="text-gray-600">Longest streak: {calculateLongestStreak()} days</span>
+            <span className="text-gray-600 dark:text-gray-400">Longest streak: {calculateLongestStreak()} days</span>
           </div>
         </div>
       </div>
       
       <div className="overflow-x-auto">
         <div className="min-w-max">
-          <div className="flex gap-1 mb-2 text-xs text-gray-400">
+          <div className="flex gap-1 mb-2 text-xs text-gray-400 dark:text-gray-500">
             <div className="w-8" />
             <div className="flex-1 grid grid-cols-[repeat(52,1fr)] gap-1">
               {weeks.map((_, weekIndex) => (
@@ -123,10 +123,14 @@ const ContributionHeatmap = ({ contributions }) => {
           </div>
 
           <div className="flex gap-1">
-            <div className="grid grid-rows-7 gap-1 text-xs text-gray-400 pr-2">
+            <div className="grid grid-rows-7 gap-1 text-xs text-gray-400 dark:text-gray-500 pr-2">
               <div>Mon</div>
+              <div></div>
               <div>Wed</div>
+              <div></div>
               <div>Fri</div>
+              <div></div>
+              <div></div>
             </div>
             <div className="flex-1 grid grid-cols-[repeat(53,1fr)] gap-1">
               {weeks.map((week, weekIndex) => (
@@ -136,7 +140,7 @@ const ContributionHeatmap = ({ contributions }) => {
                       key={dayIndex}
                       className={`w-3 h-3 rounded-sm ${getColor(count)} 
                                 transition-all duration-200 cursor-pointer
-                                hover:ring-2 hover:ring-black hover:ring-offset-1
+                                hover:ring-2 hover:ring-black dark:hover:ring-white hover:ring-offset-1
                                 transform hover:scale-110`}
                       title={`${format(parseISO(date), 'MMM d, yyyy')}: ${count} contribution${count !== 1 ? 's' : ''}`}
                     />
@@ -146,9 +150,9 @@ const ContributionHeatmap = ({ contributions }) => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500">Less</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Less</span>
               {[0, 2, 4, 6, 8, 10].map((level) => (
                 <div
                   key={level}
@@ -157,7 +161,7 @@ const ContributionHeatmap = ({ contributions }) => {
                   title={`${level} contributions`}
                 />
               ))}
-              <span className="text-xs text-gray-500">More</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">More</span>
             </div>
           </div>
         </div>
