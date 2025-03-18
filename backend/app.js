@@ -7,7 +7,8 @@ require('dotenv').config();
 const cors = require('cors')
 const morgan = require('morgan')
 const rfs = require('rotating-file-stream')
-
+const csrf = require('csurf')
+const cookieParser = require('cookie-parser')
 
 const { isAuth, isAdmin, isDev, isUser } = require('./middlewares/auth')
 
@@ -24,11 +25,18 @@ const app = express();
 const bodyParser = require('body-parser');
 const server = http.createServer(app)
 
+// CSRF Protection setup
+const csrfProtection = csrf({ cookie: true });
+
 app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(cookieParser()) // Required for CSRF
 
-app.use(cors());
-
+// Configure CORS with credentials
+app.use(cors({
+  origin: 'http://localhost:5173', // Your frontend URL
+  credentials: true
+}));
 
 // Logging by morgan
 const logsDir = path.join(__dirname, 'logs');
@@ -48,10 +56,28 @@ const accessLogStream = rfs.createStream('access.log', {
 app.use(morgan(customLogFormat, { stream: accessLogStream }));
 // app.use(morgan('dev')); // Also log to console in development
 
+// CSRF token endpoint
+app.get('/csrf-token', (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
 
+// Apply CSRF protection to all routes except auth routes
 app.use('/auth', authRouter)
 
 app.use(isAuth);
+// app.use(csrfProtection); // Apply CSRF protection after auth middleware
+
+// Error handler for CSRF token errors
+app.use((err, req, res, next) => {
+  if (err.code === 'EBADCSRFTOKEN') {
+    // Handle CSRF token errors
+    return res.status(403).json({
+      error: 'Invalid CSRF token',
+      message: 'Form submission failed. Please try again.'
+    });
+  }
+  next(err);
+});
 
 app.get("/getuser", async (req, res) => {
     try {

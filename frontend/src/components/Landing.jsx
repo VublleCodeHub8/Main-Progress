@@ -1,20 +1,45 @@
-import { Link } from "react-router-dom";
-import { Button } from "./ui/button";
+import React from "react";
+import { useNavigate } from "react-router-dom"; // Import navigation hook
 
-export default function Landing() {
+const Landing = () => {
+  const navigate = useNavigate(); // Hook for navigation
+
+  const handleLogin = () => {
+    navigate("/auth"); // Redirects to the Login Page
+  };
+
+  const handleSignup = () => {
+    navigate("/auth"); // Redirects to the Signup Page
+  };
+
   return (
-    <div className="h-full w-full flex flex-col  ">
-      <div className="flex mt-16 mx-auto">
-        <Link to={"/auth"}>
-          <Button>Login</Button>
-        </Link>
+    <div
+      className="h-screen flex flex-col items-center justify-center text-white text-center overflow-hidden"
+      style={{
+        background: "url('/background.png') no-repeat center center/cover",
+      }}
+    >
+      <h1 className="text-5xl font-bold mb-4 drop-shadow-lg">Cloud IDE</h1>
+      <p className="text-lg max-w-xl drop-shadow-md">
+        A powerful, cloud-based development environment that allows you to
+        write, test, and deploy code from anywhere.
+      </p>
+      <div className="mt-6">
+        <button
+          onClick={handleLogin}
+          className="px-6 py-2 m-2 rounded-md bg-blue-600 text-white text-lg shadow-md hover:bg-blue-700"
+        >
+          Log In
+        </button>
+        <button
+          onClick={handleSignup}
+          className="px-6 py-2 m-2 rounded-md bg-orange-500 text-white text-lg shadow-md hover:bg-orange-600"
+        >
+          Sign Up
+        </button>
       </div>
-      <h1 className="text-[50px] text-center font-bold font-mono mt-16">
-        Welcome to Cloud IDE
-      </h1>
-      <h3 className="text-[20px] text-center font-medium font-mono mt-6">
-        Sign In to Continue
-      </h3>
     </div>
   );
-}
+};
+
+export default Landing;

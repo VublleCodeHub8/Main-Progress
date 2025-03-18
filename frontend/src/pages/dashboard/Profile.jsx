@@ -125,8 +125,12 @@ const ContributionHeatmap = ({ contributions }) => {
           <div className="flex gap-1">
             <div className="grid grid-rows-7 gap-1 text-xs text-gray-400 pr-2">
               <div>Mon</div>
+              <div>Tue</div>
               <div>Wed</div>
+              <div>Thu</div>
               <div>Fri</div>
+              <div>Sat</div>
+              <div>Sun</div>
             </div>
             <div className="flex-1 grid grid-cols-[repeat(53,1fr)] gap-1">
               {weeks.map((week, weekIndex) => (

@@ -353,6 +353,7 @@ async function isPortAvailable(port) {
         });
     });
 }
+
 const editContainer = async (req, res) => {
     try {
         const { containerId } = req.params;
@@ -402,6 +403,54 @@ const editContainer = async (req, res) => {
         res.status(500).json({ 
             error: 'Failed to update container',
             message: error.message 
+        });
+    }
+}
+
+const getContainerRuntime = async (req, res) => {
+    try {
+        const contId = req.params.containerId;
+        const contDetails = await getContainerById(contId);
+        
+        if (!contDetails) {
+            return res.status(404).json({ error: "Container not found" });
+        }
+
+        const containerDetails = await docker.getContainer(contId).inspect();
+        
+        if (!containerDetails.State.Running && !contDetails.startedAt) {
+            // Container never ran
+            return res.json({
+                runtime: {
+                    hours: 0,
+                    minutes: 0, 
+                    seconds: 0
+                }
+            });
+        }
+
+        const startTime = contDetails.startedAt;
+        const endTime = containerDetails.State.Running ? Date.now() : containerDetails.State.FinishedAt;
+        
+        const timeDiff = new Date(endTime) - new Date(startTime);
+        
+        const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+        res.json({
+            runtime: {
+                hours,
+                minutes,
+                seconds
+            }
+        });
+
+    } catch (err) {
+        console.error('Error getting container runtime:', err);
+        res.status(500).json({ 
+            error: 'Failed to get container runtime',
+            message: err.message 
         });
     }
 }
