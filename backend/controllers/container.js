@@ -304,17 +304,19 @@ const getContainerDetails = async (req, res) => {
         const container = docker.getContainer(containerId);
         const containerDetails = await container.inspect();
         const stats = await container.stats({ stream: false });
+        // console.log(stats);
         const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
         const systemCpuDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
         const numberCpus = stats.cpu_stats.online_cpus || 1; // Default to 1 if not defined
         const cpuUsagePercentage = ((cpuDelta / systemCpuDelta) * 100) / numberCpus;
-        const memoryUsage = stats.memory_stats.usage;
+        const memoryUsage = stats.memory_stats.usage; 
         const memoryLimit = stats.memory_stats.limit;
         const memoryUsagePercentage = (memoryUsage / memoryLimit) * 100;
         res.json({
             status: containerDetails.State.Status,
             cpuUsagePercentage: cpuUsagePercentage.toFixed(2) + '%',
-            memoryUsagePercentage: memoryUsagePercentage.toFixed(2) + '%'
+            memoryUsagePercentage: memoryUsagePercentage.toFixed(2) + '%',
+            memoryUsage: memoryUsage,
         });
     } catch (error) {
         console.error('Error fetching container details:', error);
