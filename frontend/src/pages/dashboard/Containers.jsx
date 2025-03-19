@@ -79,14 +79,14 @@ useEffect(() => {
         return {
           id: container.id,
           title: container.name,
-          description: `Last used: ${container.lastUsed}`,
+          lastUsed: container.lastUsed,
           link: `project/${container.id}`,
           Status: details.status,
           CPU: details.cpu,
           Memory: details.memory,
+          
         };
       }));
-      // userContainers = addContainerDetails(userContainers);
       // console.log(userContainers);
       setProjects(userContainers);
       if (data === null) {

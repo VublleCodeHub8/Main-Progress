@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import CreateContButton  from  "@/components/dashboard/CreateContainer"
+import {useSelector} from "react-redux";
 
 
 
@@ -14,16 +15,16 @@ function Home() {
   const [projects, setProjects] = useState([]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const token = useSelector((state) => state.misc.token);
   const [error, setError] = useState(null);
   
 
 const getContainerStatus = async (containerId) => { 
-  const tok = JSON.parse(localStorage.getItem("token"));
   const response = await fetch(`http://localhost:3000/container/details/${containerId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${tok.token}`,
+      Authorization: `Bearer ${token.token}`,
     },
   });
   const details = await response.json();
@@ -34,7 +35,6 @@ useEffect(() => {
   const fetchContainers = async () => {
     try {
       const tok = JSON.parse(localStorage.getItem("token"));
-      // console.log(tok);
       const response = await fetch("http://localhost:3000/container/listcontainers", {
         method: "GET",
         headers: {
@@ -47,7 +47,7 @@ useEffect(() => {
         return {
           id: container.id,
           title: container.name,
-          description: `Last used: ${container.lastUsed}`,
+          lastUsed: container.lastUsed,
           link: `project/${container.id}`,
           Status: details.status,
           CPU: details.cpu,
@@ -55,7 +55,6 @@ useEffect(() => {
           MemoryUsage: details.memoryUsage,
         };
       }));
-      // console.log(userContainers);
       setProjects(userContainers);
       if (data === null) {
         console.log("empytyjhbj")
