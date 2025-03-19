@@ -137,15 +137,13 @@ export const HoverEffect = ({
           Authorization: `Bearer ${token.token}`,
         },
         body: JSON.stringify({
-          title: formData.title,
-          description: formData.description
+          title: formData.title
         }),
       });
 
       if (response.ok) {
         // Update local state
         items[index].title = formData.title;
-        items[index].description = formData.description;
         
         // Show success message
         const Toast = Swal.mixin({
@@ -158,10 +156,10 @@ export const HoverEffect = ({
 
         Toast.fire({
           icon: 'success',
-          title: 'Container updated successfully'
+          title: 'Container name updated successfully'
         });
       } else {
-        throw new Error("Failed to update container");
+        throw new Error("Failed to update container name");
       }
     } catch (error) {
       Swal.fire({
@@ -215,8 +213,8 @@ export const HoverEffect = ({
                 <div className="p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
-                      <CardTitle className="text-lg mb-1">{item.title}</CardTitle>
-                      <CardDescription className="text-sm">{item.description}</CardDescription>
+                      <CardTitle className="text-lg mb-2">{item.title}</CardTitle>
+                      <LastUsed date={item.lastUsed} />
                     </div>
 
                     <div className="flex items-center space-x-8">
@@ -315,16 +313,6 @@ export const CardTitle = ({ className, children }) => {
   );
 };
 
-export const CardDescription = ({ className, children }) => {
-  return (
-    <p className={cn(
-      "text-gray-500 tracking-wide leading-relaxed",
-      className
-    )}>
-      {children}
-    </p>
-  );
-};
 
 const CardActions = ({ onEdit, onDelete, onStop, contStatus, onStart }) => {
   return (
@@ -377,8 +365,7 @@ const CardActions = ({ onEdit, onDelete, onStop, contStatus, onStart }) => {
 // Enhanced Edit Container Modal
 const EditContainerForm = ({ item, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
-    title: item.title,
-    description: item.description || ''
+    title: item.title
   });
 
   return (
@@ -412,20 +399,6 @@ const EditContainerForm = ({ item, onSave, onCancel }) => {
                      bg-gray-50 hover:bg-white focus:bg-white"
             placeholder="Enter container name"
             autoFocus
-          />
-        </div>
-
-        {/* Container Description */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Description
-          </label>
-          <textarea
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all
-                     bg-gray-50 hover:bg-white focus:bg-white min-h-[100px]"
-            placeholder="Enter container description"
           />
         </div>
 
@@ -490,5 +463,43 @@ const EditContainerForm = ({ item, onSave, onCancel }) => {
         </motion.button>
       </div>
     </motion.div>
+  );
+};
+
+// Add this new component for LastUsed
+const LastUsed = ({ className, date }) => {
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Never used';
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    }).format(date);
+  };
+
+  return (
+    <div className={cn(
+      "flex items-center text-sm text-gray-500",
+      className
+    )}>
+      <svg 
+        className="w-4 h-4 mr-1.5 text-gray-400" 
+        fill="none" 
+        stroke="currentColor" 
+        viewBox="0 0 24 24"
+      >
+        <path 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          strokeWidth="2" 
+          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      {formatDate(date)}
+    </div>
   );
 };

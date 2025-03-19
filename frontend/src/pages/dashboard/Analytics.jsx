@@ -2,11 +2,23 @@ import { useState, useEffect } from "react";
 import { Chart } from "@/components/ui/chart";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 // More realistic container usage and billing data
-const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const currentMonth = new Date().getMonth();
-const lastSixMonths = months.slice(Math.max(0, currentMonth - 5), currentMonth + 1);
+const getLastTwelveMonths = () => {
+  const months = [];
+  const currentDate = new Date();
+  
+  for (let i = 11; i >= 0; i--) {
+    const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+    months.push({
+      label: `${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`,
+      date: date
+    });
+  }
+  return months;
+};
+
+const lastTwelveMonths = getLastTwelveMonths();
 
 // Generate colors for templates
 const generateColors = (count) => {
@@ -23,33 +35,22 @@ const generateColors = (count) => {
   return colors.slice(0, count);
 };
 
-const getContainerStatus = async (containerId) => { 
-  const tok = JSON.parse(localStorage.getItem("token"));
-  const response = await fetch(`http://localhost:3000/container/details/${containerId}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${tok.token}`,
-    },
-  });
-  const details = await response.json();
-  return {status : details.status} ;
-};
-
 function Analytics() {
-  const [selectedMonth, setSelectedMonth] = useState(lastSixMonths.length - 1);
+  const [selectedMonth, setSelectedMonth] = useState(lastTwelveMonths.length - 1);
   const [templates, setTemplates] = useState([]);
   const [projects, setProjects] = useState([]);
+  const { user, status, isEditMode } = useSelector((state) => state.user);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [containerData, setContainerData] = useState(null);
-  const { user } = useSelector((state) => state.user);
+   
 
   // Fetch templates
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
         const tok = JSON.parse(localStorage.getItem("token"));
+        // console.log(tok);
         const res = await fetch("http://localhost:3000/getAllTemplates", {
           method: "GET",
           headers: {
@@ -63,7 +64,7 @@ function Analytics() {
             .filter((template) => template.phase === "Production")
             .map((template, index) => ({
               name: template.name,
-              id: template?.id === null ? index : template.id,
+              id: template?.id === null ? index : template._id,
               image: template.image,
               price: template.price,
               phase: template.phase,
@@ -90,9 +91,10 @@ function Analytics() {
           },
         });
         let data = await response.json();
+        // console.log(data);
         const userContainers = await Promise.all(data.map(async (container) => {
           return {
-            id: container.id,
+            // id: container.id,
             title: container.name,
             First_used: container.createdAt,
             Last_used: container.lastUsed,
@@ -100,6 +102,7 @@ function Analytics() {
             template: container.template,
           };
         }));
+        // console.log(userContainers);
         setProjects(userContainers);
         setLoading(false);
       } catch (error) {
@@ -114,42 +117,54 @@ function Analytics() {
   // Generate container data when templates and projects are loaded
   useEffect(() => {
     if (templates.length > 0 && projects.length > 0) {
-      const colors = generateColors(templates.length);
-      
-      // Group containers by template and month
-      const containerCounts = templates.map((template, index) => {
-        const templateContainers = projects.filter(p => p.template === template.image);
-        const monthlyCounts = lastSixMonths.map(month => {
-          const monthIndex = months.indexOf(month);
-          return templateContainers.filter(container => {
-            const containerDate = new Date(container.First_used);
-            return containerDate.getMonth() === monthIndex;
-          }).length;
+      try {
+        const colors = generateColors(templates.length);
+        
+        // Group projects by template and month
+        const containerCounts = templates.map((template, index) => {
+          const templateProjects = projects.filter(p => p.template === template.image);
+          
+          const monthlyCounts = lastTwelveMonths.map(monthData => {
+            const monthStart = monthData.date;
+            const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
+            
+            return templateProjects.filter(project => {
+              const projectDate = new Date(project.First_used);
+              return projectDate >= monthStart && projectDate <= monthEnd;
+            }).length;
+          });
+
+          return {
+            label: template.name,
+            data: monthlyCounts,
+            backgroundColor: colors[index],
+            borderColor: colors[index].replace("0.7", "1"),
+            borderWidth: 1,
+          };
         });
 
-        return {
-          label: template.name,
-          data: monthlyCounts,
-          backgroundColor: colors[index],
-          borderColor: colors[index].replace("0.7", "1"),
-          borderWidth: 1,
-        };
-      });
+        const billData = lastTwelveMonths.map((_, monthIndex) => {
+          return containerCounts.reduce((total, template, templateIndex) => {
+            const count = template.data[monthIndex] || 0;
+            const price = templates[templateIndex].price || 0;
+            return total + (count * price);
+          }, 0);
+        });
 
-      // Calculate bills based on container counts and template prices
-      const billData = lastSixMonths.map((_, monthIndex) => {
-        return containerCounts.reduce((total, template, templateIndex) => {
-          return total + (template.data[monthIndex] * templates[templateIndex].price);
-        }, 0);
-      });
-
-      setContainerData({
-        containerCounts,
-        billData,
-      });
+        setContainerData({
+          containerCounts,
+          billData,
+        });
+      } catch (error) {
+        console.error("Error generating container data:", error);
+        setContainerData({
+          containerCounts: [],
+          billData: []
+        });
+      }
     }
   }, [templates, projects]);
-
+  // console.log(containerData);
   if (loading) {
     return <div className="w-full h-full flex items-center justify-center">Loading...</div>;
   }
@@ -159,126 +174,98 @@ function Analytics() {
   }
 
   if (!containerData) {
-    return (
-      <div className="grid gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
-                <line x1="7" y1="2" x2="7" y2="22"></line>
-                <line x1="17" y1="2" x2="17" y2="22"></line>
-                <line x1="2" y1="12" x2="22" y2="12"></line>
-                <line x1="2" y1="7" x2="7" y2="7"></line>
-                <line x1="2" y1="17" x2="7" y2="17"></line>
-                <line x1="17" y1="17" x2="22" y2="17"></line>
-                <line x1="17" y1="7" x2="22" y2="7"></line>
-              </svg>
-              No Container Usage Data
-            </CardTitle>
-            <p className="text-sm text-gray-500">You haven't deployed any containers yet. Here are the available templates:</p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {templates.map((template) => (
-                <Card key={template.name} className="">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                      </svg>
-                      {template.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-baseline space-x-2">
-                      <div className="text-2xl font-bold">${template.price}</div>
-                      <div className="text-sm text-gray-500">per container/month</div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>)
-  };
+    return <div className="w-full h-full flex items-center justify-center">No data available</div>;
+  }
 
   const { containerCounts, billData } = containerData;
   
   // Data for bar chart showing monthly container usage by template
-const barData = {
-    labels: lastSixMonths,
+  const barData = {
+    labels: lastTwelveMonths.map(m => m.label),
     datasets: containerCounts,
   };
 
   // Data for line chart showing monthly bills
   const lineData = {
-    labels: lastSixMonths,
-  datasets: [
-    {
+    labels: lastTwelveMonths.map(m => m.label),
+    datasets: [
+      {
         label: "Total Monthly Bill ($)",
         data: billData,
         fill: true,
         backgroundColor: "rgba(59, 130, 246, 0.1)",
         borderColor: "rgba(59, 130, 246, 0.8)",
         tension: 0.3,
-    },
-  ],
-};
+      },
+    ],
+  };
 
   // Data for pie chart showing container distribution for selected month
   const generatePieData = (selectedMonthIndex) => {
     return {
       labels: templates.map(t => t.name),
-  datasets: [
-    {
+      datasets: [
+        {
           data: containerCounts.map(template => template.data[selectedMonthIndex]),
           backgroundColor: templates.map((_, index) => generateColors(templates.length)[index]),
           borderColor: templates.map((_, index) => generateColors(templates.length)[index].replace("0.7", "1")),
-      borderWidth: 1,
-    },
-  ],
-};
+          borderWidth: 1,
+        },
+      ],
+    };
   };
 
   // Calculate consumption metrics
   const calculateMetrics = (selectedMonthIndex) => {
-    const totalContainers = containerCounts.reduce(
-      (sum, template) => sum + template.data[selectedMonthIndex], 0
-    );
-    
-    const totalBill = billData[selectedMonthIndex];
-    
-    const avgCostPerContainer = totalContainers > 0 
-      ? (totalBill / totalContainers).toFixed(2) 
-      : 0;
+    try {
+      const selectedMonthData = lastTwelveMonths[selectedMonthIndex];
+      const monthStart = selectedMonthData.date;
+      const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
       
-    const mostUsedTemplate = containerCounts.reduce(
-      (max, current, index) => 
-        current.data[selectedMonthIndex] > max.count 
-          ? { name: templates[index].name, count: current.data[selectedMonthIndex] }
-          : max,
-      { name: "", count: 0 }
-    );
+      // Change: Count all containers regardless of date
+      const totalContainers = projects.length; // This will count all containers
 
-    const activeContainers = containerCounts.reduce((count, template) => {
-      const status = getContainerStatus(template.id);
-      if (status.Status === "running") {
-        return count + template.data[selectedMonthIndex];
-      }
-      return count;
-    }, 0);
+      const totalBill = billData[selectedMonthIndex] || 0;
+      
+      const avgCostPerContainer = totalContainers > 0 
+        ? (totalBill / totalContainers).toFixed(2) 
+        : '0.00';
+      
+      // Only count template usage for the selected month
+      const templateUsage = templates.map(template => ({
+        name: template.name,
+        count: projects.filter(project => 
+          project.template === template.image && 
+          new Date(project.First_used) >= monthStart && 
+          new Date(project.First_used) <= monthEnd
+        ).length
+      }));
 
-    return {
-      totalContainers,
-      totalBill,
-      avgCostPerContainer,
-      mostUsedTemplate,
-      activeContainers,
-    };
+      const mostUsedTemplate = templateUsage.reduce(
+        (max, current) => current.count > max.count ? current : max,
+        { name: "None", count: 0 }
+      );
+
+      // Calculate total bill across all months
+      const totalBillTillNow = billData.reduce((total, monthlyBill) => total + monthlyBill, 0);
+
+      return {
+        totalContainers,
+        totalBill,
+        totalBillTillNow,
+        avgCostPerContainer,
+        mostUsedTemplate,
+      };
+    } catch (error) {
+      console.error("Error calculating metrics:", error);
+      return {
+        totalContainers: 0,
+        totalBill: 0,
+        totalBillTillNow: 0,
+        avgCostPerContainer: '0.00',
+        mostUsedTemplate: { name: "None", count: 0 }
+      };
+    }
   };
 
   const metrics = calculateMetrics(selectedMonth);
@@ -295,13 +282,13 @@ const barData = {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">
-              Active Containers
+              Total Containers
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.activeContainers}</div>
+            <div className="text-2xl font-bold">{metrics.totalContainers}</div>
             <p className="text-xs text-gray-500 mt-1">
-              Total containers for {lastSixMonths[selectedMonth]}
+              Total containers built till now
             </p>
           </CardContent>
         </Card>
@@ -313,9 +300,11 @@ const barData = {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${user?.billingInfo?.amount ? `${user.billingInfo.amount.toFixed(2)}` : "0.00"}</div>
+            <div className="text-2xl font-bold">
+            {user?.billingInfo?.amount ? `$${user.billingInfo.amount.toFixed(2)}` : "$0.00"}
+            </div>
             <p className="text-xs text-gray-500 mt-1">
-              For {lastSixMonths[selectedMonth]}
+              Total amount spent till now
             </p>
           </CardContent>
         </Card>
@@ -351,7 +340,7 @@ const barData = {
 
       {/* Main Content with Tabs */}
       <Card className="overflow-hidden">
-        <CardHeader className="pb-4">
+        <CardHeader className="pb-0">
           <CardTitle>Usage & Billing Analysis</CardTitle>
         </CardHeader>
         <CardContent>
@@ -368,9 +357,9 @@ const barData = {
                   type="line" 
                   data={lineData} 
                   options={{
-  plugins: {
-    title: {
-      display: true,
+                    plugins: {
+                      title: {
+                        display: true,
                         text: 'Billing Trend Over Time',
                       },
                     },
@@ -380,21 +369,21 @@ const barData = {
             </TabsContent>
             
             <TabsContent value="monthly" className="space-y-4">
-      <div className="mb-4">
+              <div className="mb-4">
                 <label htmlFor="month-select" className="text-sm font-medium mr-2">Select Month:</label>
-        <select
-          id="month-select"
-          value={selectedMonth}
+                <select
+                  id="month-select"
+                  value={selectedMonth}
                   onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
                   className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-        >
-                  {lastSixMonths.map((month, index) => (
-                    <option key={month} value={index}>
-              {month}
-            </option>
-          ))}
-        </select>
-      </div>
+                >
+                  {lastTwelveMonths.map((monthData, index) => (
+                    <option key={monthData.label} value={index}>
+                      {monthData.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
               
               <div className="h-[400px]">
                 <Chart 
@@ -404,7 +393,7 @@ const barData = {
                     plugins: {
                       title: {
                         display: true,
-                        text: `Container Distribution - ${lastSixMonths[selectedMonth]}`,
+                        text: `Container Distribution - ${lastTwelveMonths[selectedMonth].label}`,
                       },
                     },
                   }}
@@ -429,41 +418,34 @@ const barData = {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-                {templates.map((template, index) => {
-                  // Only show template if it has at least one container in selected month
-                  if (containerCounts[index].data[selectedMonth] > 0) {
-                    return (
-                      <Card key={template.name}>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm font-medium">
-                            {template.name}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-baseline space-x-2">
-                            <div className="text-2xl font-bold">${template.price}</div>
-                            <div className="text-sm text-gray-500">per container/month</div>
-                          </div>
-                          <div className="mt-2 text-sm">
-                            Current usage: {containerCounts[index].data[selectedMonth]} containers
-                          </div>
-                          <div className="mt-2 text-sm text-gray-600">
-                            Monthly cost: ${(template.price * containerCounts[index].data[selectedMonth]).toFixed(2)}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  }
-                  return null;
-                })}
+                {templates.map((template, index) => (
+                  <Card key={template.name}>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        {template.name}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-baseline space-x-2">
+                        <div className="text-2xl font-bold">${template.price}</div>
+                        <div className="text-sm text-gray-500">per container/month</div>
+                      </div>
+                      <div className="mt-2 text-sm">
+                        Current usage: {containerCounts[index].data[selectedMonth]} containers
+                      </div>
+                      <div className="mt-2 text-sm text-gray-600">
+                        Monthly cost: ${(template.price * containerCounts[index].data[selectedMonth]).toFixed(2)}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
-  </div>
-);
+    </div>
+  );
 }
 
 export default Analytics;
-
