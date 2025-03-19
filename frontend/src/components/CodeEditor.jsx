@@ -12,12 +12,18 @@ import "ace-builds/src-noconflict/mode-markdown";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/mode-html";
 import "ace-builds/src-noconflict/mode-css";
-
+import crossImg from "../assets/crossLine.png";
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/theme-twilight";
 import "ace-builds/src-noconflict/ext-language_tools";
+import clearImg from "../assets/clear.png";
+import themeImg from "../assets/background.png";
+import zoomIn from "../assets/zoom-in.png";
+import zoomOut from "../assets/zoom-out.png";
 
 let timer;
+
+const themes = ["twilight", "github"];
 
 const extentionMapping = {
   ".cpp": "c_cpp",
@@ -37,8 +43,11 @@ export default function CodeEditor({ socket }) {
   const [val, setVal] = useState(null);
   const dispatch = useDispatch();
   const currFile = useSelector((state) => state.files.selected);
+  const openedFiles = useSelector((state) => state.files.openedFiles);
   const port = useSelector((state) => state.project.port);
   const [save, setSave] = useState("saved");
+  const [selectedTheme, setSelectedTheme] = useState(1);
+  const [selectedFontSize, setSelectedFontSize] = useState(16);
 
   async function getFile() {
     const res = await fetch(`http://localhost:${port}/project/file`, {
@@ -83,6 +92,66 @@ export default function CodeEditor({ socket }) {
 
   return (
     <div className="flex flex-col  w-full h-full">
+      <div className="w-full h-[32px] flex bg-zinc-700">
+        <div
+          style={{ maxWidth: "calc( 100% - 128px )" }}
+          className="flex-grow flex divide-x-[2px] noScroll divide-black overflow-auto "
+        >
+          {openedFiles.map((i) => {
+            return (
+              <>
+                <div className="w-fit  bg-zinc-600 text-zinc-100 pl-2 pr-[6px] flex items-center text-base">
+                  <button onClick={() => dispatch(filesAction.setSelected(i))}>
+                    {i.name}
+                  </button>
+                  {currFile && currFile.fullPath === i.fullPath ? (
+                    <button
+                      className="flex ml-3"
+                      onClick={() =>
+                        dispatch(filesAction.removeSelectedFile(i))
+                      }
+                    >
+                      <img
+                        src={crossImg}
+                        className="h-[12px] w-[12px]"
+                        alt=""
+                      />
+                    </button>
+                  ) : (
+                    <div className="w-[4px]"></div>
+                  )}
+                </div>
+              </>
+            );
+          })}
+        </div>
+        <div className="w-[128px] flex">
+          <button
+            className="pr-[6px] pl-[6px] hover:bg-zinc-500"
+            onClick={() => dispatch(filesAction.clearAllSelectedFiles())}
+          >
+            <img src={clearImg} className="w-[20px] h-[20px]" alt="" />
+          </button>
+          <button
+            className="pr-[6px] pl-[6px] hover:bg-zinc-500"
+            onClick={() => setSelectedTheme((p) => (p + 1) % themes.length)}
+          >
+            <img src={themeImg} className="w-[20px] h-[20px]" alt="" />
+          </button>
+          <button
+            className="pr-[6px] pl-[6px] hover:bg-zinc-500"
+            onClick={() => setSelectedFontSize((p) => p + 2)}
+          >
+            <img src={zoomIn} className="w-[20px] h-[20px]" alt="" />
+          </button>
+          <button
+            className="pr-[6px] pl-[6px] hover:bg-zinc-500"
+            onClick={() => setSelectedFontSize((p) => p - 2)}
+          >
+            <img src={zoomOut} className="w-[20px] h-[20px]" alt="" />
+          </button>
+        </div>
+      </div>
       {currFile === null ? (
         <div className="w-full h-full bg-black flex justify-center pt-8 text-zinc-200">
           <span>No File Selected</span>
@@ -113,9 +182,9 @@ export default function CodeEditor({ socket }) {
           <div className="flex flex-grow">
             <AceEditor
               mode={extentionMapping[currFile.extension]}
-              theme="twilight"
+              theme={themes[selectedTheme]}
               onChange={(event) => fileChange(event)}
-              fontSize={16}
+              fontSize={selectedFontSize}
               name="UNIQUE_ID_OF_DIV"
               editorProps={{ $blockScrolling: true }}
               width="100%"
