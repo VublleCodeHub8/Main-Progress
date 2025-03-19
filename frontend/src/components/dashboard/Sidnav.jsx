@@ -54,7 +54,7 @@ function Sidebar() {
             name: "About",
             icon: <FaUserAlt />,
             showFor: ['user']
-        },
+        },  
         {
             path: "/analytics",
             name: "Analytics",

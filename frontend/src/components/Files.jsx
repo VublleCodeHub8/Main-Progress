@@ -1,80 +1,127 @@
-import down from "../assets/angle-down.png";
+import React, { memo } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { filesAction } from "@/store/main";
+import { 
+    FaChevronRight,
+    FaFolder,
+    FaFolderOpen,
+    FaJs,
+    FaHtml5,
+    FaCss3,
+    FaJava,
+    FaPython,
+    FaCode,
+    FaFile,
+    FaMarkdown,
+    FaDatabase
+} from "react-icons/fa";
 
-export default function Files({ tree }) {
-  const dispatch = useDispatch();
-  const openedFiles = useSelector((state) => state.files.opened);
+const getFileIcon = (fileName) => {
+    const extension = fileName.split('.').pop().toLowerCase();
+    const iconProps = { size: 16, className: "flex-shrink-0" };
+    
+    const iconMap = {
+        'js': <FaJs {...iconProps} className="text-yellow-400" />,
+        'jsx': <FaJs {...iconProps} className="text-blue-400" />,
+        'html': <FaHtml5 {...iconProps} className="text-orange-500" />,
+        'css': <FaCss3 {...iconProps} className="text-blue-500" />,
+        'java': <FaJava {...iconProps} className="text-red-500" />,
+        'py': <FaPython {...iconProps} className="text-blue-500" />,
+        'json': <FaDatabase {...iconProps} className="text-yellow-500" />,
+        'md': <FaMarkdown {...iconProps} className="text-white" />,
+        'cpp': <FaCode {...iconProps} className="text-blue-400" />,
+        'c': <FaCode {...iconProps} className="text-blue-300" />
+    };
 
-  function tileClick(file, opened) {
-    if (opened) {
-      dispatch(filesAction.removeOpened(file.path));
-    } else {
-      dispatch(filesAction.pushOpened(file.path));
-    }
-  }
+    return iconMap[extension] || <FaFile {...iconProps} className="text-gray-400" />;
+};
 
-  function fileClick(file) {
-    dispatch(filesAction.setSelected(file));
-    // console.log(file);
-  }
+const Files = memo(({ tree, searchTerm = "" }) => {
+    const dispatch = useDispatch();
+    const openedFiles = useSelector((state) => state.files.opened);
+    const selectedFile = useSelector((state) => state.files.selected);
 
-  // console.log(openedFiles);
-
-  return (
-    <div className="flex flex-col space-y-[1px]">
-      {tree.map((i) => {
-        let opened = false;
-        if (i.children != null && openedFiles.includes(i.path)) {
-          opened = true;
+    const handleFolderClick = (file, isOpen) => {
+        if (isOpen) {
+            dispatch(filesAction.removeOpened(file.path));
+        } else {
+            dispatch(filesAction.pushOpened(file.path));
         }
+    };
+
+    const handleFileClick = (file) => {
+        dispatch(filesAction.setSelected(file));
+    };
+
+    const FileItem = ({ file, isOpen, level }) => {
+        const isSelected = selectedFile?.path === file.path;
+        const paddingLeft = `${level * 12 + 8}px`;
+        const isFile = file.children === null;
+        
+        // Filter by search term if provided
+        if (searchTerm && !file.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+            return null;
+        }
+
         return (
-          <div key={i.name} className=" w-full infoBlock ">
-            {i.children === null ? (
-              <div
-                style={{ paddingLeft: `${(i.level + 1) * 15 + 4}px` }}
-                onClick={(event) => fileClick(i)}
-                className="flex cursor-pointer hover:bg-zinc-700 text-nowrap flex-grow"
-              >
-                {i.name.length > 20 - i.level * 2
-                  ? `${i.name.slice(0, 18 - i.level * 2)}`
-                  : i.name}
-                {i.name.length > 20 - i.level * 2 ? (
-                  <span className="font-sans">....</span>
-                ) : null}
-              </div>
-            ) : (
-              <>
+            <div className="group">
                 <div
-                  style={{ paddingLeft: `${i.level * 15 + 4}px` }}
-                  onClick={() => tileClick(i, opened)}
-                  className="flex cursor-pointer hover:bg-zinc-700 text-nowrap space-x-[6px] flex-grow"
+                    onClick={() => isFile ? handleFileClick(file) : handleFolderClick(file, isOpen)}
+                    style={{ paddingLeft }}
+                    className={`flex items-center py-1 px-2 cursor-pointer text-sm
+                             ${isSelected ? 'bg-blue-600' : 'hover:bg-zinc-700'}
+                             transition-colors duration-100 group-hover:bg-opacity-50`}
                 >
-                  <div className="flex justify-center items-center">
-                    <img
-                      src={down}
-                      style={{
-                        transform: `rotate(${opened ? "0" : "-90"}deg)`,
-                      }}
-                      className="w-[10px] h-[10px]"
-                      alt=""
-                    />
-                  </div>
-                  <span>
-                    {i.name.length > 20 - i.level * 2
-                      ? `${i.name.slice(0, 18 - i.level * 2)}`
-                      : i.name}
-                    {i.name.length > 20 - i.level * 2 ? (
-                      <span className="font-sans">....</span>
-                    ) : null}
-                  </span>
+                    <div className="flex items-center gap-2 min-w-0">
+                        {!isFile && (
+                            <FaChevronRight 
+                                size={12}
+                                className={`transform transition-transform duration-200
+                                        ${isOpen ? 'rotate-90' : ''} text-gray-400`}
+                            />
+                        )}
+                        <span className="w-4 flex items-center">
+                            {isFile ? (
+                                getFileIcon(file.name)
+                            ) : (
+                                isOpen ? (
+                                    <FaFolderOpen size={16} className="text-yellow-400" />
+                                ) : (
+                                    <FaFolder size={16} className="text-yellow-400" />
+                                )
+                            )}
+                        </span>
+                        <span className={`truncate ${isSelected ? 'text-white' : 'text-gray-300'}`}>
+                            {file.name}
+                        </span>
+                    </div>
                 </div>
-                {opened ? <Files tree={i.children}></Files> : null}
-              </>
-            )}
-          </div>
+                
+                {/* Render children if folder is open */}
+                {!isFile && isOpen && (
+                    <div className="relative">
+                        <div className="absolute left-[19px] top-0 bottom-0 w-px bg-zinc-700 opacity-50" />
+                        <Files tree={file.children} searchTerm={searchTerm} />
+                    </div>
+                )}
+            </div>
         );
-      })}
-    </div>
-  );
-}
+    };
+
+    return (
+        <div className="flex flex-col">
+            {tree.map((file) => (
+                <FileItem
+                    key={file.path}
+                    file={file}
+                    isOpen={file.children !== null && openedFiles.includes(file.path)}
+                    level={file.level}
+                />
+            ))}
+        </div>
+    );
+});
+
+Files.displayName = 'Files';
+
+export default Files;
