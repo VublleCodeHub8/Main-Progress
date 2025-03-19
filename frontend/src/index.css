@@ -39,6 +39,18 @@
   background: #71717a;
 }
 
+.noScroll::-webkit-scrollbar {
+  width: 0px;
+  height: 4px;
+}
+
+.noScroll::-webkit-scrollbar-track {
+}
+
+.noScroll:hover::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

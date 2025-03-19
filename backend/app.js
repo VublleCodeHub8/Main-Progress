@@ -34,8 +34,8 @@ app.use(cookieParser()) // Required for CSRF
 
 // Configure CORS with credentials
 app.use(cors({
-  origin: 'http://localhost:5173', // Your frontend URL
-  credentials: true
+    origin: 'http://localhost:5173', // Your frontend URL
+    credentials: true
 }));
 
 // Logging by morgan
@@ -58,7 +58,7 @@ app.use(morgan(customLogFormat, { stream: accessLogStream }));
 
 // CSRF token endpoint
 app.get('/csrf-token', (req, res) => {
-  res.json({ csrfToken: req.csrfToken() });
+    res.json({ csrfToken: req.csrfToken() });
 });
 
 // Apply CSRF protection to all routes except auth routes
@@ -69,14 +69,14 @@ app.use(isAuth);
 
 // Error handler for CSRF token errors
 app.use((err, req, res, next) => {
-  if (err.code === 'EBADCSRFTOKEN') {
-    // Handle CSRF token errors
-    return res.status(403).json({
-      error: 'Invalid CSRF token',
-      message: 'Form submission failed. Please try again.'
-    });
-  }
-  next(err);
+    if (err.code === 'EBADCSRFTOKEN') {
+        // Handle CSRF token errors
+        return res.status(403).json({
+            error: 'Invalid CSRF token',
+            message: 'Form submission failed. Please try again.'
+        });
+    }
+    next(err);
 });
 
 app.get("/getuser", async (req, res) => {
@@ -113,6 +113,17 @@ app.use('/user', userRouter);
 app.use((req, res) => {
     res.status(404);
     res.send();
+})
+
+app.use((req, res, next) => {
+    console.log('No Route Found');
+    next(new Error('404 - No Route Found'));
+})
+
+app.use((error, req, res, next) => {
+    console.log("Error Handler Reached");
+    console.log(error);
+    res.status(500).send();
 })
 
 
