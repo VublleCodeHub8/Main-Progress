@@ -9,6 +9,8 @@ import {
   FaStar, FaStop, FaTrash, FaPlay, FaEdit
 }from "react-icons/fa";
 import Popup from 'reactjs-popup';
+import { FiX, FiSave, FiEdit3 } from "react-icons/fi";
+import Swal from 'sweetalert2';
 
 
 
@@ -126,35 +128,62 @@ export const HoverEffect = ({
     }
   };
 
-  const handleSave =  async (index) => {
-    console.log(editTitle);
-    const response = await fetch(`http://localhost:3000/container/edit/${items[index].id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token.token}`,
-      },
-      body: JSON.stringify({
-        title: editTitle
-      }),
-    });
+  const handleSave = async (index, formData) => {
+    try {
+      const response = await fetch(`http://localhost:3000/container/edit/${items[index].id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.token}`,
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description
+        }),
+      });
 
-    if (response.ok) {
-      alert("Container updated successfully");
-      items[index].title = editTitle;
-    } else {
-      alert("Failed to update container");
+      if (response.ok) {
+        // Update local state
+        items[index].title = formData.title;
+        items[index].description = formData.description;
+        
+        // Show success message
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+        });
+
+        Toast.fire({
+          icon: 'success',
+          title: 'Container updated successfully'
+        });
+      } else {
+        throw new Error("Failed to update container");
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: error.message,
+        confirmButtonColor: '#3B82F6'
+      });
     }
     setEditIndex(null);
   };
 
   return (
     <div>
-      <div className={cn("flex flex-wrap py-2 border-1 border-neutral-800", className)}>
+      <div className={cn("grid gap-4", className)}>
         {items.map((item, idx) => (
-          <div
+          <motion.div
             key={item?.link}
-            className="relative group block p-2 h-full w-full"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: idx * 0.1 }}
+            className="relative group"
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
             onClick={() => (!editIndex && !hoveronAction) && handlePath(item?.link)}
@@ -163,105 +192,135 @@ export const HoverEffect = ({
             <AnimatePresence>
               {hoveredIndex === idx && (
                 <motion.span
-                  className="absolute inset-0 h-full bg-neutral-300 block rounded-3xl"
+                  className="absolute inset-0 h-full bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl"
                   layoutId="hoverBackground"
                   initial={{ opacity: 0 }}
-                  animate={{
-                    opacity: 1,
-                    transition: { duration: 0.15 },
-                  }}
-                  exit={{
-                    opacity: 0,
-                    transition: { duration: 0.15, delay: 0.2 },
-                  }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
                 />
               )}
             </AnimatePresence>
             
             <Card>
               {editIndex === idx ? (
-                <div>
-                  <input
-                    type="text"
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    className="w-full p-2 mb-2 border border-gray-300 rounded"
-                  />
-                  <button
-                    onClick={() => handleSave(idx)}
-                    className="bg-green-500 text-white p-1 rounded"
-                  >
-                    Save
-                  </button>
-                </div>
+                <EditContainerForm
+                  item={item}
+                  onSave={(formData) => {
+                    handleSave(idx, formData);
+                  }}
+                  onCancel={() => setEditIndex(null)}
+                />
               ) : (
-                <>
-                  <div className="flex justify-between">
-                    <div>
-                   <CardTitle>{item.title}</CardTitle>
-                  <CardDescription>{item.description}</CardDescription>
-                  </div>
-                  <div>
-                  <CardTitle>Status</CardTitle>
-                  <CardDescription>{item.Status}</CardDescription>
-                  </div>
-                  <div>
-                  <CardTitle>CPU</CardTitle>
-                  <CardDescription>{item.CPU}</CardDescription>
-                  </div>
-                  <div>
-                  <CardTitle>Memory</CardTitle>
-                  <CardDescription>{item.Memory}</CardDescription>
-                  </div>
-                  <div
-                  onMouseEnter={() => setHoveronAction(true)}
-                  onMouseLeave={() => setHoveronAction(false)}><CardActions contStatus={item.Status} onEdit={() => handleEdit(hoveredIndex)} onDelete={() => handleDelete(hoveredIndex)} onStop={()=> handleStop(hoveredIndex)} onStart={()=> handleStart(hoveredIndex)} />
+                <div className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-lg mb-1">{item.title}</CardTitle>
+                      <CardDescription className="text-sm">{item.description}</CardDescription>
+                    </div>
+
+                    <div className="flex items-center space-x-8">
+                      {/* Status */}
+                      <div className="text-center">
+                        <CardTitle className="text-sm mb-1">Status</CardTitle>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                          ${item.Status === 'running' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-gray-100 text-gray-800'}`}>
+                          {item.Status}
+                        </span>
+                      </div>
+
+                      {/* CPU Usage */}
+                      <div className="text-center">
+                        <CardTitle className="text-sm mb-1">CPU</CardTitle>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-16 bg-gray-200 rounded-full h-1.5">
+                            <div 
+                              className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
+                              style={{ width: `${item.CPU || 0}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-medium text-gray-600">
+                            {item.CPU}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Memory Usage */}
+                      <div className="text-center">
+                        <CardTitle className="text-sm mb-1">Memory</CardTitle>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-16 bg-gray-200 rounded-full h-1.5">
+                            <div 
+                              className="bg-purple-500 h-1.5 rounded-full transition-all duration-300"
+                              style={{ width: `${(item.Memory / 1000) * 100}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-medium text-gray-600">
+                            {item.Memory}MB
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div
+                        onMouseEnter={() => setHoveronAction(true)}
+                        onMouseLeave={() => setHoveronAction(false)}
+                        className="flex items-center"
+                      >
+                        <CardActions 
+                          contStatus={item.Status} 
+                          onEdit={() => handleEdit(hoveredIndex)} 
+                          onDelete={() => handleDelete(hoveredIndex)} 
+                          onStop={() => handleStop(hoveredIndex)} 
+                          onStart={() => handleStart(hoveredIndex)} 
+                        />
+                      </div>
                     </div>
                   </div>
-                </>
+                </div>
               )}
             </Card>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>
   );
 };
 
-export const Card = ({
-  className,
-  children
-}) => {
+export const Card = ({ className, children }) => {
   return (
     <div
       className={cn(
-        "rounded-2xl h-full w-full overflow-hidden bg-white border border-transparent dark:border-white/[0.2] group-hover:border-slate-700 relative z-20",
+        "relative z-20 rounded-xl bg-white border border-gray-200 shadow-sm",
+        "transition-all duration-200 ease-in-out",
+        "group-hover:border-blue-200 group-hover:shadow-md",
         className
-      )}>
-      <div className="relative z-50"></div>
-      <div className="p-4">{children}</div>
+      )}
+    >
+      {children}
     </div>
   );
 };
 
-export const CardTitle = ({
-  className,
-  children
-}) => {
+export const CardTitle = ({ className, children }) => {
   return (
-    <h4 className={cn("text-zinc-900 font-bold tracking-wide", className)}>
+    <h4 className={cn(
+      "font-semibold text-gray-900 tracking-tight",
+      className
+    )}>
       {children}
     </h4>
   );
 };
 
-export const CardDescription = ({
-  className,
-  children
-}) => {
+export const CardDescription = ({ className, children }) => {
   return (
-    <p
-      className={cn(" text-zinc-600 tracking-wide leading-relaxed text-sm z-50", className)}>
+    <p className={cn(
+      "text-gray-500 tracking-wide leading-relaxed",
+      className
+    )}>
       {children}
     </p>
   );
@@ -269,34 +328,167 @@ export const CardDescription = ({
 
 const CardActions = ({ onEdit, onDelete, onStop, contStatus, onStart }) => {
   return (
-    <div className="flex justify-end m-2 p-1">
-      <button
+    <div className="flex items-center space-x-2">
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
         onClick={onEdit}
-        className="text-slate-600 hover:text-slate-900 p-1 mr-3 rounded transform transition-transform duration-200 hover:scale-125"
+        className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+        title="Edit Container"
       >
-        <FaEdit className="w-6 h-6" />
-      </button>
+        <FaEdit className="w-5 h-5" />
+      </motion.button>
+
       {contStatus === "running" ? (
-        <button
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
           onClick={onStop}
-          className="text-slate-600 hover:text-slate-900 p-1 mr-3 rounded transform transition-transform duration-200 hover:scale-125"
+          className="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+          title="Stop Container"
         >
-          <FaStop className="w-6 h-6" />
-        </button>
+          <FaStop className="w-5 h-5" />
+        </motion.button>
       ) : (
-        <button
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
           onClick={onStart}
-          className="text-slate-600 hover:text-slate-900 p-1 mr-3 rounded transform transition-transform duration-200 hover:scale-125"
+          className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+          title="Start Container"
         >
-          <FaPlay className="w-6 h-6" />
-        </button>
+          <FaPlay className="w-5 h-5" />
+        </motion.button>
       )}
-      <button
+
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
         onClick={onDelete}
-        className="text-red-600 hover:text-red-900 p-1 rounded transform transition-transform duration-200 hover:scale-125"
+        className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+        title="Delete Container"
       >
-        <FaTrash className="w-6 h-6" />
-      </button>
+        <FaTrash className="w-5 h-5" />
+      </motion.button>
     </div>
+  );
+};
+
+// Enhanced Edit Container Modal
+const EditContainerForm = ({ item, onSave, onCancel }) => {
+  const [formData, setFormData] = useState({
+    title: item.title,
+    description: item.description || ''
+  });
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="bg-white rounded-xl shadow-lg p-6 border border-gray-200"
+    >
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-lg font-semibold text-gray-900">Edit Container</h3>
+        <button
+          onClick={onCancel}
+          className="text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <FiX className="w-5 h-5" />
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        {/* Container Name */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Container Name
+          </label>
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all
+                     bg-gray-50 hover:bg-white focus:bg-white"
+            placeholder="Enter container name"
+            autoFocus
+          />
+        </div>
+
+        {/* Container Description */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all
+                     bg-gray-50 hover:bg-white focus:bg-white min-h-[100px]"
+            placeholder="Enter container description"
+          />
+        </div>
+
+        {/* Container Details */}
+        <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">Status</span>
+            <span className={`px-2.5 py-1 rounded-full text-xs font-medium
+              ${item.Status === 'running' 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-gray-100 text-gray-800'}`}>
+              {item.Status}
+            </span>
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">CPU Usage</span>
+            <div className="flex items-center space-x-2">
+              <div className="w-24 bg-gray-200 rounded-full h-1.5">
+                <div 
+                  className="bg-blue-500 h-1.5 rounded-full"
+                  style={{ width: `${item.CPU || 0}%` }}
+                />
+              </div>
+              <span className="text-xs font-medium text-gray-600">{item.CPU}%</span>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">Memory Usage</span>
+            <div className="flex items-center space-x-2">
+              <div className="w-24 bg-gray-200 rounded-full h-1.5">
+                <div 
+                  className="bg-purple-500 h-1.5 rounded-full"
+                  style={{ width: `${(item.Memory / 1000) * 100}%` }}
+                />
+              </div>
+              <span className="text-xs font-medium text-gray-600">{item.Memory}MB</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex space-x-3 mt-6">
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => onSave(formData)}
+          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors
+                   flex items-center justify-center space-x-2"
+        >
+          <FiSave className="w-4 h-4" />
+          <span>Save Changes</span>
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={onCancel}
+          className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-lg transition-colors"
+        >
+          Cancel
+        </motion.button>
+      </div>
+    </motion.div>
   );
 };

@@ -8,8 +8,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { fetchUserData, updateUserData, setEditMode } from "../store/userSlice";
+import { User, Box, BarChart, Shield, Code, LogOut } from "lucide-react";
 
 
 const useAuth = () => {
@@ -77,48 +79,133 @@ function DashboardLayout() {
 
           <div className="flex items-center pr-20">
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center focus:outline-none text-2xl font-bold border-2 bg-white  border-slate-400 rounded-md p-1 ">
-              
-                <Avatar className="w-10 h-10">
-                  <AvatarImage
-                    src={user?.profilePicUrl || "https://github.com/shadcn.png"}
-                    alt="@shadcn" 
-                    className="rounded-lg w-12 h-12"
-                  />
-                  <AvatarFallback></AvatarFallback>
-                </Avatar>
-                <div className="ml-1 border-l-2 border-x-slate-400 px-1">{user?.username}</div>
+              <DropdownMenuTrigger className="group flex items-center gap-3 px-3 py-2 
+                                    bg-white border border-gray-200 rounded-xl
+                                    hover:bg-gray-50 transition-all duration-200 
+                                    focus:outline-none focus:ring-2 focus:ring-gray-200">
+                <div className="flex items-center gap-3">
+                  <Avatar className="w-10 h-10 ring-2 ring-white shadow-sm">
+                    <AvatarImage
+                      src={user?.profilePicUrl || "https://github.com/shadcn.png"}
+                      alt={user?.username}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="bg-gray-100 text-gray-600 font-medium">
+                      {user?.username?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-semibold text-gray-700">
+                      {user?.username}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {token.role === "admin" ? "Administrator" : 
+                       token.role === "dev" ? "Developer" : "User"}
+                    </span>
+                  </div>
+                </div>
+                <div className="h-8 w-8 rounded-full flex items-center justify-center 
+                              group-hover:bg-gray-100 transition-colors">
+                  <svg
+                    className="w-5 h-5 text-gray-500 transform group-hover:rotate-180 transition-transform duration-200"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="mt-2 w-48 ">
-                <DropdownMenuItem onSelect={() => navigate("/profile")} className="text-lg">
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => navigate("/containers")} className="text-lg">
-                  My Containers
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => navigate("/analytics")} className="text-lg">
-                  Analytics
-                </DropdownMenuItem>
-                {/* <DropdownMenuItem onSelect={() => navigate("/settings")} className="text-lg">
-                  Settings
-                </DropdownMenuItem> */}
-                <DropdownMenuItem onSelect={handleLogout} className="text-lg">
-                  Logout
-                </DropdownMenuItem>
-                {token.role === "admin" && (
-                  <>
-                  <DropdownMenuItem onSelect={() => navigate("/admin")} className="text-lg">
-                    Admin Dashboard
+
+              <DropdownMenuContent className="w-56 mt-2 p-1.5 bg-white rounded-lg shadow-lg border border-gray-200">
+                {/* User Info Section - More Compact */}
+                <div className="px-3 py-2 bg-gray-50 rounded-md mb-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Avatar className="h-8 w-8 ring-1 ring-white shadow-sm">
+                      <AvatarImage
+                        src={user?.profilePicUrl || "https://github.com/shadcn.png"}
+                        alt={user?.username}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="bg-gray-100 text-gray-600 text-sm">
+                        {user?.username?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{user?.username}</p>
+                      <p className="text-xs text-gray-500">{user?.email}</p>
+                    </div>
+                  </div>
+                  <div className="text-xs bg-white text-gray-600 px-2 py-1 rounded-md border border-gray-200 inline-block">
+                    {token.role === "admin" ? "Administrator" : token.role === "dev" ? "Developer" : "User"}
+                  </div>
+                </div>
+
+                {/* Main Menu Items - More Compact */}
+                <div className="p-1">
+                  <DropdownMenuItem onSelect={() => navigate("/profile")} 
+                    className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer
+                             hover:bg-gray-50 rounded-md transition-all duration-200">
+                    <User className="h-4 w-4 text-gray-600" />
+                    <span>Profile</span>
                   </DropdownMenuItem>
+
+                  <DropdownMenuItem onSelect={() => navigate("/containers")}
+                    className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer
+                             hover:bg-gray-50 rounded-md transition-all duration-200">
+                    <Box className="h-4 w-4 text-gray-600" />
+                    <span>My Containers</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem onSelect={() => navigate("/analytics")}
+                    className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer
+                             hover:bg-gray-50 rounded-md transition-all duration-200">
+                    <BarChart className="h-4 w-4 text-gray-600" />
+                    <span>Analytics</span>
+                  </DropdownMenuItem>
+                </div>
+
+                {/* Role-based Menu Items - More Compact */}
+                {(token.role === "admin" || token.role === "dev") && (
+                  <>
+                    <DropdownMenuSeparator className="my-1 border-gray-200" />
+                    <div className="p-1">
+                      {token.role === "admin" && (
+                        <DropdownMenuItem onSelect={() => navigate("/admin")}
+                          className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer
+                                   hover:bg-gray-50 rounded-md transition-all duration-200">
+                          <Shield className="h-4 w-4 text-gray-600" />
+                          <span>Admin Dashboard</span>
+                        </DropdownMenuItem>
+                      )}
+
+                      {token.role === "dev" && (
+                        <DropdownMenuItem onSelect={() => navigate("/dev")}
+                          className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer
+                                   hover:bg-gray-50 rounded-md transition-all duration-200">
+                          <Code className="h-4 w-4 text-gray-600" />
+                          <span>Dev Dashboard</span>
+                        </DropdownMenuItem>
+                      )}
+                    </div>
                   </>
                 )}
-                {
-                  token.role === "dev" && (
-                    <DropdownMenuItem onSelect={() => navigate("/dev")} className="text-lg">
-                      Dev Dashboard
-                    </DropdownMenuItem>
-                  )
-                }
+
+                {/* Logout Section - More Compact */}
+                <DropdownMenuSeparator className="my-1 border-gray-200" />
+                <div className="p-1">
+                  <DropdownMenuItem onSelect={handleLogout}
+                    className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer
+                             hover:bg-red-50 text-red-600 rounded-md transition-all duration-200">
+                    <LogOut className="h-4 w-4" />
+                    <span>Sign Out</span>
+                  </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

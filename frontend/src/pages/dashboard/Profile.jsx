@@ -195,16 +195,78 @@ const Profile = () => {
     joinedDate: user?.joinedDate || new Date().toISOString()
   });
 
-  // Modify userStats to include billing
+  // Add new state for container stats
+  const [containerStats, setContainerStats] = useState({
+    totalContainers: 0,
+    activeTime: 0
+  });
+
+  // Add this function to calculate time difference in hours
+  const calculateActiveTime = (startedAt) => {
+    if (!startedAt) return 0;
+    const startDate = new Date(startedAt);
+    const now = new Date();
+    const diffInMs = now - startDate;
+    return Math.round(diffInMs / (1000 * 60 * 60)); // Convert milliseconds to hours
+  };
+
+  // Update the fetchContainerStats function
+  const fetchContainerStats = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/container/listcontainers", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token.token}`,
+        },
+      });
+      const containers = await response.json();
+      const totalActiveTime = containers.reduce((total, container) => {
+        return total + calculateActiveTime(container.startedAt);
+      }, 0);
+      setContainerStats({
+        totalContainers: containers.length,
+        activeTime: totalActiveTime
+      });
+    } catch (error) {
+      console.error("Error fetching container stats:", error);
+      setContainerStats({
+        totalContainers: 0,
+        activeTime: 0
+      });
+    }
+  };
+
+  // Update the userStats to format the active time better
+  const formatActiveTime = (hours) => {
+    if (hours < 24) {
+      return `${hours}h`;
+    } else {
+      const days = Math.floor(hours / 24);
+      const remainingHours = hours % 24;
+      return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days}d`;
+    }
+  };
+
+  // Update the userStats array
   const userStats = [
     {
       label: "Total Bill",
       value: user?.billingInfo?.amount ? `$${user.billingInfo.amount.toFixed(2)}` : "$0.00",
       icon: <DollarSign className="h-4 w-4 text-green-500" />,
-      color: "bg-green-50"  // Add a subtle background color
+      color: "bg-green-50"
     },
-    { label: "Total Containers", value: 12, icon: <Container className="h-4 w-4" /> },
-    { label: "Active Time", value: "127h", icon: <Clock className="h-4 w-4" /> },
+    {
+      label: "Total Containers",
+      value: containerStats.totalContainers,
+      icon: <Container className="h-4 w-4 text-blue-500" />,
+      color: "bg-blue-50"
+    },
+    {
+      label: "Active Time",
+      value: formatActiveTime(containerStats.activeTime),
+      icon: <Clock className="h-4 w-4 text-purple-500" />,
+      color: "bg-purple-50"
+    }
   ];
 
   const recentActivity = [
@@ -231,6 +293,13 @@ const Profile = () => {
       });
     }
   }, [user]);
+
+  // Add to useEffect
+  useEffect(() => {
+    if (token) {
+      fetchContainerStats();
+    }
+  }, [token]);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
