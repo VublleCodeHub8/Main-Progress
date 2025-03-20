@@ -23,8 +23,10 @@ import { TailwindcssButtons } from "@/components/ui/tailwindcss-buttons";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
+import { motion } from "framer-motion";
+import { Box, Server, Clock, Check } from "lucide-react";
 
-const CreateContButton = ({ templateDefault = 1, className, children }) =>{
+const CreateContButton = ({ templateDefault = 1, className, children }) => {
   const token = useSelector((state) => state.misc.token);
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
@@ -117,69 +119,134 @@ const CreateContButton = ({ templateDefault = 1, className, children }) =>{
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Create Container</DialogTitle>
-          <DialogDescription>
-            Make a new template for your containers.
+      <DialogContent className="sm:max-w-[500px] p-0 gap-0 bg-white/95 backdrop-blur-sm">
+        <DialogHeader className="p-6 pb-2">
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+            Create Container
+          </DialogTitle>
+          <DialogDescription className="text-gray-500">
+            Configure your new development environment
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4 w-full">
-            <Label htmlFor="name" className="text-right">
-              Template
-            </Label>
+
+        <div className="px-6 py-4 space-y-6">
+          {/* Template Selection */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Server className="w-4 h-4" />
+                Select Template
+              </Label>
+              {template && (
+                <span className="text-xs text-gray-500">
+                  {templates.find(t => t.image === template)?.name}
+                </span>
+              )}
+            </div>
             <Select onValueChange={handleTemplateChange} value={template}>
-              <SelectTrigger className="w-64">
-                <SelectValue />
+              <SelectTrigger className="w-full border-2 h-11 transition-all duration-200 hover:border-gray-400 focus:border-gray-600 focus:ring-0">
+                <SelectValue placeholder="Choose a template" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="border-2">
                 <SelectGroup>
-                  <SelectLabel>Templates</SelectLabel>
+                  <SelectLabel className="text-gray-500">Available Templates</SelectLabel>
                   {templates.map((template) => (
-                    <SelectItem key={template.name} value={template.image}>
-                      {template.name}
+                    <SelectItem 
+                      key={template.name} 
+                      value={template.image}
+                      className="focus:bg-gray-50 cursor-pointer py-3 px-4 m-1 rounded-lg
+                                data-[state=checked]:bg-gray-50 group transition-all duration-200"
+                    >
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="space-y-2"
+                      >
+                        {/* Template Header with improved spacing */}
+                        <div className="flex items-center">
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center
+                                          group-hover:bg-gray-200 transition-colors duration-200 flex-shrink-0">
+                              <Server className="w-4 h-4 text-gray-600" />
+                            </div>
+                            <span className="font-medium text-gray-800 truncate">
+                              {template.name}
+                            </span>
+                          </div>
+                          {/* Added minimum gap between name and price */}
+                          <div className="ml-6 flex-shrink-0">
+                            <div className="px-3 py-1 bg-gray-100 rounded-md text-sm font-medium text-gray-700">
+                              ${template.price}/hr
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* ... rest of template item content ... */}
+                      </motion.div>
                     </SelectItem>
                   ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="title" className="text-right">
-              Title
+
+          {/* Container Name */}
+          <div className="space-y-4">
+            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Box className="w-4 h-4" />
+              Container Name
             </Label>
             <Input
               id="title"
-              className="col-span-3"
+              placeholder="Enter container name"
+              className="border-2 h-11 transition-all duration-200 hover:border-gray-400 focus:border-gray-600 focus:ring-0"
               onChange={handleTitleChange}
               value={title}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="price" className="text-right">
-              Price:
-            </Label>
-            <div className="col-span-3">
-              {templates.find((t) => t.image === template)?.price || "N/A"} / per hour
-            </div>
-          </div>
+
+          {/* Price Information */}
+          {template && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-gray-50 rounded-xl p-4 border-2 border-gray-100"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Clock className="w-4 h-4" />
+                  <span className="text-sm font-medium">Hourly Rate</span>
+                </div>
+                <div className="text-lg font-bold text-gray-800">
+                  ${templates.find((t) => t.image === template)?.price || "N/A"}
+                </div>
+              </div>
+            </motion.div>
+          )}
         </div>
-        <DialogFooter>
-          <TailwindcssButtons 
-            idx={2} 
-            onClick={()=>{setIsLoading(true); newProject();}}
+
+        {/* Footer */}
+        <DialogFooter className="p-6 pt-2">
+          <button
+            onClick={() => {setIsLoading(true); newProject();}}
             disabled={isLoading}
+            className={`w-full py-3 rounded-lg font-medium transition-all duration-300 
+              ${isLoading 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                : 'bg-gray-800 text-white hover:bg-gray-700'}`}
           >
             {isLoading ? (
-              <>
-                <span className="animate-pulse">Creating</span>
-                <span className="animate-[bounce_1s_infinite]">...</span>
-              </>
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                <span>Creating Container...</span>
+              </div>
             ) : (
-              "Create"
+              <div className="flex items-center justify-center gap-2">
+                <Check className="w-5 h-5" />
+                <span>Create Container</span>
+              </div>
             )}
-          </TailwindcssButtons>
+          </button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

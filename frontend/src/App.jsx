@@ -218,8 +218,63 @@ function App() {
     return (
       <>
         <Toaster position="top-right" />
-        <div className="flex h-screen w-screen  justify-center items-center">
-          Checking Authentication....
+        <div className="flex h-screen w-screen justify-center items-center bg-gradient-to-br from-gray-50 to-gray-100">
+          <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full mx-4">
+            {/* Logo Section */}
+            <div className="mb-8">
+              <div className="w-20 h-20 mx-auto bg-blue-500 rounded-full flex items-center justify-center">
+                <svg 
+                  className="w-12 h-12 text-white" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth="2" 
+                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            {/* Spinner and Text */}
+            <div className="space-y-6">
+              <div className="relative">
+                <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 mx-auto">
+                  <div className="absolute top-0 left-0 right-0 bottom-0 border-t-4 border-blue-500 rounded-full"></div>
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                  Authentication in Progress
+                </h2>
+                <p className="text-gray-600 mb-4">
+                  Please wait while we verify your credentials
+                </p>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="w-full bg-gray-200 rounded-full h-1.5 mb-4 overflow-hidden">
+                <div className="animate-loading-bar bg-blue-500 h-full rounded-full"></div>
+              </div>
+
+              {/* Status Messages */}
+              <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+                <span className="flex items-center">
+                  <span className="animate-pulse mr-2">⚡</span>
+                  Securing connection
+                </span>
+                <span>•</span>
+                <span className="flex items-center">
+                  <span className="animate-bounce mr-2">🔒</span>
+                  Verifying credentials
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </>
     );
