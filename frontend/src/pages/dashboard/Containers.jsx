@@ -3,6 +3,7 @@ import { TailwindcssButtons } from "@/components/ui/tailwindcss-buttons";
 import { HoverEffect } from "@/components/ui/card_container";
 import { Loader2, Search, Server, Box, Activity, RefreshCw, Plus, InfoIcon } from "lucide-react";
 import CreateContButton from "@/components/dashboard/CreateContainer";
+import Loader from '@/components/ui/Loader';
 
 const getContainerStatus = async (containerId) => {
   const tok = JSON.parse(localStorage.getItem("token"));
@@ -247,12 +248,10 @@ function Containers() {
       <div className="rounded-sm h-auto overflow-auto">
         <div className="text-black border-2 h-[700px] overflow-auto justify-center">
           {loading ? (
-            <div className="min-h-screen flex items-center justify-center">
-              <div className="flex items-center gap-2">
-                <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
-                <span className="text-gray-600 font-medium">Loading containers...</span>
-              </div>
-            </div>
+            <Loader 
+              title="Loading Containers" 
+              description="Please wait while we fetch your containers" 
+            />
           ) : error ? (
             <div className="flex flex-col items-center justify-center h-full">
               <h3 className="text-xl font-semibold text-gray-600 mb-2">

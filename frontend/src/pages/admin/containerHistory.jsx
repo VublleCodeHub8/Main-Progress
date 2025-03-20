@@ -3,6 +3,19 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Power, Search, Shield, User, Calendar, Box, Clock, Activity } from "lucide-react";
+import { Bar, Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
+
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
+
+const generateRandomColor = (opacity = 0.8) => {
+    // Generate pastel colors for better visibility
+    const hue = Math.floor(Math.random() * 360);
+    const saturation = 70 + Math.random() * 10; // 70-80%
+    const lightness = 65 + Math.random() * 10;  // 65-75%
+    
+    return `hsla(${hue}, ${saturation}%, ${lightness}%, ${opacity})`;
+};
 
 const ContainerHistory = () => {
     const token = useSelector((state) => state.misc.token);
@@ -31,6 +44,167 @@ const ContainerHistory = () => {
     const filteredContainerHistory = containerHistory.filter((container) => {
         return container.userName.toLowerCase().includes(searchTerm.toLowerCase()) || container.template.toLowerCase().includes(searchTerm.toLowerCase());
     })
+
+    const getTemplateData = () => {
+        // Get unique templates
+        const templates = [...new Set(containerHistory.map(container => container.template))];
+        
+        const data = {
+            labels: templates,
+            datasets: [
+                {
+                    label: 'Deleted Containers',
+                    data: templates.map(template => 
+                        containerHistory.filter(container => container.template === template).length
+                    ),
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.8)',   // Blue
+                        'rgba(255, 99, 132, 0.8)',   // Red
+                        'rgba(75, 192, 192, 0.8)',   // Teal
+                        'rgba(255, 206, 86, 0.8)',   // Yellow
+                        'rgba(153, 102, 255, 0.8)',  // Purple
+                        'rgba(255, 159, 64, 0.8)'    // Orange
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    animation: {
+                        y: {
+                            from: 1000,
+                            duration: 2000,
+                            easing: 'easeOutQuart',
+                            delay: (context) => context.dataIndex * 100
+                        }
+                    },
+                    transitions: {
+                        active: {
+                            animation: {
+                                duration: 400
+                            }
+                        }
+                    }
+                }
+            ]
+        };
+
+        return data;
+    };
+
+    const getUserData = () => {
+        const users = [...new Set(containerHistory.map(container => container.userName))];
+        
+        // Generate a color for each user
+        const colors = users.map(() => {
+            const color = generateRandomColor();
+            return {
+                background: color,
+                border: color.replace(/, \d+\)/, ', 1)') // Make border solid by setting opacity to 1
+            };
+        });
+        
+        const data = {
+            labels: users,
+            datasets: [
+                {
+                    label: 'Containers per User',
+                    data: users.map(user => 
+                        containerHistory.filter(container => container.userName === user).length
+                    ),
+                    backgroundColor: colors.map(c => c.background),
+                    borderColor: colors.map(c => c.border),
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    animation: {
+                        y: {
+                            from: 1000,
+                            duration: 2000,
+                            easing: 'easeOutQuart',
+                            delay: (context) => context.dataIndex * 100
+                        }
+                    },
+                    transitions: {
+                        active: {
+                            animation: {
+                                duration: 400
+                            }
+                        }
+                    }
+                }
+            ]
+        };
+
+        return data;
+    };
+
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    font: {
+                        family: "'Inter', sans-serif",
+                        size: 12
+                    },
+                    padding: 20,
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                }
+            },
+            title: {
+                display: true,
+                text: 'Container Distribution by Template',
+                font: {
+                    size: 16,
+                    family: "'Inter', sans-serif",
+                    weight: 'bold'
+                },
+                color: '#374151',
+                padding: {
+                    top: 10,
+                    bottom: 30
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.1)',
+                    drawBorder: false
+                },
+                ticks: {
+                    font: {
+                        size: 12,
+                        family: "'Inter', sans-serif"
+                    }
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    font: {
+                        size: 12,
+                        family: "'Inter', sans-serif"
+                    }
+                }
+            }
+        },
+        animation: {
+            duration: 2000,
+            easing: 'easeOutQuart',
+        },
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-8">
@@ -134,7 +308,138 @@ const ContainerHistory = () => {
                 </div>
             </div>
 
-            {/* Enhanced Container History Table */}
+            {/* Charts Section - Side by Side in one line */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                {/* Template Distribution Chart - Left Side */}
+                <Card className="shadow-lg">
+                    <CardHeader className="border-b border-gray-100">
+                        <CardTitle className="text-xl font-semibold text-gray-800">
+                            Template Distribution
+                        </CardTitle>
+                        <p className="text-sm text-gray-500">
+                            Distribution across templates
+                        </p>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        <div className="h-[400px] w-full">
+                            <Bar 
+                                data={getTemplateData()} 
+                                options={{
+                                    ...chartOptions,
+                                    plugins: {
+                                        ...chartOptions.plugins,
+                                        legend: {
+                                            ...chartOptions.plugins.legend,
+                                            position: 'top',
+                                        },
+                                        title: {
+                                            ...chartOptions.plugins.title,
+                                            display: false
+                                        }
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            grid: {
+                                                color: 'rgba(0, 0, 0, 0.1)',
+                                                drawBorder: false
+                                            },
+                                            ticks: {
+                                                font: {
+                                                    size: 12,
+                                                    family: "'Inter', sans-serif"
+                                                },
+                                                stepSize: 1
+                                            }
+                                        },
+                                        x: {
+                                            grid: {
+                                                display: false
+                                            },
+                                            ticks: {
+                                                font: {
+                                                    size: 12,
+                                                    family: "'Inter', sans-serif"
+                                                }
+                                            },
+                                            barPercentage: 0.85,
+                                            categoryPercentage: 0.95
+                                        }
+                                    },
+                                    barThickness: 45
+                                }} 
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* User Distribution Chart - Right Side */}
+                <Card className="shadow-lg">
+                    <CardHeader className="border-b border-gray-100">
+                        <CardTitle className="text-xl font-semibold text-gray-800">
+                            User Activity
+                        </CardTitle>
+                        <p className="text-sm text-gray-500">
+                            Distribution across users
+                        </p>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        <div className="h-[400px] w-full">
+                            <Bar 
+                                data={getUserData()} 
+                                options={{
+                                    ...chartOptions,
+                                    plugins: {
+                                        ...chartOptions.plugins,
+                                        legend: {
+                                            ...chartOptions.plugins.legend,
+                                            position: 'top',
+                                        },
+                                        title: {
+                                            ...chartOptions.plugins.title,
+                                            display: false
+                                        }
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            grid: {
+                                                color: 'rgba(0, 0, 0, 0.1)',
+                                                drawBorder: false
+                                            },
+                                            ticks: {
+                                                font: {
+                                                    size: 12,
+                                                    family: "'Inter', sans-serif"
+                                                },
+                                                stepSize: 1
+                                            }
+                                        },
+                                        x: {
+                                            grid: {
+                                                display: false
+                                            },
+                                            ticks: {
+                                                font: {
+                                                    size: 12,
+                                                    family: "'Inter', sans-serif"
+                                                },
+                                                maxRotation: 45,
+                                                minRotation: 45
+                                            },
+                                            barPercentage: 0.85,
+                                            categoryPercentage: 0.95
+                                        }
+                                    },
+                                    barThickness: 45
+                                }} 
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Container Activity Log Table */}
             <Card className="shadow-lg">
                 <CardHeader className="bg-gray-50 border-b border-gray-100">
                     <CardTitle className="text-xl font-semibold text-gray-800">Container Activity Log</CardTitle>
