@@ -3,6 +3,8 @@ import { Chart } from "@/components/ui/chart";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useSelector } from "react-redux";
+import Loader from "@/components/ui/Loader";
+import { AlertTriangle } from "lucide-react";
 // More realistic container usage and billing data
 const getLastTwelveMonths = () => {
   const months = [];
@@ -166,15 +168,37 @@ function Analytics() {
   }, [templates, projects]);
   // console.log(containerData);
   if (loading) {
-    return <div className="w-full h-full flex items-center justify-center">Loading...</div>;
+    return (
+        <div className="w-full h-screen flex items-center justify-center bg-white/80">
+            <Loader 
+                title="Loading Analytics" 
+                description="Fetching your container usage and billing data..."
+            />
+        </div>
+    );
   }
 
   if (error) {
-    return <div className="w-full h-full flex items-center justify-center text-red-500">Error: {error.message}</div>;
+    return (
+        <div className="w-full h-screen flex items-center justify-center bg-white/80">
+            <div className="text-center p-8 rounded-lg">
+                <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-red-700 mb-2">Analytics Error</h3>
+                <p className="text-red-600">{error.message}</p>
+            </div>
+        </div>
+    );
   }
 
   if (!containerData) {
-    return <div className="w-full h-full flex items-center justify-center">No data available</div>;
+    return (
+        <div className="w-full h-screen flex items-center justify-center bg-white/80">
+            <Loader 
+                title="Preparing Analytics" 
+                description="Setting up your dashboard..."
+            />
+        </div>
+    );
   }
 
   const { containerCounts, billData } = containerData;
