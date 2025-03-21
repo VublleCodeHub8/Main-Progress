@@ -9,6 +9,7 @@ import {
 import Popup from "@/components/Popup";
 import { Link } from 'react-router-dom';
 import { subDays, format, parseISO } from 'date-fns';
+import Loader from '@/components/ui/Loader';
 
 const generateMockContributions = () => {
   const contributions = {};
@@ -343,12 +344,10 @@ const Profile = () => {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
-          <span className="text-gray-600 font-medium">Loading profile...</span>
-        </div>
-      </div>
+      <Loader 
+        title="Loading Profile" 
+        description="Please wait while we fetch your profile information" 
+      />
     );
   }
 

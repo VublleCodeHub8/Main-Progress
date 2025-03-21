@@ -75,6 +75,48 @@ const BugReports = () => {
         ],
     };
 
+    const userBugDistribution = {
+        labels: [...new Set(bugReports.map(report => report.name))],
+        datasets: [
+            {
+                label: 'Bugs Reported',
+                data: [...new Set(bugReports.map(report => report.name))].map(name =>
+                    bugReports.filter(report => report.name === name).length
+                ),
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.85)',   // Blue
+                    'rgba(255, 99, 132, 0.85)',   // Red
+                    'rgba(75, 192, 192, 0.85)',   // Teal
+                    'rgba(255, 206, 86, 0.85)',   // Yellow
+                    'rgba(153, 102, 255, 0.85)',  // Purple
+                    'rgba(255, 159, 64, 0.85)',   // Orange
+                    'rgba(201, 203, 207, 0.85)'   // Gray
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(201, 203, 207, 1)'
+                ],
+                borderWidth: 2,
+                hoverBorderWidth: 3,
+                hoverOffset: 15,
+                offset: 5,
+                spacing: 3,
+                borderRadius: 3,
+                hoverBorderColor: 'white',
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    delay: (context) => context.dataIndex * 300
+                }
+            }
+        ]
+    };
+
     const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
@@ -164,6 +206,113 @@ const BugReports = () => {
                 bottom: 0
             }
         }
+    };
+
+    const pieChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'right',
+                labels: {
+                    font: {
+                        size: 12,
+                        family: "'Inter', sans-serif",
+                        weight: '500'
+                    },
+                    padding: 20,
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                    generateLabels: (chart) => {
+                        const datasets = chart.data.datasets;
+                        return chart.data.labels.map((label, index) => ({
+                            text: `${label} (${datasets[0].data[index]} reports)`,
+                            fillStyle: datasets[0].backgroundColor[index],
+                            strokeStyle: datasets[0].borderColor[index],
+                            lineWidth: 1,
+                            hidden: false,
+                            index: index
+                        }));
+                    }
+                }
+            },
+            title: {
+                display: true,
+                text: 'Distribution of Bug Reports by User',
+                font: {
+                    size: 16,
+                    family: "'Inter', sans-serif",
+                    weight: 'bold'
+                },
+                padding: {
+                    top: 10,
+                    bottom: 30
+                },
+                color: '#374151'
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                padding: 12,
+                titleFont: {
+                    size: 14,
+                    family: "'Inter', sans-serif",
+                    weight: 'bold'
+                },
+                bodyFont: {
+                    size: 13,
+                    family: "'Inter', sans-serif"
+                },
+                displayColors: true,
+                usePointStyle: true,
+                callbacks: {
+                    label: function(context) {
+                        const label = context.label || '';
+                        const value = context.raw || 0;
+                        const total = context.dataset.data.reduce((acc, curr) => acc + curr, 0);
+                        const percentage = ((value / total) * 100).toFixed(1);
+                        return `${label}: ${value} reports (${percentage}%)`;
+                    },
+                    title: function(context) {
+                        return 'User Report Distribution';
+                    }
+                }
+            },
+            datalabels: {
+                color: '#fff',
+                font: {
+                    weight: 'bold',
+                    size: 11
+                },
+                formatter: (value, context) => {
+                    const total = context.dataset.data.reduce((acc, curr) => acc + curr, 0);
+                    const percentage = ((value / total) * 100).toFixed(1);
+                    return percentage + '%';
+                }
+            }
+        },
+        animation: {
+            animateRotate: true,
+            animateScale: true,
+            duration: 2000,
+            easing: 'easeInOutQuart',
+            delay: (context) => context.dataIndex * 200
+        },
+        elements: {
+            arc: {
+                borderWidth: 2,
+                borderColor: 'white'
+            }
+        },
+        layout: {
+            padding: {
+                top: 20,
+                bottom: 20,
+                left: 20,
+                right: 120
+            }
+        },
+        cutout: '40%',
+        radius: '90%'
     };
 
     const filteredBugReports = bugReports.filter((bugReport) => {
@@ -281,16 +430,30 @@ const BugReports = () => {
                 </div>
             </div>
 
-            {/* bar chart for bug report type wise */}
-            <div className='mb-8'>
+            {/* Charts Section */}
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-8 mb-8'>
+                {/* Bar Chart */}
                 <Card className="p-4">
                     <CardHeader className="pb-0">
-                        <CardTitle className="text-xl font-semibold text-gray-800">Bug Report Analytics</CardTitle>
+                        <CardTitle className="text-xl font-semibold text-gray-800">Bug Type Analytics</CardTitle>
                         <p className="text-sm text-gray-500">Distribution of reported issues by category</p>
                     </CardHeader>
                     <CardContent>
-                        <div className="h-[400px] w-full p-4"> {/* Fixed height for better presentation */}
+                        <div className="h-[400px] w-full p-4">
                             <Bar data={bugReportType} options={chartOptions} />
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Pie Chart */}
+                <Card className="p-4">
+                    <CardHeader className="pb-0">
+                        <CardTitle className="text-xl font-semibold text-gray-800">User Report Distribution</CardTitle>
+                        <p className="text-sm text-gray-500">Number of bugs reported per user</p>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="h-[400px] w-full p-4">
+                            <Pie data={userBugDistribution} options={pieChartOptions} />
                         </div>
                     </CardContent>
                 </Card>

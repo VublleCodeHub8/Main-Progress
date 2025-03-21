@@ -7,6 +7,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import CreateContButton  from  "@/components/dashboard/CreateContainer"
 import {useSelector} from "react-redux";
+import { Server, Command, BarChart2, Plus, Settings2 } from "lucide-react";
 
 
 
@@ -72,16 +73,51 @@ useEffect(() => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      {/* Header Section */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">Container Dashboard</h1>
-            <p className="text-gray-500">Manage and monitor your container infrastructure</p>
+      {/* Enhanced Header Section */}
+      <div className="bg-gradient-to-b from-white to-gray-50 rounded-xl shadow-sm p-8 mb-8 border-2 border-gray-100">
+        <div className="flex items-center justify-between gap-8">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-gray-50 rounded-xl shadow-sm border-2 border-gray-100">
+                <Server className="w-7 h-7 text-gray-700" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                  Container Dashboard
+                </h1>
+                <div className="flex items-center gap-6 mt-2">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Command className="w-4 h-4" />
+                    <span className="text-sm">Manage</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <BarChart2 className="w-4 h-4" />
+                    <span className="text-sm">Monitor</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Settings2 className="w-4 h-4" />
+                    <span className="text-sm">Configure</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p className="text-gray-600 pl-[52px] border-l-2 border-gray-100">
+              Manage and monitor your container infrastructure. Create, deploy, and scale your development environments with ease.
+            </p>
           </div>
-          <div className="transform hover:scale-105 transition-transform duration-200">
+
+          {/* Enhanced Create Container Button */}
+          <div className="flex-shrink-0">
             <CreateContButton templateDefault={"undefined"}>
-              <TailwindcssButtons idx={2}>+ Create Container</TailwindcssButtons>
+              <button 
+                className="flex items-center gap-2 px-6 py-3 rounded-xl
+                          bg-gray-900 text-white hover:bg-gray-800 
+                          transition-all duration-200 group border-2 border-gray-800
+                          hover:shadow-lg"
+              >
+                <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <span className="font-medium">Create Container</span>
+              </button>
             </CreateContButton>
           </div>
         </div>

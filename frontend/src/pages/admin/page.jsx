@@ -7,6 +7,7 @@ import { Activity, Users, User, Box, Power, StopCircle, Trash, Search, Play, Edi
 import { Link } from 'react-router-dom';
 import Popup from '@/components/Popup';
 import { set } from 'react-hook-form';
+import Loader from '@/components/ui/Loader';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
@@ -27,6 +28,10 @@ const AdminPage = () => {
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [loadingAction, setLoadingAction] = useState({
+    isLoading: false,
+    message: ''
+  });
 
 
   const fetchTemplates = async () => {
@@ -48,9 +53,8 @@ const AdminPage = () => {
   };
 
   const assignTemplate = async (userEmail, templateId) => {
+    setLoadingAction({ isLoading: true, message: 'Assigning Template' });
     try {
-      setIsLoading(true); // Add loading state
-
       if (!userEmail || !templateId) {
         throw new Error("Email and template ID are required");
       }
@@ -84,13 +88,13 @@ const AdminPage = () => {
       setPopupType("error");
       setPopupVisible(true);
     } finally {
-      setIsLoading(false); // Clear loading state
+      setLoadingAction({ isLoading: false, message: '' });
     }
   };
 
   const removeTemplate = async (userEmail, templateId) => {
+    setLoadingAction({ isLoading: true, message: 'Removing Template' });
     try{
-      setIsLoading(true);
       if(!userEmail || !templateId){
         throw new Error("Email and template ID are required");
       }
@@ -125,7 +129,7 @@ const AdminPage = () => {
       setPopupType("error");
       setPopupVisible(true);
     } finally {
-      setIsLoading(false);
+      setLoadingAction({ isLoading: false, message: '' });
     }
   };
 
@@ -228,7 +232,7 @@ const AdminPage = () => {
   };
 
   const handleStopContainer = async (containerId) => {
-    setIsLoading(true);
+    setLoadingAction({ isLoading: true, message: 'Stopping Container' });
     try {
       const response = await fetch(`http://localhost:3000/container/stop/${containerId}`, {
         method: "GET",
@@ -237,29 +241,28 @@ const AdminPage = () => {
           Authorization: `Bearer ${token.token}`,
         },
       });
-      setIsLoading(false);
       if (response.ok) {
         setContainers(containers.map(container => container.id === containerId ? { ...container, status: "exited" } : container));
         setPopupMessage("Container stopped successfully");
         setPopupType("success");
         setPopupVisible(true);
       } else {
-        console.error(`Failed to stop container ${containerId}`);
         setPopupMessage("Failed to stop container");
         setPopupType("error");
         setPopupVisible(true);
       }
     } catch (error) {
-      console.error(`Error stopping container ${containerId}:`, error);
       setPopupMessage("Error stopping container");
       setPopupType("error");
       setPopupVisible(true);
+    } finally {
+      setLoadingAction({ isLoading: false, message: '' });
+      setRefreshTrigger(prevTrigger => !prevTrigger);
     }
-    setRefreshTrigger(prevTrigger => !prevTrigger);
   };
 
   const handleStartContainer = async (containerId) => {
-    setIsLoading(true);
+    setLoadingAction({ isLoading: true, message: 'Starting Container' });
     try {
       const response = await fetch(`http://localhost:3000/container/start/${containerId}`, {
         method: "GET",
@@ -268,7 +271,6 @@ const AdminPage = () => {
           Authorization: `Bearer ${token.token}`,
         },
       });
-      setIsLoading(false);
       if (response.ok) {
         setContainers(containers.map(container => container.id === containerId ? { ...container, status: "running" } : container));
         setPopupMessage("Container started successfully");
@@ -285,13 +287,14 @@ const AdminPage = () => {
       setPopupMessage("Error starting container");
       setPopupType("error");
       setPopupVisible(true);
+    } finally {
+      setLoadingAction({ isLoading: false, message: '' });
     }
-    // setPopupMessage(true);
     setRefreshTrigger(prevTrigger => !prevTrigger);
   };
 
   const handleDeleteContainer = async (containerId) => {
-    setIsLoading(true);
+    setLoadingAction({ isLoading: true, message: 'Deleting Container' });
     try {
       const response = await fetch(`http://localhost:3000/container/delete/${containerId}`, {
         method: "DELETE",
@@ -300,7 +303,6 @@ const AdminPage = () => {
           Authorization: `Bearer ${token.token}`,
         },
       });
-      setIsLoading(false);
       if (response.ok) {
         setContainers(containers.filter(container => container.id !== containerId));
         setPopupMessage("Container deleted successfully");
@@ -317,13 +319,14 @@ const AdminPage = () => {
       setPopupMessage("Error deleting container");
       setPopupType("error");
       setPopupVisible(true);
+    } finally {
+      setLoadingAction({ isLoading: false, message: '' });
     }
-    // setPopupMessage(true);
     setRefreshTrigger(prevTrigger => !prevTrigger);
   };
 
-  const logoutUser = async (userEmail) => { // Rename parameter to avoid conflict
-    setIsLoading(true);
+  const logoutUser = async (userEmail) => {
+    setLoadingAction({ isLoading: true, message: 'Logging Out User' });
     try {
       const response = await fetch("http://localhost:3000/admin/adminLogout", {
         method: "POST",
@@ -331,9 +334,8 @@ const AdminPage = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token.token}`,
         },
-        body: JSON.stringify({ email: userEmail }), // Use userEmail directly in the payload
+        body: JSON.stringify({ email: userEmail }),
       });
-      setIsLoading(false);
       if (response.ok) {
         setUsers(users.map(user => user.email === userEmail ? { ...user, isLoggedIn: false } : user));
         setPopupMessage("User logged out successfully");
@@ -350,12 +352,14 @@ const AdminPage = () => {
       setPopupMessage("Error logging out user");
       setPopupType("error");
       setPopupVisible(true);
+    } finally {
+      setLoadingAction({ isLoading: false, message: '' });
     }
     setRefreshTrigger(prevTrigger => !prevTrigger);
   };
 
   const changeRole = async (userEmail) => {
-    setIsLoading(true);
+    setLoadingAction({ isLoading: true, message: 'Changing User Role' });
     try {
       const response = await fetch("http://localhost:3000/admin/roleChange", {
         method: "POST",
@@ -365,7 +369,6 @@ const AdminPage = () => {
         },
         body: JSON.stringify({ email: userEmail }),
       });
-      setIsLoading(false);
       if (response.ok) {
         setUsers(users.map(user => user.email === userEmail ? { ...user, role: user.role === 'dev' ? 'user' : 'dev' } : user));
         setPopupMessage("Role changed successfully");
@@ -382,6 +385,8 @@ const AdminPage = () => {
       setPopupMessage("Error changing role for user");
       setPopupType("error");
       setPopupVisible(true);
+    } finally {
+      setLoadingAction({ isLoading: false, message: '' });
     }
     setRefreshTrigger(prevTrigger => !prevTrigger);
   };
@@ -894,13 +899,8 @@ const AdminPage = () => {
       />
 
       {/* Loading Overlay */}
-      {isLoading && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 shadow-xl">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-            <p className="mt-2 text-sm font-medium text-gray-600">Loading...</p>
-          </div>
-        </div>
+      {loadingAction.isLoading && (
+        <LoadingOverlay message={loadingAction.message} />
       )}
     </div>
   );
@@ -941,6 +941,7 @@ const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, use
         <TableHeader title="Role" />
         <TableHeader title="Login Status" />
         <TableHeader title="Containers" />
+        <TableHeader title="Bill Amount" />
         {activeRole === 'dev' && <TableHeader title="Templates" />}
         <TableHeader title="Actions" />
       </tr>
@@ -1009,6 +1010,17 @@ const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, use
               </div>
             </td>
 
+            <td className="px-4 py-4">
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium
+                  ${(user.billingInfo?.amount || 0) > 0 
+                    ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-600/20' 
+                    : 'bg-gray-50 text-gray-600 ring-1 ring-gray-500/10'}`}>
+                  $ {(user.billingInfo?.amount || 0).toFixed(2)}
+                </span>
+              </div>
+            </td>
+
             {activeRole === 'dev' && (
               <td className="px-4 py-4">
                 <div className="flex items-center gap-2">
@@ -1063,19 +1075,20 @@ const UserTable = ({ setPopupVisible, popupMessage, popupType, popupVisible, use
             <>
               <tr className="bg-gray-50/60">
                 <th scope="col" colSpan={activeRole == 'dev' ? 3 : 2} 
-                    className="py-3 pl-12 pr-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Container Name
                 </th>
-                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Template
                 </th>
-                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" colSpan={activeRole == 'dev' ? 2 : 2}
+                   className="px-24 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Resources
                 </th>
-                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -1302,7 +1315,7 @@ const ContainerRow = ({ setPopupVisible, popupMessage, popupType, popupVisible, 
       </span>
     </td>
 
-    <td className="px-4 py-3">
+    <td className="px-4 py-3" colSpan={activeRole == 'dev' ? 2 : 2}>
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500">CPU:</span>
@@ -1370,6 +1383,63 @@ const ContainerRow = ({ setPopupVisible, popupMessage, popupType, popupVisible, 
       />
     </td>
   </tr>
+);
+
+const LoadingOverlay = ({ message }) => (
+  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-all">
+      <div className="flex flex-col items-center gap-6">
+        {/* Loader Animation */}
+        <div className="relative">
+          {/* Outer ring */}
+          <div className="w-20 h-20 border-4 border-gray-200 rounded-full animate-spin"></div>
+          {/* Middle ring */}
+          <div className="absolute top-1 left-1 w-18 h-18 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+          {/* Inner ring */}
+          <div className="absolute top-2 left-2 w-16 h-16 border-4 border-blue-500 border-b-transparent rounded-full animate-spin-reverse"></div>
+          {/* Center dot */}
+          <div className="absolute top-[34px] left-[34px] w-4 h-4 bg-black rounded-full">
+            <div className="absolute top-0 left-0 w-full h-full bg-black rounded-full animate-ping"></div>
+          </div>
+        </div>
+
+        {/* Loading Text */}
+        <div className="text-center space-y-3">
+          <h3 className="text-xl font-semibold text-gray-900">
+            {message}
+          </h3>
+          <p className="text-sm text-gray-500">Please wait while we complete your request</p>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 w-full animate-progress"></div>
+        </div>
+      </div>
+    </div>
+
+    <style jsx>{`
+      @keyframes spin-reverse {
+        from {
+          transform: rotate(360deg);
+        }
+        to {
+          transform: rotate(0deg);
+        }
+      }
+      @keyframes progress {
+        0% { transform: translateX(-100%); }
+        50% { transform: translateX(0); }
+        100% { transform: translateX(100%); }
+      }
+      .animate-spin-reverse {
+        animation: spin-reverse 1s linear infinite;
+      }
+      .animate-progress {
+        animation: progress 2s linear infinite;
+      }
+    `}</style>
+  </div>
 );
 
 export default AdminPage;

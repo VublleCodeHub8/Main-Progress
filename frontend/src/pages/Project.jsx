@@ -6,6 +6,7 @@ import { Link, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { projectAction } from "@/store/main";
+import { ArrowLeft } from "lucide-react";
 
 export default function Project() {
   const [soc, setSoc] = useState(null);
@@ -55,16 +56,23 @@ export default function Project() {
         </div>
       ) : (
         <>
-          <div className="h-[50px] items-center bg-home_background p-2 justify-between pr-8 pl-6 pb-4 font-semibold text-lg flex">
-            <Link to={"/"}>
-              <svg height="35" width="220" xmlns="http://www.w3.org/2000/svg">
-                <text y="34" fill="darkblue" stroke="darkblue" font-size="40">
-                  Terminus
-                </text>
-              </svg>
+          <div className="h-[50px] bg-gray-900 flex items-center justify-between px-6 shadow-sm">
+            <Link to="/" className="flex items-center">
+              <span className="text-xl font-bold text-white tracking-wide">
+                TERMINUS
+              </span>
             </Link>
-            <Link to={"/"} className="hover:text-blue-500">
-              Back To Home
+            <Link 
+              to="/" 
+              className="group flex items-center gap-2 px-4 py-1.5 rounded-lg
+                        border border-gray-700 hover:border-gray-600
+                        text-gray-300 hover:text-white 
+                        transition-all duration-200 bg-gray-800/50
+                        hover:bg-gray-800"
+            >
+              <ArrowLeft className="w-4 h-4 transition-transform duration-200 
+                           group-hover:-translate-x-1" />
+              <span className="text-sm font-medium">Back to Dashboard</span>
             </Link>
           </div>
           <div
