@@ -2,11 +2,11 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import Files from "./Files";
 import { useDispatch, useSelector } from "react-redux";
 import { filesAction } from "@/store/main";
-import { 
-    FaChevronLeft, 
-    FaChevronRight, 
-    FaFolder, 
-    FaSync, 
+import {
+    FaChevronLeft,
+    FaChevronRight,
+    FaFolder,
+    FaSync,
     FaSearch,
     FaPlus,
     FaEllipsisV,
@@ -19,12 +19,12 @@ import {
 // Add this utility function outside the component
 const searchInFileTree = (tree, searchTerm, filters) => {
     if (!tree || !searchTerm) return tree;
-    
+
     const search = filters?.caseSensitive ? searchTerm : searchTerm.toLowerCase();
-    
+
     const matchesSearch = (name) => {
         const itemName = filters?.caseSensitive ? name : name.toLowerCase();
-        
+
         if (filters?.regex) {
             try {
                 const regex = new RegExp(search);
@@ -33,12 +33,12 @@ const searchInFileTree = (tree, searchTerm, filters) => {
                 return false;
             }
         }
-        
+
         if (filters?.wholeWord) {
             const words = itemName.split(/[\s-_./]+/);
             return words.some(word => word === search);
         }
-        
+
         return itemName.includes(search);
     };
 
@@ -48,20 +48,20 @@ const searchInFileTree = (tree, searchTerm, filters) => {
         return items.reduce((filtered, item) => {
             // Create a copy of the current item
             const newItem = { ...item };
-            
+
             // Check if the current item matches the search
             const nameMatches = matchesSearch(item.name);
-            
+
             // If it has children, recursively filter them
             if (item.children) {
                 newItem.children = filterTree(item.children);
             }
-            
+
             // Include the item if it matches or has matching children
             if (nameMatches || (newItem.children && newItem.children.length > 0)) {
                 filtered.push(newItem);
             }
-            
+
             return filtered;
         }, []);
     };
@@ -79,6 +79,8 @@ export default function FileSystem({ socket }) {
     const [error, setError] = useState(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [searchFilters, setSearchFilters] = useState({});
+    const [showNewFileDialog, setShowNewFileDialog] = useState(false);
+    const [newFileName, setNewFileName] = useState('');
 
     // Refs
     const optionsRef = useRef(null);
@@ -125,13 +127,13 @@ export default function FileSystem({ socket }) {
             setIsRefreshing(true);
 
             const res = await fetch(`http://localhost:${port}/project/files`);
-            
+
             if (!res.ok) {
                 throw new Error(`Failed to fetch files: ${res.statusText}`);
             }
 
             const data = await res.json();
-            
+
             if (!data || typeof data !== 'object') {
                 throw new Error("Invalid file tree data received");
             }
@@ -142,7 +144,7 @@ export default function FileSystem({ socket }) {
             }
         } catch (error) {
             console.error("File tree fetch error:", error);
-            
+
             if (retryCount < 3 && mountedRef.current) {
                 setTimeout(() => getFileTree(retryCount + 1), 1000 * (retryCount + 1));
                 setError(`Retrying... (${retryCount + 1}/3)`);
@@ -210,7 +212,7 @@ export default function FileSystem({ socket }) {
     // Update the Files component rendering to use the filtered tree
     const getFilteredTree = useCallback(() => {
         if (!fileTree || !searchTerm) return fileTree;
-        
+
         const filteredTree = searchInFileTree(fileTree, searchTerm, searchFilters);
         return filteredTree;
     }, [fileTree, searchTerm, searchFilters]);
@@ -235,7 +237,7 @@ export default function FileSystem({ socket }) {
 
             const traverse = (items) => {
                 if (!Array.isArray(items)) return;
-                
+
                 items.forEach(item => {
                     if (item.children === null) {
                         files++;
@@ -291,6 +293,42 @@ export default function FileSystem({ socket }) {
         </div>
     );
 
+    async function handleNewFile(filePath) {
+        try {
+            // Validate input
+            if (!filePath) {
+                throw new Error('File path is required');
+            }
+
+            // Clean up path if needed (remove leading slashes, etc.)
+            const cleanPath = filePath.replace(/^\/+/, '');
+
+            // Send request to create the file
+            const response = await fetch(`http://localhost:${port}/project/file/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ filePath: cleanPath }),
+            });
+
+            // Parse response
+            const data = await response.json();
+
+            // Handle errors
+            if (!response.ok) {
+                console.error('Failed to create file:', data.error);
+                throw new Error(data.error || 'Failed to create file');
+            }
+
+            console.log('File created successfully:', data);
+            return data;
+        } catch (error) {
+            console.error('Error in handleNewFile:', error);
+            throw error;
+        }
+    }
+
     return (
         <div className="h-full flex">
             {/* Collapsed Sidebar */}
@@ -318,11 +356,10 @@ export default function FileSystem({ socket }) {
                         <button
                             onClick={handleRefresh}
                             disabled={isRefreshing}
-                            className={`p-1.5 rounded transition-colors ${
-                                isRefreshing 
-                                    ? 'text-zinc-600' 
-                                    : 'text-zinc-400 hover:text-white hover:bg-zinc-700'
-                            }`}
+                            className={`p-1.5 rounded transition-colors ${isRefreshing
+                                ? 'text-zinc-600'
+                                : 'text-zinc-400 hover:text-white hover:bg-zinc-700'
+                                }`}
                             title={isRefreshing ? "Refreshing..." : "Refresh"}
                         >
                             <FaSync size={14} className={isRefreshing ? 'animate-spin' : ''} />
@@ -371,7 +408,9 @@ export default function FileSystem({ socket }) {
                         </button>
                         {showOptions && (
                             <div className="absolute mt-8 bg-zinc-800 rounded shadow-lg border border-zinc-700 z-10">
-                                <button className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-700">
+                                <button
+                                    onClick={() => setShowNewFileDialog(true)}
+                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-700">
                                     <FaFileMedical size={12} />
                                     New File
                                 </button>
@@ -391,6 +430,65 @@ export default function FileSystem({ socket }) {
                     </div>
                 </div>
 
+                {/* New File Dialog */}
+                {showNewFileDialog && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                        <div className="bg-zinc-800 rounded-md shadow-lg border border-zinc-700 w-80">
+                            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-700">
+                                <h3 className="text-sm font-medium">Create New File</h3>
+                                <button
+                                    onClick={() => setShowNewFileDialog(false)}
+                                    className="text-zinc-400 hover:text-white"
+                                >
+                                    <FaTimes size={14} />
+                                </button>
+                            </div>
+                            <div className="p-4">
+                                <form onSubmit={(e) => {
+                                    e.preventDefault();
+                                    const filePath = newFileName.trim();
+                                    if (filePath) {
+                                        handleNewFile(filePath);
+                                        setNewFileName('');
+                                        setShowNewFileDialog(false);
+                                        setShowOptions(false);
+                                    }
+                                }}>
+                                    <div className="mb-4">
+                                        <label className="block text-xs text-zinc-400 mb-1">File Name</label>
+                                        <input
+                                            type="text"
+                                            value={newFileName}
+                                            onChange={(e) => setNewFileName(e.target.value)}
+                                            placeholder="example.js"
+                                            className="w-full px-3 py-2 bg-zinc-900 border border-zinc-700 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                            autoFocus
+                                        />
+                                    </div>
+                                    <div className="flex justify-end gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setNewFileName('');
+                                                setShowNewFileDialog(false);
+                                            }}
+                                            className="px-3 py-1.5 text-xs bg-zinc-700 hover:bg-zinc-600 rounded"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-500 rounded"
+                                        >
+                                            Create
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* File Tree */}
                 <div className="flex-1 overflow-y-auto">
                     {isLoading ? (
@@ -402,8 +500,8 @@ export default function FileSystem({ socket }) {
                     ) : fileTree ? (
                         <>
                             <div className="py-2">
-                                <Files 
-                                    tree={getFilteredTree()} 
+                                <Files
+                                    tree={getFilteredTree()}
                                     searchTerm={searchTerm}
                                 />
                             </div>

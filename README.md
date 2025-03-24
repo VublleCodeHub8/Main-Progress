@@ -91,3 +91,14 @@ The backend server will run on `http://localhost:3000`
 
 ### Frontend (.env)
 
+## Docker Backend File Structure
+
+- public -> dir
+- user -> dir
+- util -> dir
+  - project.js
+- Dockerfile
+- index.js
+- package-lock.json
+- package.json
+   
