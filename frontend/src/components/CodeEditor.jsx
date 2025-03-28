@@ -27,6 +27,7 @@ import "ace-builds/src-noconflict/mode-markdown";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/mode-html";
 import "ace-builds/src-noconflict/mode-css";
+import "ace-builds/src-noconflict/mode-text";
 
 // Import additional themes
 import "ace-builds/src-noconflict/theme-monokai";
@@ -73,6 +74,7 @@ const extentionMapping = {
     ".html": "html",
     ".css": "css",
     ".txt": "text",
+    ".hpp": "c_cpp",
 };
 
 const getFileIcon = (extension) => {
@@ -87,6 +89,7 @@ const getFileIcon = (extension) => {
         ".json": "📦",
         ".md": "📝",
         ".txt": "📄",
+        ".hpp": "⚡",
     };
     return iconMap[extension] || "📄";
 };
@@ -322,7 +325,7 @@ export default function CodeEditor({ socket }) {
                             enableLiveAutocompletion: true,
                             enableSnippets: true,
                             showLineNumbers: true,
-                            tabSize: 2,
+                            tabSize: 4,
                             showPrintMargin: false,
                             showGutter: true,
                             highlightActiveLine: true,

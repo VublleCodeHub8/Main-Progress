@@ -80,7 +80,9 @@ export default function FileSystem({ socket }) {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [searchFilters, setSearchFilters] = useState({});
     const [showNewFileDialog, setShowNewFileDialog] = useState(false);
+    const [showNewFolderDialog, setShowNewFolderDialog] = useState(false);
     const [newFileName, setNewFileName] = useState('');
+    const [newFolderName, setNewFolderName] = useState('');
 
     // Refs
     const optionsRef = useRef(null);
@@ -89,7 +91,7 @@ export default function FileSystem({ socket }) {
 
     // Redux
     const dispatch = useDispatch();
-    const port = useSelector((state) => state.project.port);
+    const port = useSelector((state) => state.project.port) || 4000;
 
     // Close options menu when clicking outside
     useEffect(() => {
@@ -329,6 +331,162 @@ export default function FileSystem({ socket }) {
         }
     }
 
+    const handleNewFolder = async (folderPath) => {
+        try {
+            if (!folderPath) {
+                throw new Error('Folder path is required');
+            }
+
+            // Clean up path if needed (remove leading slashes, etc.)
+            const cleanPath = folderPath.replace(/^\/+/, '');
+
+            // Send request to create the folder
+            const response = await fetch(`http://localhost:${port}/project/folder/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ folderPath: cleanPath }),
+            });
+
+            // Parse response
+            const data = await response.json();
+
+            // Handle errors
+            if (!response.ok) {
+                console.error('Failed to create folder:', data.error);
+                throw new Error(data.error || 'Failed to create folder');
+            }
+
+            console.log('Folder created successfully:', data);
+            return data;
+        } catch (error) {
+            console.error('Error in handleNewFolder:', error);
+            throw error;
+        }
+    }
+
+    const handleDeleteFile = async (filePath) => {
+        console.log('Received file delete request:', { filePath });
+            
+        try {
+            if (!filePath) {
+                throw new Error('File path is required');
+            }
+
+            // Clean up path - remove leading slashes and ../user/ prefix
+            const cleanPath = filePath.replace(/^\/+/, '').replace(/^\.\.\/user\//, '');
+
+            console.log('Sending file delete request:', { filePath, cleanPath });
+
+            // Send request to delete the file
+            const response = await fetch(`http://localhost:${port}/project/file/delete`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ filePath: cleanPath }),
+            });
+
+            // Parse response
+            const data = await response.json();
+
+            // Handle errors
+            if (!response.ok) {
+                console.error('Failed to delete file:', data.error);
+                throw new Error(data.error || 'Failed to delete file');
+            }
+
+            console.log('File deleted successfully:', data);
+            // Refresh the file tree after successful deletion
+            handleRefresh();
+            return data;
+        } catch (error) {
+            console.error('Error in handleDeleteFile:', error);
+            throw error;
+        }
+    }
+
+    const handleDeleteFolder = async (folderPath) => {
+        try {
+            if (!folderPath) {
+                throw new Error('Folder path is required');
+            }
+
+            // Clean up path - remove leading slashes and ../user/ prefix
+            const cleanPath = folderPath.replace(/^\/+/, '').replace(/^\.\.\/user\//, '');
+
+            console.log('Sending folder delete request:', { folderPath, cleanPath });
+
+            // Send request to delete the folder
+            const response = await fetch(`http://localhost:${port}/project/folder/delete`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ folderPath: cleanPath }),
+            });
+
+            // Parse response
+            const data = await response.json();
+            console.log(data);
+            // Handle errors
+            if (!response.ok) {
+                console.error('Failed to delete folder:', data.error);
+                throw new Error(data.error || 'Failed to delete folder');
+            }
+
+            console.log('Folder deleted successfully:', data);
+            // Refresh the file tree after successful deletion
+            handleRefresh();
+            return data;
+        } catch (error) {
+            console.error('Error in handleDeleteFolder:', error);
+            throw error;
+        }
+    }
+
+    const handleRenameFile = async (oldPath, newPath) => {
+        try {
+            if (!oldPath || !newPath) {
+                throw new Error('Both old and new file paths are required');
+            }
+
+            // Clean up paths if needed (remove leading slashes, etc.)
+            const cleanOldPath = oldPath.replace(/^\/+/, '');
+            const cleanNewPath = newPath.replace(/^\/+/, '');
+
+            // Send request to rename the file
+            const response = await fetch(`http://localhost:${port}/project/file/rename`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    oldPath: cleanOldPath,
+                    newPath: cleanNewPath 
+                }),
+            });
+
+            // Parse response
+            const data = await response.json();
+
+            // Handle errors
+            if (!response.ok) {
+                console.error('Failed to rename file:', data.error);
+                throw new Error(data.error || 'Failed to rename file');
+            }
+
+            console.log('File renamed successfully:', data);
+            // Refresh the file tree after successful rename
+            handleRefresh();
+            return data;
+        } catch (error) {
+            console.error('Error in handleRenameFile:', error);
+            throw error;
+        }
+    }
+
     return (
         <div className="h-full flex">
             {/* Collapsed Sidebar */}
@@ -414,7 +572,9 @@ export default function FileSystem({ socket }) {
                                     <FaFileMedical size={12} />
                                     New File
                                 </button>
-                                <button className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-700">
+                                <button 
+                                    onClick={() => setShowNewFolderDialog(true)}
+                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-700">
                                     <FaFolderPlus size={12} />
                                     New Folder
                                 </button>
@@ -489,35 +649,91 @@ export default function FileSystem({ socket }) {
                     </div>
                 )}
 
+                {/* New Folder Dialog */}
+                {showNewFolderDialog && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                        <div className="bg-zinc-800 rounded-md shadow-lg border border-zinc-700 w-80">
+                            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-700">
+                                <h3 className="text-sm font-medium">Create New Folder</h3>
+                                <button
+                                    onClick={() => setShowNewFolderDialog(false)}
+                                    className="text-zinc-400 hover:text-white"
+                                >
+                                    <FaTimes size={14} />
+                                </button>
+                            </div>
+                            <div className="p-4">
+                                <form onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    const folderPath = newFolderName.trim();
+                                    if (folderPath) {
+                                        try {
+                                            await handleNewFolder(folderPath);
+                                            setNewFolderName('');
+                                            setShowNewFolderDialog(false);
+                                            setShowOptions(false);
+                                            // Refresh the file tree
+                                            handleRefresh();
+                                        } catch (error) {
+                                            // You might want to show this error to the user in a more user-friendly way
+                                            console.error('Failed to create folder:', error);
+                                        }
+                                    }
+                                }}>
+                                    <div className="mb-4">
+                                        <label className="block text-xs text-zinc-400 mb-1">Folder Name</label>
+                                        <input
+                                            type="text"
+                                            value={newFolderName}
+                                            onChange={(e) => setNewFolderName(e.target.value)}
+                                            placeholder="my-folder"
+                                            className="w-full px-3 py-2 bg-zinc-900 border border-zinc-700 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                            autoFocus
+                                        />
+                                    </div>
+                                    <div className="flex justify-end gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setNewFolderName('');
+                                                setShowNewFolderDialog(false);
+                                            }}
+                                            className="px-3 py-1.5 text-xs bg-zinc-700 hover:bg-zinc-600 rounded"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-500 rounded"
+                                        >
+                                            Create
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* File Tree */}
                 <div className="flex-1 overflow-y-auto">
                     {isLoading ? (
                         <div className="flex items-center justify-center h-full">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                            <span className="text-zinc-500">Loading...</span>
                         </div>
                     ) : error ? (
-                        <ErrorMessage message={error} onRetry={() => getFileTree()} />
-                    ) : fileTree ? (
-                        <>
-                            <div className="py-2">
-                                <Files
-                                    tree={getFilteredTree()}
-                                    searchTerm={searchTerm}
-                                />
-                            </div>
-                            {searchTerm && searchResults.total === 0 && (
-                                <div className="flex flex-col items-center justify-center py-8 text-zinc-500">
-                                    <FaSearch size={24} className="mb-2 opacity-50" />
-                                    <p className="text-sm">No matching files found</p>
-                                    <p className="text-xs mt-1">Try adjusting your search terms</p>
-                                </div>
-                            )}
-                        </>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-full text-zinc-500">
-                            <FaFolder size={48} className="mb-2 opacity-50" />
-                            <p className="text-sm">No files found</p>
+                        <div className="flex items-center justify-center h-full text-red-500">
+                            <FaExclamationTriangle className="mr-2" />
+                            {error}
                         </div>
+                    ) : (
+                        <Files 
+                            tree={getFilteredTree()} 
+                            searchTerm={searchTerm}
+                            onDeleteFile={handleDeleteFile}
+                            onDeleteFolder={handleDeleteFolder}
+                            onRenameFile={handleRenameFile}
+                        />
                     )}
                 </div>
 

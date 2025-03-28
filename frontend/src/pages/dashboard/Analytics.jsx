@@ -169,7 +169,7 @@ function Analytics() {
   // console.log(containerData);
   if (loading) {
     return (
-        <div className="w-full h-screen flex items-center justify-center bg-white/80">
+        <div className="w-full h-screen flex items-center justify-center bg-white/90">
             <Loader 
                 title="Loading Analytics" 
                 description="Fetching your container usage and billing data..."

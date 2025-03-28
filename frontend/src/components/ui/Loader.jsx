@@ -2,7 +2,7 @@ import React from 'react';
 
 const Loader = ({ title = "Loading", description = "Please wait while we fetch the data" }) => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b ">
       <div className="text-center p-8 rounded-xl bg-white shadow-2xl transform hover:scale-105 transition-all duration-500">
         <div className="flex flex-col items-center gap-6">
           {/* Enhanced Loader Animation */}

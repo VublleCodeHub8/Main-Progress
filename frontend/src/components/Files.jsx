@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { filesAction } from "@/store/main";
 import { 
@@ -13,7 +13,10 @@ import {
     FaCode,
     FaFile,
     FaMarkdown,
-    FaDatabase
+    FaDatabase,
+    FaTrash,
+    FaTimes,
+    FaPencilAlt
 } from "react-icons/fa";
 
 const getFileIcon = (fileName) => {
@@ -30,16 +33,22 @@ const getFileIcon = (fileName) => {
         'json': <FaDatabase {...iconProps} className="text-yellow-500" />,
         'md': <FaMarkdown {...iconProps} className="text-white" />,
         'cpp': <FaCode {...iconProps} className="text-blue-400" />,
-        'c': <FaCode {...iconProps} className="text-blue-300" />
+        'c': <FaCode {...iconProps} className="text-blue-300" />,
+        'hpp': <FaCode {...iconProps} className="text-blue-400" />,
     };
 
     return iconMap[extension] || <FaFile {...iconProps} className="text-gray-400" />;
 };
 
-const Files = memo(({ tree, searchTerm = "" }) => {
+const Files = memo(({ tree, searchTerm = "", onDeleteFile, onDeleteFolder, onRenameFile }) => {
     const dispatch = useDispatch();
     const openedFiles = useSelector((state) => state.files.opened);
     const selectedFile = useSelector((state) => state.files.selected);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
+    const [showRenameDialog, setShowRenameDialog] = useState(false);
+    const [fileToRename, setFileToRename] = useState(null);
+    const [newFileName, setNewFileName] = useState('');
 
     const handleFolderClick = (file, isOpen) => {
         if (isOpen) {
@@ -51,6 +60,66 @@ const Files = memo(({ tree, searchTerm = "" }) => {
 
     const handleFileClick = (file) => {
         dispatch(filesAction.setSelected(file));
+    };
+
+    const handleDeleteClick = (e, item) => {
+        e.stopPropagation(); // Prevent file/folder selection
+        setItemToDelete(item);
+        setShowDeleteConfirm(true);
+    };
+
+    const handleRenameClick = (e, file) => {
+        e.stopPropagation(); // Prevent file selection
+        setFileToRename(file);
+        setNewFileName(file.name);
+        setShowRenameDialog(true);
+    };
+
+    const confirmDelete = async () => {
+        try {
+            if (itemToDelete.children === null) {
+                // It's a file
+                await onDeleteFile(itemToDelete.path);
+                // If the deleted file was selected, clear selection
+                if (selectedFile?.path === itemToDelete.path) {
+                    dispatch(filesAction.setSelected(null));
+                }
+            } else {
+                // It's a folder
+                console.log('Attempting to delete folder:', {
+                    path: itemToDelete.path,
+                    name: itemToDelete.name,
+                    item: itemToDelete
+                });
+                await onDeleteFolder(itemToDelete.path);
+                // Remove from opened folders if it was open
+                if (openedFiles.includes(itemToDelete.path)) {
+                    dispatch(filesAction.removeOpened(itemToDelete.path));
+                }
+            }
+            setShowDeleteConfirm(false);
+            setItemToDelete(null);
+        } catch (error) {
+            console.error('Failed to delete item:', error);
+            // You might want to show an error message to the user
+        }
+    };
+
+    const confirmRename = async () => {
+        try {
+            const newPath = fileToRename.path.replace(fileToRename.name, newFileName);
+            await onRenameFile(fileToRename.path, newPath);
+            setShowRenameDialog(false);
+            setFileToRename(null);
+            setNewFileName('');
+            // If the renamed file was selected, update selection
+            if (selectedFile?.path === fileToRename.path) {
+                dispatch(filesAction.setSelected({ ...selectedFile, path: newPath, name: newFileName }));
+            }
+        } catch (error) {
+            console.error('Failed to rename file:', error);
+            // You might want to show an error message to the user
+        }
     };
 
     const FileItem = ({ file, isOpen, level }) => {
@@ -68,7 +137,7 @@ const Files = memo(({ tree, searchTerm = "" }) => {
                 <div
                     onClick={() => isFile ? handleFileClick(file) : handleFolderClick(file, isOpen)}
                     style={{ paddingLeft }}
-                    className={`flex items-center py-1 px-2 cursor-pointer text-sm
+                    className={`flex items-center py-1 px-2 cursor-pointer text-sm justify-between
                              ${isSelected ? 'bg-blue-600' : 'hover:bg-zinc-700'}
                              transition-colors duration-100 group-hover:bg-opacity-50`}
                 >
@@ -95,13 +164,37 @@ const Files = memo(({ tree, searchTerm = "" }) => {
                             {file.name}
                         </span>
                     </div>
+                    <div className="opacity-0 group-hover:opacity-100 flex items-center gap-2">
+                        {isFile && (
+                            <button
+                                onClick={(e) => handleRenameClick(e, file)}
+                                className="text-gray-400 hover:text-blue-500 transition-all duration-200"
+                                title="Rename file"
+                            >
+                                <FaPencilAlt size={12} />
+                            </button>
+                        )}
+                        <button
+                            onClick={(e) => handleDeleteClick(e, file)}
+                            className="text-gray-400 hover:text-red-500 transition-all duration-200"
+                            title={`Delete ${isFile ? 'file' : 'folder'}`}
+                        >
+                            <FaTrash size={12} />
+                        </button>
+                    </div>
                 </div>
                 
                 {/* Render children if folder is open */}
-                {!isFile && isOpen && (
-                    <div className="relative">
-                        <div className="absolute left-[19px] top-0 bottom-0 w-px bg-zinc-700 opacity-50" />
-                        <Files tree={file.children} searchTerm={searchTerm} />
+                {!isFile && isOpen && file.children && (
+                    <div>
+                        {file.children.map((child) => (
+                            <FileItem
+                                key={child.path}
+                                file={child}
+                                isOpen={openedFiles.includes(child.path)}
+                                level={level + 1}
+                            />
+                        ))}
                     </div>
                 )}
             </div>
@@ -109,16 +202,119 @@ const Files = memo(({ tree, searchTerm = "" }) => {
     };
 
     return (
-        <div className="flex flex-col">
-            {tree.map((file) => (
-                <FileItem
-                    key={file.path}
-                    file={file}
-                    isOpen={file.children !== null && openedFiles.includes(file.path)}
-                    level={file.level}
-                />
-            ))}
-        </div>
+        <>
+            <div className="flex flex-col">
+                {tree.map((file) => (
+                    <FileItem
+                        key={file.path}
+                        file={file}
+                        isOpen={openedFiles.includes(file.path)}
+                        level={0}
+                    />
+                ))}
+            </div>
+
+            {/* Delete Confirmation Dialog */}
+            {showDeleteConfirm && itemToDelete && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-zinc-800 rounded-md shadow-lg border border-zinc-700 w-80">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-700">
+                            <h3 className="text-sm font-medium">Delete {itemToDelete.children === null ? 'File' : 'Folder'}</h3>
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className="text-zinc-400 hover:text-white"
+                            >
+                                <FaTimes size={14} />
+                            </button>
+                        </div>
+                        <div className="p-4">
+                            <p className="text-sm text-zinc-300 mb-4">
+                                Are you sure you want to delete <span className="text-white font-medium">{itemToDelete.name}</span>?
+                                {itemToDelete.children !== null && (
+                                    <span className="block mt-2 text-red-400">
+                                        This will also delete all contents inside the folder. This action cannot be undone.
+                                    </span>
+                                )}
+                                {itemToDelete.children === null && (
+                                    <span className="block mt-2 text-red-400">
+                                        This action cannot be undone.
+                                    </span>
+                                )}
+                            </p>
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    onClick={() => setShowDeleteConfirm(false)}
+                                    className="px-3 py-1.5 text-xs bg-zinc-700 hover:bg-zinc-600 rounded"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmDelete}
+                                    className="px-3 py-1.5 text-xs bg-red-600 hover:bg-red-500 rounded"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Rename Dialog */}
+            {showRenameDialog && fileToRename && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-zinc-800 rounded-md shadow-lg border border-zinc-700 w-80">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-700">
+                            <h3 className="text-sm font-medium">Rename File</h3>
+                            <button
+                                onClick={() => setShowRenameDialog(false)}
+                                className="text-zinc-400 hover:text-white"
+                            >
+                                <FaTimes size={14} />
+                            </button>
+                        </div>
+                        <div className="p-4">
+                            <form onSubmit={(e) => {
+                                e.preventDefault();
+                                if (newFileName.trim() && newFileName !== fileToRename.name) {
+                                    confirmRename();
+                                }
+                            }}>
+                                <div className="mb-4">
+                                    <label className="block text-xs text-zinc-400 mb-1">File Name</label>
+                                    <input
+                                        type="text"
+                                        value={newFileName}
+                                        onChange={(e) => setNewFileName(e.target.value)}
+                                        className="w-full px-3 py-2 bg-zinc-900 border border-zinc-700 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                        autoFocus
+                                    />
+                                </div>
+                                <div className="flex justify-end gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setNewFileName('');
+                                            setShowRenameDialog(false);
+                                        }}
+                                        className="px-3 py-1.5 text-xs bg-zinc-700 hover:bg-zinc-600 rounded"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-500 rounded"
+                                        disabled={!newFileName.trim() || newFileName === fileToRename.name}
+                                    >
+                                        Rename
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 });
 
