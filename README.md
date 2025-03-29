@@ -1,53 +1,87 @@
-# 🌐 Online IDE (Terminas)
+<p align="center">
+  <img src="https://img.shields.io/badge/-%F0%9F%9A%80%20TERMINAS%20IDE-000000?style=for-the-badge&logoColor=white" alt="Terminas Banner" />
+</p>
 
-<div align="center">
+<h1 align="center">🌐 Online IDE (Terminas)</h1>
 
-![Terminas Banner](https://img.shields.io/badge/-%F0%9F%9A%80%20TERMINAS-000000?style=for-the-badge&logoColor=white)
+<p align="center">
+  <em>The next generation cloud development environment</em>
+</p>
 
-> *The next generation cloud development environment*
+<p align="center">
+  <a href="https://nodejs.org/">
+    <img src="https://img.shields.io/badge/Node.js-16+-brightgreen?style=flat-square&logo=node.js" alt="Node.js" />
+  </a>
+  <a href="https://www.docker.com/get-started">
+    <img src="https://img.shields.io/badge/Docker-Required-2496ED?style=flat-square&logo=docker" alt="Docker" />
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="License" />
+  </a>
+  <a href="https://github.com/VublleCodeHub8/Main-Progress/stargazers">
+    <img src="https://img.shields.io/github/stars/VublleCodeHub8/Main-Progress?style=flat-square" alt="Stars" />
+  </a>
+</p>
 
-[![Node.js](https://img.shields.io/badge/Node.js-16%2B-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org/)
-[![Docker](https://img.shields.io/badge/Docker-Required-blue?style=flat-square&logo=docker)](https://www.docker.com/get-started)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+<p align="center">
+  <b>🔥 Code Anywhere</b> &nbsp;•&nbsp;
+  <b>🚀 Deploy Instantly</b> &nbsp;•&nbsp;
+  <b>🤝 Collaborate Seamlessly</b>
+</p>
 
----
+<p align="center">
+  <a href="#-quick-start">Getting Started</a> •
+  <a href="#-features">Features</a> •
+  <a href="docs/">Documentation</a> •
+  <a href="CONTRIBUTING.md">Contributing</a>
+</p>
 
-🔥 **Code Anywhere, Anytime** | 🚀 **Deploy Instantly** | 🤝 **Collaborate Seamlessly**
-
-[Getting Started](#-quick-start) • [Features](#-features) • [Documentation](docs/) • [Contributing](CONTRIBUTING.md)
-
-</div>
+<hr>
 
 ## ⚡ Overview
 
 Terminas is a powerful online IDE that revolutionizes the way developers work with containerized environments. Built with modern technologies, it offers:
 
+<div align="center">
 <table>
 <tr>
-<td width="50%">
+<td align="center" width="50%">
 
 ### 🎯 Key Highlights
 
-- 🔥 Real-time collaboration
-- 🐳 Instant container deployment
-- 🎨 Customizable workspaces
-- 🔒 Secure environment
-- 🚀 One-click deployment
+<p align="left">
+  
+- 🔥 **Real-time collaboration** with zero latency
+- 🐳 **Instant containers** with auto-scaling
+- 🎨 **Custom workspaces** with themes
+- 🔒 **Enterprise security** with SSO
+- 🚀 **One-click deployment** to any cloud
+
+</p>
 
 </td>
-<td width="50%">
+<td align="center" width="50%">
 
 ### 💡 Perfect for
 
-- 👥 Remote development teams
-- 🎓 Educational institutions
-- 🏢 Enterprise development
-- 🔬 Research projects
-- 🌐 Open source contributors
+<p align="left">
+
+- 👥 **Teams**
+  - Real-time collaboration
+  - Shared environments
+- 🎓 **Education**
+  - Virtual classrooms
+  - Assignment tracking
+- 🏢 **Enterprise**
+  - Custom deployment
+  - Advanced security
+
+</p>
 
 </td>
 </tr>
 </table>
+</div>
 
 ## 🚀 Quick Start
 
