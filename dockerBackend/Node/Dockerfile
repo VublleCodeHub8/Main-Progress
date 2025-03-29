@@ -1,14 +1,20 @@
-FROM node
+FROM node:18
+
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-COPY package-lock.json /server/package-lock.json
-COPY package.json /server/package.json
-COPY index.js /server/index.js
+COPY package*.json /server/
+
+RUN cd /server && npm install
+
+COPY index.js /server/
 COPY /util /server/util
 COPY /public /server/public
 COPY /user /user
 
-RUN cd /server && npm install
-
-ENTRYPOINT ["node","/server/index.js"]
+ENTRYPOINT ["node", "/server/index.js"]
