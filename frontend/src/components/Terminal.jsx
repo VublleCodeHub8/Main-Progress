@@ -15,7 +15,7 @@ import {
     FaCog
 } from "react-icons/fa";
 
-export default function Terminal({ socket }) {
+export default function Terminal({ socket, onHeightChange }) {
   const terminalRef = useRef();
     const xterminalRef = useRef(null);
     const fitAddonRef = useRef(null);
@@ -238,17 +238,31 @@ export default function Terminal({ socket }) {
                         <button
                             onClick={() => {
                                 setIsCollapsed(!isCollapsed);
+                                onHeightChange(isCollapsed ? '320px' : '40px');
                                 if (isCollapsed) {
                                     setTimeout(() => fitAddonRef.current?.fit(), 300);
                                 }
                             }}
-                            className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-700 rounded"
+                            className={`
+                                flex items-center gap-2 px-3 py-1.5 rounded-lg
+                                transition-all duration-200 ease-in-out
+                                ${isCollapsed 
+                                    ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20 hover:text-green-300' 
+                                    : 'bg-zinc-700/50 text-zinc-400 hover:bg-zinc-700 hover:text-white'
+                                }
+                            `}
                             title={isCollapsed ? "Expand Terminal" : "Collapse Terminal"}
                         >
-                            {isCollapsed ? <FaChevronUp size={14} /> : <FaChevronDown size={14} />}
-          </button>
-        </div>
-      </div>
+                            <span className="text-xs font-medium hidden sm:inline">
+                                {isCollapsed ? "Expand" : "Collapse"}
+                            </span>
+                            {isCollapsed 
+                                ? <FaChevronUp size={14} className="transform transition-transform duration-200 group-hover:translate-y-[-2px]" />
+                                : <FaChevronDown size={14} className="transform transition-transform duration-200 group-hover:translate-y-[2px]" />
+                            }
+                        </button>
+                    </div>
+                </div>
 
                 {showSettings && (
                     <div className="w-full h-[300px] bg-zinc-900 border-t border-zinc-700">
@@ -386,25 +400,23 @@ export default function Terminal({ socket }) {
                 {/* Terminal Container */}
                 <div
                     className={`w-full overflow-hidden transition-all duration-300 ease-in-out
-                        ${isCollapsed ? 'h-0' : isFullscreen ? 'h-screen' : 'h-[300px]'}`}
+                        ${isCollapsed ? 'opacity-50' : 'opacity-100'}`}
                     style={{
-                        opacity: isCollapsed ? 0 : 1,
-                        visibility: isCollapsed ? 'hidden' : 'visible',
+                        visibility: 'visible',
+                        transform: isCollapsed ? 'translateY(0)' : 'translateY(0)'
                     }}
                 >
-                    <div
-        ref={terminalRef}
-                        className="w-full h-full bg-black"
-                        style={{
-                            padding: '8px',
-                        }}
-                    />
+                    <div ref={terminalRef} className="terminal-container" />
                 </div>
 
-                {/* Optional: Collapsed State Indicator */}
+                {/* Collapsed State Indicator */}
                 {isCollapsed && !isFullscreen && (
-                    <div className="h-1 bg-zinc-700 w-full">
-                        <div className="h-full w-16 mx-auto bg-zinc-600 rounded-full" />
+                    <div className="h-1 bg-zinc-700 w-full cursor-pointer" onClick={() => {
+                        setIsCollapsed(false);
+                        onHeightChange('320px');
+                        setTimeout(() => fitAddonRef.current?.fit(), 300);
+                    }}>
+                        <div className="h-full w-16 mx-auto bg-zinc-600 rounded-full hover:bg-zinc-500 transition-colors" />
                     </div>
                 )}
     </div>

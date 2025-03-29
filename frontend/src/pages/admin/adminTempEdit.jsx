@@ -85,6 +85,18 @@ const AdminTempEdit = () => {
         setPopupType("error");
         setPopupVisible(true);
       }
+      // Send notification for template creation
+      await fetch("http://localhost:3000/dev/notification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.token}`,
+        },
+        body: JSON.stringify({
+          title: "New Template Created",
+          message: `A new template "${newTemplate.name}" has been created`
+        }),
+      });
       setPopupMessage("Template created successfully");
       setPopupType("success");
       setPopupVisible(true);
@@ -117,6 +129,18 @@ const AdminTempEdit = () => {
         setPopupType("error");
         setPopupVisible(true);
       }
+      // Send notification for template update
+      await fetch("http://localhost:3000/dev/notification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.token}`,
+        },
+        body: JSON.stringify({
+          title: "Template Updated",
+          message: `Template "${updateTemplate.name}" has been updated`
+        }),
+      });
       setPopupMessage("Template updated successfully");
       setPopupType("success");
       setPopupVisible(true);

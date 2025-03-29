@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from 'react-router-dom';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Power, Edit, Search, Sliders, Trash, Shield, Box, CheckCircle, Code, Activity } from "lucide-react";
+import { Power, Edit, Search, Sliders, Trash, Shield, Box, CheckCircle, Code, Activity, Bell, Bug } from "lucide-react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import Popup from '@/components/Popup';
 import { fetchUserData, updateUserData, setEditMode } from "../../store/userSlice";
@@ -199,6 +199,24 @@ const DevPage = () => {
             >
               <Edit className="h-4 w-4" />
               Editor
+            </Link>
+            <Link
+              to="/dev/bugreports"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 
+                       bg-white border border-gray-300 rounded-lg hover:bg-gray-50 
+                       transition-all duration-200 shadow-sm hover:shadow"
+            >
+              <Bug className="h-4 w-4" />
+              Bug Reports
+            </Link>
+            <Link
+              to="/dev/notification"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 
+                       bg-white border border-gray-300 rounded-lg hover:bg-gray-50 
+                       transition-all duration-200 shadow-sm hover:shadow"
+            >
+              <Bell className="h-4 w-4" />
+              Notifications
             </Link>
             {token.role === 'admin' && (
               <Link

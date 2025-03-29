@@ -10,6 +10,7 @@ import { ArrowLeft } from "lucide-react";
 
 export default function Project() {
   const [soc, setSoc] = useState(null);
+  const [terminalHeight, setTerminalHeight] = useState('330px');
   const params = useParams();
   const token = useSelector((state) => state.misc.token);
   const dispatch = useDispatch();
@@ -45,26 +46,51 @@ export default function Project() {
   }, []);
 
   return (
-    <div className="w-screen h-screen">
+    <div className="w-screen h-screen overflow-hidden bg-gray-900">
       {soc === null ? (
-        <div className="w-full h-full flex justify-center items-start">
-          Loading ...
+        <div className="w-full h-full flex justify-center items-center bg-gradient-to-b from-gray-900 to-gray-800">
+          <div className="flex flex-col items-center gap-6 p-8 rounded-2xl bg-gray-800/50 backdrop-blur-sm border border-gray-700/50">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-600 border-t-blue-500"></div>
+              <div className="absolute inset-0 animate-pulse rounded-full h-12 w-12 border-4 border-transparent border-t-blue-400/30"></div>
+            </div>
+            <div className="space-y-2 text-center">
+              <p className="text-lg text-gray-200 font-medium tracking-wide">Loading Project</p>
+              <p className="text-sm text-gray-400">Please wait while we set up your workspace...</p>
+            </div>
+          </div>
         </div>
       ) : soc === false ? (
-        <div className="w-full h-full flex justify-center items-start">
-          Error Fetching Project "{params.projectId}"
+        <div className="w-full h-full flex justify-center items-center bg-gradient-to-b from-gray-900 to-gray-800">
+          <div className="flex flex-col items-center gap-4 p-8 rounded-2xl bg-gray-800/50 backdrop-blur-sm border border-red-500/20">
+            <div className="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center">
+              <svg className="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+            <div className="space-y-2 text-center">
+              <p className="text-xl text-gray-200 font-medium">Error Fetching Project</p>
+              <p className="text-gray-400">"{params.projectId}" could not be loaded</p>
+              <Link 
+                to="/"
+                className="inline-block mt-4 px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm font-medium transition-colors"
+              >
+                Return to Dashboard
+              </Link>
+            </div>
+          </div>
         </div>
       ) : (
         <>
-          <div className="h-[50px] bg-gray-900 flex items-center justify-between px-6 shadow-sm">
+          <div className="h-14 bg-gray-900 flex items-center justify-between px-6 shadow-md border-b border-gray-800">
             <Link to="/" className="flex items-center">
-              <span className="text-xl font-bold text-white tracking-wide">
+              <span className="text-xl font-bold text-white tracking-wide hover:text-gray-200 transition-colors">
                 TERMINUS
               </span>
             </Link>
             <Link 
               to="/" 
-              className="group flex items-center gap-2 px-4 py-1.5 rounded-lg
+              className="group flex items-center gap-2 px-4 py-2 rounded-lg
                         border border-gray-700 hover:border-gray-600
                         text-gray-300 hover:text-white 
                         transition-all duration-200 bg-gray-800/50
@@ -76,21 +102,28 @@ export default function Project() {
             </Link>
           </div>
           <div
-            style={{ height: "calc( 100% - 50px )" }}
-            className="w-full flex"
+            className="h-[calc(100vh-3.5rem)] w-full flex"
           >
-            <div id="our-fileSystem" className="h-full  bg-zinc-800">
+            <div id="our-fileSystem" className="h-full w-64 bg-zinc-800 border-r border-zinc-700 overflow-y-auto">
               <FileSystem socket={soc}></FileSystem>
             </div>
             <div className="flex flex-col flex-grow h-full">
               <div
                 id="our-codeEditor"
-                className="w-full flex-grow overflow-auto "
+                className="w-full flex-grow overflow-auto border-b border-gray-800"
+                style={{ height: `calc(100vh - ${terminalHeight})` }}
               >
                 <CodeEditor socket={soc}></CodeEditor>
               </div>
-              <div id="our-terminal" className="w-full h-fit ">
-                <Terminal socket={soc}></Terminal>
+              <div 
+                id="our-terminal" 
+                className="w-full overflow-hidden transition-all duration-300 ease-in-out bg-zinc-900 border-t border-zinc-700"
+                style={{ height: terminalHeight }}
+              >
+                <Terminal 
+                  socket={soc}
+                  onHeightChange={setTerminalHeight}
+                ></Terminal>
               </div>
             </div>
           </div>

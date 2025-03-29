@@ -196,45 +196,85 @@ export default function CodeEditor({ socket }) {
     };
 
     return (
-        <div className={`flex flex-col h-full ${isDarkMode ? 'bg-zinc-900' : 'bg-gray-50'} ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
+        <div className={`flex flex-col h-full ${isDarkMode ? 'bg-zinc-900' : 'bg-slate-50'} ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
             {/* Editor Header */}
             <div className={`flex items-center justify-between h-10 
-                         ${isDarkMode ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'} 
+                         ${isDarkMode 
+                             ? 'bg-zinc-800 border-zinc-700' 
+                             : 'bg-slate-50 border-slate-200 shadow-sm'} 
                          border-b`}>
                 {/* Tabs */}
-                <div className="flex flex-1 overflow-x-auto">
+                <div className="flex-1 flex items-center overflow-x-auto hide-scrollbar">
                     {openedFiles.map((file) => (
-                        <TabButton 
+                        <div
                             key={file.fullPath}
-                            file={file}
-                            isActive={currFile && currFile.fullPath === file.fullPath}
-                        />
+                            onClick={() => dispatch(filesAction.setSelected(file))}
+                            className={`
+                                flex items-center gap-2 px-3 py-1.5 cursor-pointer
+                                border-r transition-colors duration-150 select-none
+                                ${file.fullPath === currFile?.fullPath
+                                    ? isDarkMode
+                                        ? 'bg-zinc-700 text-white border-zinc-600'
+                                        : 'bg-blue-100 text-blue-800 border-slate-200 font-semibold shadow-sm'
+                                    : isDarkMode
+                                        ? 'hover:bg-zinc-700/50 text-zinc-400 border-zinc-700'
+                                        : 'hover:bg-slate-100 text-slate-700 border-slate-200 hover:text-slate-900'
+                                }
+                            `}
+                        >
+                            <span className="mr-2">{getFileIcon(file.extension)}</span>
+                            <span className="truncate max-w-[150px] font-medium">{file.name}</span>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    dispatch(filesAction.removeSelectedFile(file));
+                                }}
+                                className={`
+                                    p-1 rounded-full opacity-70 hover:opacity-100
+                                    ${isDarkMode 
+                                        ? 'hover:bg-zinc-600' 
+                                        : 'hover:bg-slate-200 text-slate-600 hover:text-slate-900'
+                                    }
+                                `}
+                            >
+                                <FaTimes size={10} />
+                            </button>
+                        </div>
                     ))}
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center px-2 space-x-2">
+                <div className={`
+                    flex items-center gap-2 px-3 border-l
+                    ${isDarkMode ? 'border-zinc-700' : 'border-slate-200'}
+                `}>
                     {/* Zoom Controls */}
                     <div className="flex items-center mr-2 border-r border-zinc-600 pr-2">
                         <button
                             onClick={zoomOut}
-                            className={`p-1.5 rounded transition-colors
-                                    ${isDarkMode 
-                                        ? 'text-zinc-400 hover:text-white hover:bg-zinc-700' 
-                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}
+                            className={`
+                                p-1.5 rounded-lg transition-colors
+                                ${isDarkMode
+                                    ? 'text-zinc-400 hover:text-white hover:bg-zinc-700'
+                                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                                }
+                            `}
                             title="Zoom Out"
                         >
                             <FaSearchMinus size={14} />
                         </button>
-                        <span className={`mx-2 text-xs ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>
+                        <span className={`mx-2 text-xs ${isDarkMode ? 'text-zinc-400' : 'text-slate-600'}`}>
                             {fontSize}px
                         </span>
                         <button
                             onClick={zoomIn}
-                            className={`p-1.5 rounded transition-colors
-                                    ${isDarkMode 
-                                        ? 'text-zinc-400 hover:text-white hover:bg-zinc-700' 
-                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}
+                            className={`
+                                p-1.5 rounded-lg transition-colors
+                                ${isDarkMode
+                                    ? 'text-zinc-400 hover:text-white hover:bg-zinc-700'
+                                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                                }
+                            `}
                             title="Zoom In"
                         >
                             <FaSearchPlus size={14} />
@@ -243,30 +283,39 @@ export default function CodeEditor({ socket }) {
 
                     <button
                         onClick={() => dispatch(filesAction.clearAllSelectedFiles())}
-                        className={`p-1.5 rounded transition-colors
-                                ${isDarkMode 
-                                    ? 'text-zinc-400 hover:text-white hover:bg-zinc-700' 
-                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}
+                        className={`
+                            p-1.5 rounded-lg transition-colors
+                            ${isDarkMode
+                                ? 'text-zinc-400 hover:text-white hover:bg-zinc-700'
+                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                            }
+                        `}
                         title="Close All"
                     >
                         <FaTimes size={14} />
                     </button>
                     <button
                         onClick={cycleTheme}
-                        className={`p-1.5 rounded transition-colors
-                                ${isDarkMode 
-                                    ? 'text-zinc-400 hover:text-white hover:bg-zinc-700' 
-                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}
+                        className={`
+                            p-1.5 rounded-lg transition-colors
+                            ${isDarkMode
+                                ? 'text-zinc-400 hover:text-white hover:bg-zinc-700'
+                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                            }
+                        `}
                         title="Change Theme Variant"
                     >
                         <FaPalette size={14} />
                     </button>
                     <button
                         onClick={toggleTheme}
-                        className={`p-1.5 rounded transition-colors
-                                ${isDarkMode 
-                                    ? 'text-zinc-400 hover:text-white hover:bg-zinc-700' 
-                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}
+                        className={`
+                            p-1.5 rounded-lg transition-colors
+                            ${isDarkMode
+                                ? 'text-zinc-400 hover:text-white hover:bg-zinc-700'
+                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                            }
+                        `}
                         title="Toggle Light/Dark Mode"
                     >
                         {isDarkMode ? <FaSun size={14} /> : <FaMoon size={14} />}

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { fetchUserData, updateUserData, setEditMode } from "../store/userSlice";
 import { User, Box, BarChart, Shield, Code, LogOut } from "lucide-react";
-
+import NotificationBell from "@/components/ui/notificationBell";
 
 const useAuth = () => {
   const token = useSelector((state) => state.misc.token);
@@ -77,7 +77,8 @@ function DashboardLayout() {
 </svg>
           </div>
 
-          <div className="flex items-center pr-20">
+          <div className="flex items-center pr-20 gap-4">
+            <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger className="group flex items-center gap-3 px-3 py-2 
                                     bg-white border border-gray-200 rounded-xl

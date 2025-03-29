@@ -20,6 +20,10 @@ const bugReportSchema = new mongoose.Schema({
     date: {
         type: Date,
         default: Date.now,
+    },
+    seenTo: {
+        type: Boolean,
+        default: false,
     }
 })
 
@@ -58,9 +62,23 @@ async function deleteBugReport(id) {
     }
 }
 
+async function toggleSeenStatus(id) {
+    try {
+        const bugReport = await BugReport.findById(id);
+        if (!bugReport) return false;
+        
+        bugReport.seenTo = !bugReport.seenTo;
+        await bugReport.save();
+        return true;
+    } catch (error) {
+        console.error('Error toggling bug report seen status:', error);
+        return false;
+    }
+}
 
 const BugReport = mongoose.model('BugReport', bugReportSchema);
 
 exports.addBugReport = addBugReport;
 exports.getAllBugReports = getAllBugReports;
 exports.deleteBugReport = deleteBugReport;
+exports.toggleSeenStatus = toggleSeenStatus;

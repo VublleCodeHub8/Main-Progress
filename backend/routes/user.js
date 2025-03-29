@@ -3,7 +3,7 @@ const router = express.Router();
 const { getUserData, addMoreData } = require('../controllers/user');
 const multer = require("multer");
 const { isUser } = require('../middlewares/auth');
-const { addBugReportController, addContactUsController } = require('../controllers/user');
+const { addBugReportController, addContactUsController, getTop5NotificationsController } = require('../controllers/user');
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -24,6 +24,8 @@ const addMoreDataMiddleware = [upload.single('profilePic')];
 router.get('/getuserdata', getUserData);
 router.post('/addbugreport', addBugReportController);
 router.post('/addcontactus', addContactUsController);
+router.get('/topnotification', getTop5NotificationsController);
+
 
 router.put('/addmoredata',
     addMoreDataMiddleware[0], 

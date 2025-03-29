@@ -5,6 +5,7 @@ const { getUserByEmail } = require('../models/user');
 const User = require('../models/user').userModel;
 const { addBugReport } = require('../models/bugReport');
 const { addContactUs } = require('../models/contactUs');
+const { gettop5Notification } = require('../models/notification');
 const storage = multer.memoryStorage();
 
 const upload = multer({
@@ -136,9 +137,25 @@ const addBugReportController = async (req, res) => {
     res.status(200).json({ message: "Bug report added successfully" });
 }
 
+const getTop5NotificationsController = async (req, res) => {
+    try {
+        const notifications = await gettop5Notification();
+        if (!notifications) {
+            return res.status(500).json({ message: "Failed to fetch notifications" });
+        }
+        res.status(200).json({ notifications });
+    } catch (error) {
+        console.error('Error fetching top 5 notifications:', error);
+        res.status(500).json({ message: "Error fetching notifications" });
+    }
+};
+
 module.exports = {
     addMoreData,
     getUserData,
     addBugReportController,
-    addContactUsController
+    addContactUsController,
+    getTop5NotificationsController,
+    upload,
+    getTop5NotificationsController
 };

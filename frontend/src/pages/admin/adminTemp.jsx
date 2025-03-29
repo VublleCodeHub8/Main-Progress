@@ -151,6 +151,11 @@ const AdminTemp = () => {
 
   const deleteTemplate = async (id) => {
     try {
+      const templateData = templates.find(template => template._id === id);
+      if (!templateData) {
+        throw new Error("Template not found");
+      }
+
       const response = await fetch(`http://localhost:3000/dev/deleteTemplate/${id}`, {
         method: "DELETE",
         headers: {
@@ -159,6 +164,18 @@ const AdminTemp = () => {
         },
       });
       if (response.ok) {
+        await fetch("http://localhost:3000/dev/notification", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token.token}`,
+          },
+          body: JSON.stringify({
+            title: "Template Deleted",
+            message: `Template "${templateData.name}" has been deleted by admin`
+          }),
+        });
+
         setTemplates(templates.filter((template) => template._id !== id));
         setPopupMessage("Template deleted successfully");
         setPopupType("success");

@@ -3,9 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from 'react-router-dom';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Power, Edit, Search, Sliders, Trash, Shield, ClipboardList, Layout, AlertTriangle, Activity, MessageCircle, Eye, ScrollText, EyeOff } from "lucide-react";
+import { Power, Edit, Search, Sliders, Trash, Shield, ClipboardList, Layout, AlertTriangle, Activity, MessageCircle, Eye, ScrollText } from "lucide-react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
-import Popup from '@/components/Popup';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
@@ -13,22 +12,18 @@ const BugReports = () => {
     const token = useSelector((state) => state.misc.token);
     const [searchTerm, setSearchTerm] = useState("");
     const [bugReports, setBugReports] = useState([]);
-    const [popupVisible, setPopupVisible] = useState(false);
-    const [popupMessage, setPopupMessage] = useState("");
-    const [popupType, setPopupType] = useState("success");
-    const [refreshTrigger, setRefreshTrigger] = useState(false);
-
 
     useEffect(() => {
         const fetchBugReports = async () => {
             try {
-                const response = await fetch("http://localhost:3000/admin/getAllBugReports", {
+                const response = await fetch("http://localhost:3000/dev/getAllBugReports", {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${token.token}`
                     }
                 });
+                console.log(response.ok);
                 const data = await response.json();
                 setBugReports(data);
             } catch (error) {
@@ -36,7 +31,7 @@ const BugReports = () => {
             }
         };
         fetchBugReports();
-    }, [token, refreshTrigger]);
+    }, [token]);
 
     const bugReportType = {
         labels: ['UI', 'Functionality', 'Performance', 'Security', 'Crash', 'Other'],
@@ -44,12 +39,12 @@ const BugReports = () => {
             {
                 label: 'Number of Reports',
                 data: [
-                    bugReports.filter((bugReport) => bugReport.type === 'ui').length,
-                    bugReports.filter((bugReport) => bugReport.type === 'functional').length,
-                    bugReports.filter((bugReport) => bugReport.type === 'performance').length,
-                    bugReports.filter((bugReport) => bugReport.type === 'security').length,
-                    bugReports.filter((bugReport) => bugReport.type === 'crash').length,
-                    bugReports.filter((bugReport) => bugReport.type === 'other').length
+                    bugReports.filter((bugReport) => bugReport.type === 'ui' && bugReport.seenTo === true).length,
+                    bugReports.filter((bugReport) => bugReport.type === 'functional' && bugReport.seenTo === true).length,
+                    bugReports.filter((bugReport) => bugReport.type === 'performance' && bugReport.seenTo === true).length,
+                    bugReports.filter((bugReport) => bugReport.type === 'security' && bugReport.seenTo === true).length,
+                    bugReports.filter((bugReport) => bugReport.type === 'crash' && bugReport.seenTo === true).length,
+                    bugReports.filter((bugReport) => bugReport.type === 'other' && bugReport.seenTo === true).length
                 ],
                 backgroundColor: [
                     'rgba(54, 162, 235, 0.8)',   // UI - Blue
@@ -76,12 +71,12 @@ const BugReports = () => {
     };
 
     const userBugDistribution = {
-        labels: [...new Set(bugReports.map(report => report.name))],
+        labels: [...new Set(bugReports.filter(report => report.seenTo === true).map(report => report.name))],
         datasets: [
             {
-                label: 'Bugs Reported',
-                data: [...new Set(bugReports.map(report => report.name))].map(name =>
-                    bugReports.filter(report => report.name === name).length
+                label: 'Reviewed Bugs Reported',
+                data: [...new Set(bugReports.filter(report => report.seenTo === true).map(report => report.name))].map(name =>
+                    bugReports.filter(report => report.name === name && report.seenTo === true).length
                 ),
                 backgroundColor: [
                     'rgba(54, 162, 235, 0.85)',   // Blue
@@ -117,46 +112,12 @@ const BugReports = () => {
         ]
     };
 
-    const seenStatusDistribution = {
-        labels: ['Seen', 'Not Seen'],
-        datasets: [
-            {
-                label: 'Report Status',
-                data: [
-                    bugReports.filter(report => report.seenTo === true).length,
-                    bugReports.filter(report => report.seenTo === false).length
-                ],
-                backgroundColor: [
-                    'rgba(34, 197, 94, 0.8)',  // Green for seen
-                    'rgba(156, 163, 175, 0.8)'  // Gray for not seen
-                ],
-                borderColor: [
-                    'rgba(34, 197, 94, 1)',
-                    'rgba(156, 163, 175, 1)'
-                ],
-                borderWidth: 1,
-                borderRadius: 8,
-                hoverOffset: 4,
-                hoverBorderWidth: 2,
-            }
-        ]
-    };
-
     const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: 'top',
-                labels: {
-                    font: {
-                        size: 12,
-                        family: "'Inter', sans-serif"
-                    },
-                    padding: 20,
-                    usePointStyle: true,
-                    pointStyle: 'circle'
-                }
+                display: false
             },
             title: {
                 display: true,
@@ -169,14 +130,16 @@ const BugReports = () => {
                 padding: {
                     top: 10,
                     bottom: 30
-                }
+                },
+                color: '#374151'
             },
             tooltip: {
                 backgroundColor: 'rgba(0, 0, 0, 0.8)',
                 padding: 12,
                 titleFont: {
                     size: 14,
-                    family: "'Inter', sans-serif"
+                    family: "'Inter', sans-serif",
+                    weight: 'bold'
                 },
                 bodyFont: {
                     size: 13,
@@ -196,39 +159,16 @@ const BugReports = () => {
                 beginAtZero: true,
                 grid: {
                     display: true,
-                    color: 'rgba(0, 0, 0, 0.1)',
-                    drawBorder: false
+                    drawBorder: false,
                 },
                 ticks: {
-                    font: {
-                        size: 12,
-                        family: "'Inter', sans-serif"
-                    },
                     stepSize: 1
                 }
             },
             x: {
                 grid: {
                     display: false
-                },
-                ticks: {
-                    font: {
-                        size: 12,
-                        family: "'Inter', sans-serif"
-                    }
                 }
-            }
-        },
-        animation: {
-            duration: 2000,
-            easing: 'easeInOutQuart'
-        },
-        layout: {
-            padding: {
-                left: 20,
-                right: 20,
-                top: 0,
-                bottom: 0
             }
         }
     };
@@ -311,7 +251,9 @@ const BugReports = () => {
     };
 
     const filteredBugReports = bugReports.filter((bugReport) => {
-        return bugReport.name.toLowerCase().includes(searchTerm.toLowerCase()) || bugReport.type.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = bugReport.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            bugReport.type.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesSearch && bugReport.seenTo === true;
     })
 
     return (
@@ -336,7 +278,7 @@ const BugReports = () => {
                                 </h1>
                                 <p className="text-gray-500 flex items-center gap-2 mt-1">
                                     <ClipboardList className="h-4 w-4" />
-                                    Monitor and manage reported issues
+                                    View and manage reviewed bug reports
                                 </p>
                             </div>
                         </div>
@@ -344,16 +286,7 @@ const BugReports = () => {
                         {/* Action Buttons */}
                         <div className="flex items-center gap-3">
                             <Link
-                                to="/admin/contactus"
-                                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium
-                                         bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 
-                                         transition-all duration-200 shadow-sm hover:shadow group"
-                            >
-                                <MessageCircle className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                                Contact Messages
-                            </Link>
-                            <Link
-                                to="/admin"
+                                to="/dev"
                                 className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium
                                          bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 
                                          transition-all duration-200 shadow-sm hover:shadow group"
@@ -401,24 +334,24 @@ const BugReports = () => {
                     {/* Quick Stats */}
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
                         <QuickStat 
-                            title="Total Reports" 
-                            value={bugReports.length}
+                            title="Total Reviewed Reports" 
+                            value={bugReports.filter(b => b.seenTo === true).length}
                             icon={<ClipboardList className="h-4 w-4" />}
                         />
                         <QuickStat 
                             title="UI Issues" 
-                            value={bugReports.filter(b => b.type === 'ui').length}
+                            value={bugReports.filter(b => b.type === 'ui' && b.seenTo === true).length}
                             icon={<Layout className="h-4 w-4" />}
                         />
                         <QuickStat 
                             title="Critical Issues" 
-                            value={bugReports.filter(b => b.type === 'crash').length}
+                            value={bugReports.filter(b => b.type === 'crash' && b.seenTo === true).length}
                             icon={<AlertTriangle className="h-4 w-4" />}
                             valueColor="text-red-600"
                         />
                         <QuickStat 
                             title="Performance Issues" 
-                            value={bugReports.filter(b => b.type === 'performance').length}
+                            value={bugReports.filter(b => b.type === 'performance' && b.seenTo === true).length}
                             icon={<Activity className="h-4 w-4" />}
                         />
                     </div>
@@ -426,7 +359,7 @@ const BugReports = () => {
             </div>
 
             {/* Charts Section */}
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-8 mb-8'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-8 mb-8'>
                 {/* Bar Chart */}
                 <Card className="p-4">
                     <CardHeader className="pb-0">
@@ -452,19 +385,6 @@ const BugReports = () => {
                         </div>
                     </CardContent>
                 </Card>
-
-                {/* Seen Status Distribution Chart */}
-                <Card className="p-4">
-                    <CardHeader className="pb-0">
-                        <CardTitle className="text-xl font-semibold text-gray-800">Seen Status Distribution</CardTitle>
-                        <p className="text-sm text-gray-500">Distribution of bug reports by seen status</p>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="h-[400px] w-full p-4">
-                            <Pie data={seenStatusDistribution} options={pieChartOptions} />
-                        </div>
-                    </CardContent>
-                </Card>
             </div>
 
             {/* Bug Reports Table */}
@@ -474,7 +394,7 @@ const BugReports = () => {
                 </CardHeader>
                 <CardContent>
                     <div className='overflow-x-auto'>
-                        <BugReportTable token={token} bugReports={filteredBugReports} setBugReports={setBugReports} refreshTrigger={refreshTrigger} setRefreshTrigger={setRefreshTrigger} setPopupVisible={setPopupVisible} setPopupMessage={setPopupMessage} setPopupType={setPopupType} popupMessage={popupMessage} popupType={popupType} popupVisible={popupVisible} />
+                        <BugReportTable bugReports={filteredBugReports} />
                     </div>
                 </CardContent>
             </Card>
@@ -514,36 +434,7 @@ const DateCell = ({ date, isCreated }) => {
     );
 };
 
-const BugReportTable = ({ token, bugReports, refreshTrigger, setBugReports, setRefreshTrigger, setPopupVisible, setPopupMessage, setPopupType, popupMessage, popupType, popupVisible }) => {
-    const handleDeleteBugReport = async (id) => {
-        try {
-            const responce = await fetch("http://localhost:3000/admin/deleteBugReport", {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token.token}`
-                },
-                body: JSON.stringify({ id })
-            });
-
-            if (responce.ok) {
-                setBugReports(bugReports.filter((report) => report._id !== id));
-                setPopupMessage("Bug report deleted successfully");
-                setPopupType("success");
-                setPopupVisible(true);
-            } else {
-                setPopupMessage("Failed to delete bug report");
-                setPopupType("error");
-                setPopupVisible(true);
-            }
-        } catch (error) {
-            setPopupMessage("Error deleting bug report");
-            setPopupType("error");
-            setPopupVisible(true);
-        }
-        setRefreshTrigger(!refreshTrigger);
-    };
-
+const BugReportTable = ({ bugReports }) => {
     return (
         <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
             <table className="w-full border-collapse bg-white text-left text-sm text-gray-500">
@@ -554,14 +445,12 @@ const BugReportTable = ({ token, bugReports, refreshTrigger, setBugReports, setR
                         <TableHeader title="Issue Type" />
                         <TableHeader title="Description" />
                         <TableHeader title="Reported On" />
-                        <TableHeader title="Seen Status" />
-                        <TableHeader title="Actions" />
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 border-t border-gray-100">
                     {bugReports.length === 0 ? (
                         <tr>
-                            <td colSpan={7} className="px-6 py-8 text-center">
+                            <td colSpan={6} className="px-6 py-8 text-center">
                                 <div className="flex flex-col items-center gap-2">
                                     <ClipboardList className="h-8 w-8 text-gray-400" />
                                     <p className="text-gray-500 font-medium">No bug reports found</p>
@@ -653,78 +542,24 @@ const BugReportTable = ({ token, bugReports, refreshTrigger, setBugReports, setR
 
                                 {/* Date Cell */}
                                 <td className="px-6 py-4">
-                                    <DateCell date={bugReport.date} isCreated={true} />
-                                </td>
-
-                                {/* Seen Status Cell */}
-                                <td className="px-6 py-4">
-                                    <button
-                                        onClick={async () => {
-                                            try {
-                                                const response = await fetch("http://localhost:3000/admin/toggleBugReportSeen", {
-                                                    method: "POST",
-                                                    headers: {
-                                                        "Content-Type": "application/json",
-                                                        "Authorization": `Bearer ${token.token}`
-                                                    },
-                                                    body: JSON.stringify({ id: bugReport._id })
-                                                });
-                                                
-                                                if (response.ok) {
-                                                    setBugReports(bugReports.map(report => 
-                                                        report._id === bugReport._id 
-                                                            ? { ...report, seenTo: !report.seenTo }
-                                                            : report
-                                                    ));
-                                                    setPopupMessage("Bug report status updated successfully");
-                                                    setPopupType("success");
-                                                } else {
-                                                    setPopupMessage("Failed to update bug report status");
-                                                    setPopupType("error");
-                                                }
-                                                setPopupVisible(true);
-                                            } catch (error) {
-                                                setPopupMessage("Error updating bug report status");
-                                                setPopupType("error");
-                                                setPopupVisible(true);
-                                            }
-                                        }}
-                                        className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium
-                                            ${bugReport.seenTo 
-                                                ? 'bg-green-50 text-green-700 hover:bg-green-100' 
-                                                : 'bg-gray-50 text-gray-700 hover:bg-gray-100'} 
-                                            transition-colors duration-200`}
-                                    >
-                                        {bugReport.seenTo 
-                                            ? <Eye className="h-4 w-4" />
-                                            : <EyeOff className="h-4 w-4" />}
-                                        {bugReport.seenTo ? 'Seen' : 'Not Seen'}
-                                    </button>
-                                </td>
-
-                                {/* Actions Cell */}
-                                <td className="px-6 py-4">
-                                    <button 
-                                        onClick={() => handleDeleteBugReport(bugReport._id)}
-                                        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium
-                                                 text-red-700 bg-red-50 rounded-md hover:bg-red-100 
-                                                 transition-colors duration-200"
-                                    >
-                                        <Trash className="h-3.5 w-3.5" />
-                                        Delete Report
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 
+                                                      text-xs font-medium bg-gray-100 text-gray-700">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-gray-500"></span>
+                                            {new Date(bugReport.date).toLocaleString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </span>
+                                    </div>
                                 </td>
                             </tr>
                         ))
                     )}
                 </tbody>
             </table>
-            <Popup
-                visible={popupVisible}
-                message={popupMessage}
-                onClose={() => setPopupVisible(false)}
-                type={popupType}
-            />
         </div>
     );
 };

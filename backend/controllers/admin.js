@@ -2,7 +2,7 @@ const { allUsers, changeRole } = require('../models/user');
 const { allContainers } = require('../models/containers');
 const { allAuth , deleteToken } = require('../models/auth');
 const { addtemplate, removetemplate } = require('../models/user');
-const { getAllBugReports, deleteBugReport } = require('../models/bugReport');
+const { getAllBugReports, deleteBugReport, toggleSeenStatus } = require('../models/bugReport');
 const { getAllContainerHistory } = require('../models/containerHistory');
 const { getAllContactUs, deleteContactUs } = require('../models/contactUs');
 
@@ -123,6 +123,19 @@ const deleteContactUsController = async (req, res) => {
     res.status(200).json({ message: "Contact us deleted successfully", data });
 }
 
+const toggleBugReportSeenStatus = async (req, res) => {
+    const { id } = req.body;
+    if (!id) {
+        return res.status(400).json({ error: "Bug report ID is required" });
+    }
+
+    const success = await toggleSeenStatus(id);
+    if (!success) {
+        return res.status(500).json({ error: "Failed to toggle bug report seen status" });
+    }
+    res.status(200).json({ message: "Bug report seen status toggled successfully" });
+};
+
 module.exports = {
     getAllUsers,
     getAllAuth,
@@ -135,5 +148,6 @@ module.exports = {
     deleteBugReportController,
     getAllContainerHistoryController,
     getAllContactUsController,
-    deleteContactUsController
+    deleteContactUsController,
+    toggleBugReportSeenStatus
 }

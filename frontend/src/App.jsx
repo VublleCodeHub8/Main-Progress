@@ -27,6 +27,8 @@ import Documentation from "./pages/dashboard/Documentation";
 import BugReports from "./pages/admin/bugReports";
 import ContainerHistory from "./pages/admin/containerHistory";
 import AdminContactUs from "./pages/admin/adminContactUs";
+import Notification from "./pages/dev/notification";
+import DevBugReports from "./pages/dev/bugReports";
 const router = createBrowserRouter([
   {
     path: "auth",
@@ -129,6 +131,14 @@ const router = createBrowserRouter([
           {
             path: "editor",
             element: <DevEdit />,
+          },
+          {
+            path: "notification",
+            element: <Notification />,
+          },
+          {
+            path: "bugreports",
+            element: <DevBugReports />,
           }
         ],
       },

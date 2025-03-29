@@ -3,7 +3,7 @@ const router = express.Router();
 
 const { getAllAuth, getAllUsers, getAllContainers , adminLogout , roleChange, addTemplate, removeTemplate,
     getAllBugReportsController, deleteBugReportController, getAllContainerHistoryController, getAllContactUsController, 
-    deleteContactUsController
+    deleteContactUsController, toggleBugReportSeenStatus
  } = require('../controllers/admin')
 
 
@@ -32,4 +32,6 @@ router.get('/getAllContactUs', getAllContactUsController)
 
 router.delete('/deleteContactUs', deleteContactUsController)
 
-exports.adminRouter = router
+router.post('/toggleBugReportSeen', toggleBugReportSeenStatus);
+
+exports.adminRouter = router;
