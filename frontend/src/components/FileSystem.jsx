@@ -13,8 +13,31 @@ import {
     FaFolderPlus,
     FaFileMedical,
     FaExclamationTriangle,
-    FaTimes
+    FaTimes,
+    FaStream,
+    FaList,
+    FaFilter
 } from "react-icons/fa";
+
+// Add this utility function outside the component
+const filterTree = (tree, filterFn = null) => {
+    if (!tree) return null;
+    
+    const filtered = tree.reduce((acc, item) => {
+        const passesFilter = !filterFn || filterFn(item);
+        if (item.children) {
+            const filteredChildren = filterTree(item.children, filterFn);
+            if (filteredChildren.length > 0 || passesFilter) {
+                acc.push({ ...item, children: filteredChildren });
+            }
+        } else if (passesFilter) {
+            acc.push(item);
+        }
+        return acc;
+    }, []);
+    
+    return filtered;
+};
 
 // Add this utility function outside the component
 const searchInFileTree = (tree, searchTerm, filters) => {
@@ -42,50 +65,37 @@ const searchInFileTree = (tree, searchTerm, filters) => {
         return itemName.includes(search);
     };
 
-    const filterTree = (items) => {
-        if (!Array.isArray(items)) return [];
-
-        return items.reduce((filtered, item) => {
-            // Create a copy of the current item
-            const newItem = { ...item };
-
-            // Check if the current item matches the search
-            const nameMatches = matchesSearch(item.name);
-
-            // If it has children, recursively filter them
-            if (item.children) {
-                newItem.children = filterTree(item.children);
-            }
-
-            // Include the item if it matches or has matching children
-            if (nameMatches || (newItem.children && newItem.children.length > 0)) {
-                filtered.push(newItem);
-            }
-
-            return filtered;
-        }, []);
-    };
-
-    return filterTree(tree);
+    return filterTree(tree, (item) => matchesSearch(item.name));
 };
 
-export default function FileSystem({ socket }) {
+export default function FileSystem({ socket, onSidebarToggle, isHidden }) {
     // State management
     const [fileTree, setFileTree] = useState(null);
-    const [hide, setHide] = useState(false);
+    const [hide, setHide] = useState(isHidden);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [showOptions, setShowOptions] = useState(false);
     const [error, setError] = useState(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [searchFilters, setSearchFilters] = useState({});
+    const [searchFilters, setSearchFilters] = useState({
+        showHidden: false,
+        fileTypes: [],
+        modifiedWithin: null,
+        caseSensitive: false,
+        regex: false,
+        wholeWord: false
+    });
     const [showNewFileDialog, setShowNewFileDialog] = useState(false);
     const [showNewFolderDialog, setShowNewFolderDialog] = useState(false);
     const [newFileName, setNewFileName] = useState('');
     const [newFolderName, setNewFolderName] = useState('');
+    const [showFilterMenu, setShowFilterMenu] = useState(false);
+    const [recentFiles, setRecentFiles] = useState([]);
+    const [viewMode, setViewMode] = useState('tree'); // 'tree' or 'list'
 
     // Refs
     const optionsRef = useRef(null);
+    const filterMenuRef = useRef(null);
     const searchDebounceRef = useRef(null);
     const mountedRef = useRef(true);
 
@@ -93,28 +103,43 @@ export default function FileSystem({ socket }) {
     const dispatch = useDispatch();
     const port = useSelector((state) => state.project.port) || 4000;
 
-    // Close options menu when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (optionsRef.current && !optionsRef.current.contains(event.target)) {
-                setShowOptions(false);
-            }
-        };
+    // Enhanced file tree filtering with search and filters
+    const getFilteredTree = useCallback(() => {
+        if (!fileTree) return null;
+        
+        return searchInFileTree(fileTree, searchTerm, searchFilters);
+    }, [fileTree, searchTerm, searchFilters]);
 
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
+    // Handle search with debounce
+    const handleSearch = useCallback((term) => {
+        setSearchTerm(term);
+        if (searchDebounceRef.current) {
+            clearTimeout(searchDebounceRef.current);
+        }
+        searchDebounceRef.current = setTimeout(() => {
+            // The UI will update automatically due to state change
+        }, 300);
     }, []);
 
-    // Cleanup on unmount
+    // Track recent files
+    const trackRecentFile = useCallback((file) => {
+        setRecentFiles(prev => {
+            const newRecent = [file, ...prev.filter(f => f.path !== file.path)].slice(0, 5);
+            localStorage.setItem('recentFiles', JSON.stringify(newRecent));
+            return newRecent;
+        });
+    }, []);
+
+    // Load recent files on mount
     useEffect(() => {
-        return () => {
-            mountedRef.current = false;
-            if (searchDebounceRef.current) {
-                clearTimeout(searchDebounceRef.current);
+        const saved = localStorage.getItem('recentFiles');
+        if (saved) {
+            try {
+                setRecentFiles(JSON.parse(saved));
+            } catch (e) {
+                console.error('Failed to load recent files:', e);
             }
-        };
+        }
     }, []);
 
     // Fetch file tree with error handling and retry mechanism
@@ -185,16 +210,29 @@ export default function FileSystem({ socket }) {
         };
     }, [socket, getFileTree, isRefreshing]);
 
-    // Debounced search
-    const handleSearch = (value) => {
-        if (searchDebounceRef.current) {
-            clearTimeout(searchDebounceRef.current);
-        }
+    // Close options menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (optionsRef.current && !optionsRef.current.contains(event.target)) {
+                setShowOptions(false);
+            }
+        };
 
-        searchDebounceRef.current = setTimeout(() => {
-            setSearchTerm(value);
-        }, 300);
-    };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            mountedRef.current = false;
+            if (searchDebounceRef.current) {
+                clearTimeout(searchDebounceRef.current);
+            }
+        };
+    }, []);
 
     // Action handlers
     const closeAll = useCallback(() => {
@@ -211,51 +249,42 @@ export default function FileSystem({ socket }) {
         }
     }, [getFileTree, isRefreshing]);
 
-    // Update the Files component rendering to use the filtered tree
-    const getFilteredTree = useCallback(() => {
-        if (!fileTree || !searchTerm) return fileTree;
-
-        const filteredTree = searchInFileTree(fileTree, searchTerm, searchFilters);
-        return filteredTree;
-    }, [fileTree, searchTerm, searchFilters]);
-
-    // Add this state for search results count
+    // Update search results count when tree is filtered
     const [searchResults, setSearchResults] = useState({
         total: 0,
         files: 0,
         folders: 0
     });
 
-    // Update search results count when tree is filtered
     useEffect(() => {
         if (!searchTerm) {
             setSearchResults({ total: 0, files: 0, folders: 0 });
             return;
         }
 
-        const countResults = (tree) => {
-            let files = 0;
-            let folders = 0;
+        const filtered = getFilteredTree();
+        if (!filtered) return;
 
-            const traverse = (items) => {
-                if (!Array.isArray(items)) return;
-
-                items.forEach(item => {
-                    if (item.children === null) {
-                        files++;
-                    } else {
-                        folders++;
-                        traverse(item.children);
-                    }
-                });
-            };
-
-            traverse(tree);
-            return { total: files + folders, files, folders };
+        const countResults = (items) => {
+            return items.reduce((counts, item) => {
+                if (item.children) {
+                    counts.folders++;
+                    const childCounts = countResults(item.children);
+                    counts.files += childCounts.files;
+                    counts.folders += childCounts.folders;
+                } else {
+                    counts.files++;
+                }
+                return counts;
+            }, { files: 0, folders: 0 });
         };
 
-        const filteredTree = getFilteredTree();
-        setSearchResults(countResults(filteredTree));
+        const counts = countResults(filtered);
+        setSearchResults({
+            total: counts.files + counts.folders,
+            files: counts.files,
+            folders: counts.folders
+        });
     }, [searchTerm, getFilteredTree]);
 
     // Update the search results display in the footer
@@ -488,257 +517,362 @@ export default function FileSystem({ socket }) {
     }
 
     return (
-        <div className="h-full flex">
-            {/* Collapsed Sidebar */}
-            {hide && (
-                <div className="w-12 h-full bg-zinc-900 border-r border-zinc-700 flex flex-col items-center py-2">
+        <div className="h-full flex flex-col bg-zinc-800">
+            {/* Header with view toggle */}
+            <div className="flex items-center justify-between p-3 border-b border-zinc-700">
+                <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-medium text-gray-200">Explorer</h2>
+                    <div className="flex items-center gap-1 ml-2">
+                        <button
+                            onClick={() => setViewMode('tree')}
+                            className={`p-1.5 rounded-lg transition-colors ${
+                                viewMode === 'tree' 
+                                    ? 'bg-zinc-700 text-white' 
+                                    : 'text-gray-400 hover:text-gray-200 hover:bg-zinc-700/50'
+                            }`}
+                            title="Tree View"
+                        >
+                            <FaStream size={12} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`p-1.5 rounded-lg transition-colors ${
+                                viewMode === 'list' 
+                                    ? 'bg-zinc-700 text-white' 
+                                    : 'text-gray-400 hover:text-gray-200 hover:bg-zinc-700/50'
+                            }`}
+                            title="List View"
+                        >
+                            <FaList size={12} />
+                        </button>
+                    </div>
+                </div>
+                <div className="flex items-center gap-1">
                     <button
-                        onClick={toggleHide}
-                        className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-colors"
-                        title="Show File Explorer"
+                        onClick={() => handleRefresh()}
+                        disabled={isRefreshing}
+                        className={`p-1.5 rounded-lg transition-colors ${
+                            isRefreshing
+                                ? 'text-zinc-600'
+                                : 'text-gray-400 hover:text-gray-200 hover:bg-zinc-700/50'
+                        }`}
+                        title={isRefreshing ? "Refreshing..." : "Refresh"}
                     >
-                        <FaChevronRight size={16} />
+                        <FaSync size={12} className={isRefreshing ? 'animate-spin' : ''} />
+                    </button>
+                    <button
+                        onClick={() => onSidebarToggle(prev => !prev)}
+                        className="p-1.5 rounded-lg hover:bg-zinc-700/50 text-gray-400 hover:text-gray-200 transition-colors"
+                        title={isHidden ? "Show Sidebar" : "Hide Sidebar"}
+                    >
+                        <FaChevronLeft
+                            size={14}
+                            className={`transform transition-transform duration-300 ${
+                                isHidden ? 'rotate-180' : ''
+                            }`}
+                        />
                     </button>
                 </div>
-            )}
+            </div>
 
-            {/* Expanded Sidebar */}
-            <div className={`${hide ? 'hidden' : 'flex flex-col'} w-64 h-full bg-zinc-900 text-zinc-100`}>
-                {/* Header */}
-                <div className="flex items-center justify-between px-3 h-12 border-b border-zinc-700 bg-zinc-800">
-                    <div className="flex items-center gap-2">
-                        <FaFolder className="text-zinc-400" />
-                        <span className="font-semibold">EXPLORER</span>
+            {/* Enhanced Search Bar */}
+            <div className="p-3 border-b border-zinc-700">
+                <div className="relative group">
+                    <input
+                        type="text"
+                        placeholder="Search files..."
+                        value={searchTerm}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        className="w-full bg-zinc-900/50 text-gray-200 text-sm rounded-lg pl-8 pr-8 py-1.5
+                                 border border-transparent focus:border-zinc-600
+                                 focus:outline-none focus:ring-1 focus:ring-zinc-600
+                                 placeholder-gray-500"
+                    />
+                    <FaSearch className="absolute left-2.5 top-2.5 text-gray-500 group-focus-within:text-gray-400" size={12} />
+                    {searchTerm && (
+                        <button
+                            onClick={() => handleSearch("")}
+                            className="absolute right-2.5 top-2 text-gray-500 hover:text-gray-400 p-0.5"
+                        >
+                            <FaTimes size={12} />
+                        </button>
+                    )}
+                </div>
+                
+                {/* Search Filters */}
+                <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                    <button
+                        onClick={() => setShowFilterMenu(true)}
+                        className="flex items-center gap-1 px-2 py-1 rounded hover:bg-zinc-700/50 transition-colors"
+                    >
+                        <FaFilter size={10} />
+                        Filters
+                        {Object.values(searchFilters).some(v => v) && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                        )}
+                    </button>
+                    {searchFilters.fileTypes.map(type => (
+                        <span key={type} className="px-2 py-0.5 rounded bg-zinc-700/50">
+                            {type}
+                        </span>
+                    ))}
+                </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="flex-1 overflow-y-auto">
+                {isLoading ? (
+                    <div className="flex items-center justify-center h-full">
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-zinc-600 border-t-blue-500"></div>
                     </div>
-                    <div className="flex items-center gap-1">
+                ) : error ? (
+                    <div className="flex flex-col items-center justify-center h-full text-red-500 p-4 text-center">
+                        <FaExclamationTriangle size={20} className="mb-2" />
+                        <p className="text-sm">{error}</p>
                         <button
                             onClick={handleRefresh}
-                            disabled={isRefreshing}
-                            className={`p-1.5 rounded transition-colors ${isRefreshing
-                                ? 'text-zinc-600'
-                                : 'text-zinc-400 hover:text-white hover:bg-zinc-700'
-                                }`}
-                            title={isRefreshing ? "Refreshing..." : "Refresh"}
+                            className="mt-4 px-3 py-1 text-xs bg-zinc-700 hover:bg-zinc-600 text-gray-200 rounded-lg transition-colors"
                         >
-                            <FaSync size={14} className={isRefreshing ? 'animate-spin' : ''} />
-                        </button>
-                        <button
-                            onClick={toggleHide}
-                            className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-700 rounded transition-colors"
-                            title="Hide Sidebar"
-                        >
-                            <FaChevronLeft size={14} />
+                            Try Again
                         </button>
                     </div>
-                </div>
-
-                {/* Search Bar */}
-                <div className="px-3 py-2 border-b border-zinc-700">
-                    <div className="relative">
-                        <input
-                            type="text"
-                            placeholder="Search files..."
-                            onChange={(e) => handleSearch(e.target.value)}
-                            className="w-full bg-zinc-800 text-zinc-100 text-sm rounded px-8 py-1.5 
-                                     focus:outline-none focus:ring-1 focus:ring-zinc-600"
-                        />
-                        <FaSearch className="absolute left-2.5 top-2.5 text-zinc-500" size={12} />
-                        {searchTerm && (
-                            <button
-                                onClick={() => setSearchTerm("")}
-                                className="absolute right-2 top-2 text-zinc-500 hover:text-zinc-300"
-                            >
-                                <FaTimes size={12} />
-                            </button>
-                        )}
-                    </div>
-                </div>
-
-                {/* Actions Bar */}
-                <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-700 bg-zinc-800/50">
-                    <div className="flex items-center gap-1" ref={optionsRef}>
-                        <button
-                            onClick={() => setShowOptions(!showOptions)}
-                            className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-700 rounded transition-colors"
-                            title="New File/Folder"
-                        >
-                            <FaPlus size={14} />
-                        </button>
-                        {showOptions && (
-                            <div className="absolute mt-8 bg-zinc-800 rounded shadow-lg border border-zinc-700 z-10">
-                                <button
-                                    onClick={() => setShowNewFileDialog(true)}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-700">
-                                    <FaFileMedical size={12} />
-                                    New File
-                                </button>
-                                <button 
-                                    onClick={() => setShowNewFolderDialog(true)}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-700">
-                                    <FaFolderPlus size={12} />
-                                    New Folder
-                                </button>
+                ) : (
+                    <>
+                        {/* Recent Files Section */}
+                        {recentFiles.length > 0 && !searchTerm && (
+                            <div className="mb-4">
+                                <div className="px-3 py-2 text-xs font-medium text-gray-400 bg-zinc-800/50">
+                                    Recent Files
+                                </div>
+                                {recentFiles.map(file => (
+                                    <button
+                                        key={file.path}
+                                        onClick={() => handleFileClick(file)}
+                                        className="w-full px-3 py-1.5 text-sm text-gray-300 hover:bg-zinc-700/50 flex items-center gap-2"
+                                    >
+                                        {getFileIcon(file.name)}
+                                        <span className="truncate">{file.name}</span>
+                                    </button>
+                                ))}
                             </div>
                         )}
-                        <button
-                            onClick={closeAll}
-                            className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-700 rounded transition-colors"
-                            title="Close All"
-                        >
-                            <FaEllipsisV size={14} />
-                        </button>
-                    </div>
-                </div>
-
-                {/* New File Dialog */}
-                {showNewFileDialog && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                        <div className="bg-zinc-800 rounded-md shadow-lg border border-zinc-700 w-80">
-                            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-700">
-                                <h3 className="text-sm font-medium">Create New File</h3>
-                                <button
-                                    onClick={() => setShowNewFileDialog(false)}
-                                    className="text-zinc-400 hover:text-white"
-                                >
-                                    <FaTimes size={14} />
-                                </button>
-                            </div>
-                            <div className="p-4">
-                                <form onSubmit={(e) => {
-                                    e.preventDefault();
-                                    const filePath = newFileName.trim();
-                                    if (filePath) {
-                                        handleNewFile(filePath);
-                                        setNewFileName('');
-                                        setShowNewFileDialog(false);
-                                        setShowOptions(false);
-                                    }
-                                }}>
-                                    <div className="mb-4">
-                                        <label className="block text-xs text-zinc-400 mb-1">File Name</label>
-                                        <input
-                                            type="text"
-                                            value={newFileName}
-                                            onChange={(e) => setNewFileName(e.target.value)}
-                                            placeholder="example.js"
-                                            className="w-full px-3 py-2 bg-zinc-900 border border-zinc-700 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                            autoFocus
-                                        />
-                                    </div>
-                                    <div className="flex justify-end gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setNewFileName('');
-                                                setShowNewFileDialog(false);
-                                            }}
-                                            className="px-3 py-1.5 text-xs bg-zinc-700 hover:bg-zinc-600 rounded"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            className="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-500 rounded"
-                                        >
-                                            Create
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* New Folder Dialog */}
-                {showNewFolderDialog && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                        <div className="bg-zinc-800 rounded-md shadow-lg border border-zinc-700 w-80">
-                            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-700">
-                                <h3 className="text-sm font-medium">Create New Folder</h3>
-                                <button
-                                    onClick={() => setShowNewFolderDialog(false)}
-                                    className="text-zinc-400 hover:text-white"
-                                >
-                                    <FaTimes size={14} />
-                                </button>
-                            </div>
-                            <div className="p-4">
-                                <form onSubmit={async (e) => {
-                                    e.preventDefault();
-                                    const folderPath = newFolderName.trim();
-                                    if (folderPath) {
-                                        try {
-                                            await handleNewFolder(folderPath);
-                                            setNewFolderName('');
-                                            setShowNewFolderDialog(false);
-                                            setShowOptions(false);
-                                            // Refresh the file tree
-                                            handleRefresh();
-                                        } catch (error) {
-                                            // You might want to show this error to the user in a more user-friendly way
-                                            console.error('Failed to create folder:', error);
-                                        }
-                                    }
-                                }}>
-                                    <div className="mb-4">
-                                        <label className="block text-xs text-zinc-400 mb-1">Folder Name</label>
-                                        <input
-                                            type="text"
-                                            value={newFolderName}
-                                            onChange={(e) => setNewFolderName(e.target.value)}
-                                            placeholder="my-folder"
-                                            className="w-full px-3 py-2 bg-zinc-900 border border-zinc-700 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                            autoFocus
-                                        />
-                                    </div>
-                                    <div className="flex justify-end gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setNewFolderName('');
-                                                setShowNewFolderDialog(false);
-                                            }}
-                                            className="px-3 py-1.5 text-xs bg-zinc-700 hover:bg-zinc-600 rounded"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            className="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-500 rounded"
-                                        >
-                                            Create
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* File Tree */}
-                <div className="flex-1 overflow-y-auto">
-                    {isLoading ? (
-                        <div className="flex items-center justify-center h-full">
-                            <span className="text-zinc-500">Loading...</span>
-                        </div>
-                    ) : error ? (
-                        <div className="flex items-center justify-center h-full text-red-500">
-                            <FaExclamationTriangle className="mr-2" />
-                            {error}
-                        </div>
-                    ) : (
+                        
+                        {/* File Tree/List */}
                         <Files 
                             tree={getFilteredTree()} 
+                            viewMode={viewMode}
                             searchTerm={searchTerm}
                             onDeleteFile={handleDeleteFile}
                             onDeleteFolder={handleDeleteFolder}
                             onRenameFile={handleRenameFile}
+                            onFileClick={(file) => {
+                                handleFileClick(file);
+                                trackRecentFile(file);
+                            }}
                         />
-                    )}
-                </div>
-
-                <SearchResultsFooter />
+                    </>
+                )}
             </div>
+
+            {/* Action Buttons */}
+            <div className="p-3 border-t border-zinc-700 bg-zinc-800/50">
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setShowNewFileDialog(true)}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 
+                                 bg-blue-600 hover:bg-blue-500 rounded-lg transition-all duration-200
+                                 text-sm text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30
+                                 transform hover:-translate-y-0.5"
+                    >
+                        <FaFileMedical size={12} className="text-blue-200" />
+                        New File
+                    </button>
+                    <button
+                        onClick={() => setShowNewFolderDialog(true)}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 
+                                 bg-amber-600 hover:bg-amber-500 rounded-lg transition-all duration-200
+                                 text-sm text-white shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30
+                                 transform hover:-translate-y-0.5"
+                    >
+                        <FaFolderPlus size={12} className="text-amber-200" />
+                        New Folder
+                    </button>
+                </div>
+            </div>
+
+            {/* New File Dialog */}
+            {showNewFileDialog && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
+                    <div className="bg-zinc-800 rounded-xl shadow-xl border border-zinc-700 w-96 transform transition-all duration-200">
+                        <div className="flex items-center justify-between p-4 border-b border-zinc-700">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-blue-500/10 rounded-lg">
+                                    <FaFileMedical size={16} className="text-blue-500" />
+                                </div>
+                                <h3 className="text-lg font-medium text-gray-200">Create New File</h3>
+                            </div>
+                            <button
+                                onClick={() => setShowNewFileDialog(false)}
+                                className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-zinc-700/50 transition-colors"
+                            >
+                                <FaTimes size={16} />
+                            </button>
+                        </div>
+                        <div className="p-4">
+                            <form onSubmit={(e) => {
+                                e.preventDefault();
+                                const filePath = newFileName.trim();
+                                if (filePath) {
+                                    handleNewFile(filePath);
+                                    setNewFileName('');
+                                    setShowNewFileDialog(false);
+                                }
+                            }}>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">File Name</label>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                value={newFileName}
+                                                onChange={(e) => setNewFileName(e.target.value)}
+                                                placeholder="example.js"
+                                                className="w-full px-4 py-2 bg-zinc-900/50 border border-zinc-700 rounded-lg
+                                                         text-gray-200 placeholder-gray-500
+                                                         focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500
+                                                         transition-all duration-200"
+                                                autoFocus
+                                            />
+                                            {newFileName && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setNewFileName('')}
+                                                    className="absolute right-2 top-2 p-1 text-gray-500 hover:text-gray-400
+                                                             rounded-full hover:bg-zinc-700/50 transition-colors"
+                                                >
+                                                    <FaTimes size={12} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex justify-end gap-3 mt-6">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setNewFileName('');
+                                            setShowNewFileDialog(false);
+                                        }}
+                                        className="px-4 py-2 text-sm text-gray-400 hover:text-gray-300 
+                                                 bg-zinc-700 hover:bg-zinc-600 rounded-lg transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-500 
+                                                 rounded-lg transition-colors shadow-lg shadow-blue-500/20
+                                                 hover:shadow-blue-500/30 transform hover:-translate-y-0.5"
+                                    >
+                                        Create File
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* New Folder Dialog */}
+            {showNewFolderDialog && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
+                    <div className="bg-zinc-800 rounded-xl shadow-xl border border-zinc-700 w-96 transform transition-all duration-200">
+                        <div className="flex items-center justify-between p-4 border-b border-zinc-700">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-amber-500/10 rounded-lg">
+                                    <FaFolderPlus size={16} className="text-amber-500" />
+                                </div>
+                                <h3 className="text-lg font-medium text-gray-200">Create New Folder</h3>
+                            </div>
+                            <button
+                                onClick={() => setShowNewFolderDialog(false)}
+                                className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-zinc-700/50 transition-colors"
+                            >
+                                <FaTimes size={16} />
+                            </button>
+                        </div>
+                        <div className="p-4">
+                            <form onSubmit={async (e) => {
+                                e.preventDefault();
+                                const folderPath = newFolderName.trim();
+                                if (folderPath) {
+                                    try {
+                                        await handleNewFolder(folderPath);
+                                        setNewFolderName('');
+                                        setShowNewFolderDialog(false);
+                                        handleRefresh();
+                                    } catch (error) {
+                                        console.error('Failed to create folder:', error);
+                                    }
+                                }
+                            }}>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Folder Name</label>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                value={newFolderName}
+                                                onChange={(e) => setNewFolderName(e.target.value)}
+                                                placeholder="my-folder"
+                                                className="w-full px-4 py-2 bg-zinc-900/50 border border-zinc-700 rounded-lg
+                                                         text-gray-200 placeholder-gray-500
+                                                         focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500
+                                                         transition-all duration-200"
+                                                autoFocus
+                                            />
+                                            {newFolderName && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setNewFolderName('')}
+                                                    className="absolute right-2 top-2 p-1 text-gray-500 hover:text-gray-400
+                                                             rounded-full hover:bg-zinc-700/50 transition-colors"
+                                                >
+                                                    <FaTimes size={12} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex justify-end gap-3 mt-6">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setNewFolderName('');
+                                            setShowNewFolderDialog(false);
+                                        }}
+                                        className="px-4 py-2 text-sm text-gray-400 hover:text-gray-300 
+                                                 bg-zinc-700 hover:bg-zinc-600 rounded-lg transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="px-4 py-2 text-sm text-white bg-amber-600 hover:bg-amber-500 
+                                                 rounded-lg transition-colors shadow-lg shadow-amber-500/20
+                                                 hover:shadow-amber-500/30 transform hover:-translate-y-0.5"
+                                    >
+                                        Create Folder
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Search Results Footer */}
+            <SearchResultsFooter />
         </div>
     );
 }

@@ -13,8 +13,23 @@ import {
     FaSun,
     FaDownload,
     FaSearchPlus,
-    FaSearchMinus
+    FaSearchMinus,
+    FaPlay,
+    FaJs,
+    FaPython,
+    FaJava,
+    FaHtml5,
+    FaCss3,
+    FaMarkdown,
+    FaFile,
+    FaFileAlt,
+    FaFileCode,
+    FaDatabase
 } from "react-icons/fa";
+import {
+    SiCplusplus,
+    SiC
+} from "react-icons/si";
 
 // Import all Ace modes and themes
 import "ace-builds/src-noconflict/mode-javascript";
@@ -79,19 +94,19 @@ const extentionMapping = {
 
 const getFileIcon = (extension) => {
     const iconMap = {
-        ".js": "💛",
-        ".py": "🐍",
-        ".java": "☕",
-        ".cpp": "⚡",
-        ".c": "⚙️",
-        ".html": "🌐",
-        ".css": "🎨",
-        ".json": "📦",
-        ".md": "📝",
-        ".txt": "📄",
-        ".hpp": "⚡",
+        ".js": <FaJs className="text-yellow-400" />,
+        ".py": <FaPython className="text-blue-400" />,
+        ".java": <FaJava className="text-red-400" />,
+        ".cpp": <SiCplusplus className="text-blue-500" />,
+        ".c": <SiC className="text-blue-600" />,
+        ".html": <FaHtml5 className="text-orange-500" />,
+        ".css": <FaCss3 className="text-blue-500" />,
+        ".json": <FaDatabase className="text-gray-400" />,
+        ".md": <FaMarkdown className="text-white" />,
+        ".txt": <FaFileAlt className="text-gray-400" />,
+        ".hpp": <FaFileCode className="text-blue-500" />,
     };
-    return iconMap[extension] || "📄";
+    return iconMap[extension] || <FaFile className="text-gray-400" />;
 };
 
 export default function CodeEditor({ socket }) {
@@ -104,6 +119,7 @@ export default function CodeEditor({ socket }) {
     const [isDarkMode, setIsDarkMode] = useState(true);
     const [themeIndex, setThemeIndex] = useState(0);
     const [fontSize, setFontSize] = useState(14);
+    const [isRunning, setIsRunning] = useState(false);
 
     const dispatch = useDispatch();
     const currFile = useSelector((state) => state.files.selected);
@@ -193,6 +209,57 @@ export default function CodeEditor({ socket }) {
 
     const zoomOut = () => {
         setFontSize(prev => Math.max(prev - 2, 8)); // Min size 8
+    };
+
+    const handleRunCode = async () => {
+        if (!currFile || !currFile.path) {
+            console.error('No file selected');
+            return;
+        }
+
+        const fileExt = currFile.path.substring(currFile.path.lastIndexOf('.'));
+        if (!['.cpp', '.js', '.py'].includes(fileExt)) {
+            console.error('Unsupported file type. Only .cpp, .js, and .py files are supported');
+            return;
+        }
+
+        setIsRunning(true);
+        try {
+            // Get the file path
+            const res = await fetch(`http://localhost:${port}/project/file/find/${currFile.name}`);
+            if (!res.ok) {
+                throw new Error('Failed to get file path');
+            }
+            
+            const data = await res.json();
+            const filePath = data.path;
+            const folderPath = filePath.substring(0, filePath.lastIndexOf('/'));
+            const fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
+
+            // Determine command based on file type
+            let command;
+            switch (fileExt) {
+                case '.cpp':
+                    const fileNameWithoutExt = fileName.replace('.cpp', '');
+                    command = `cd "/user/${folderPath}" && g++ "${fileName}" -o "${fileNameWithoutExt}" && "./${fileNameWithoutExt}"`;
+                    break;
+                case '.js':
+                    command = `cd "/user/${folderPath}" && node "${fileName}"`;
+                    break;
+                case '.py':
+                    command = `cd "/user/${folderPath}" && python3 "${fileName}"`;
+                    break;
+                default:
+                    throw new Error('Unsupported file type');
+            }
+            
+            // Send command to terminal
+            socket.emit("terminal:write", command + "\n");
+        } catch (error) {
+            console.error('Failed to run code:', error);
+        } finally {
+            setIsRunning(false);
+        }
     };
 
     return (
@@ -327,6 +394,56 @@ export default function CodeEditor({ socket }) {
                     >
                         <FaExpandAlt size={14} />
                     </button>
+                    {currFile?.path && ['.cpp', '.js', '.py'].includes(currFile.path.substring(currFile.path.lastIndexOf('.'))) && (
+                        <button
+                            onClick={handleRunCode}
+                            disabled={isRunning || save !== 'saved'}
+                            className={`p-2 rounded flex items-center gap-2 ${
+                                isRunning 
+                                    ? 'text-gray-500 cursor-not-allowed' 
+                                    : save !== 'saved'
+                                    ? 'text-gray-500 cursor-not-allowed'
+                                    : currFile.path.endsWith('.cpp')
+                                    ? 'text-blue-500 hover:text-blue-600'
+                                    : currFile.path.endsWith('.js')
+                                    ? 'text-yellow-500 hover:text-yellow-600'
+                                    : currFile.path.endsWith('.py')
+                                    ? 'text-green-500 hover:text-green-600'
+                                    : 'text-gray-500'
+                            } transition-colors`}
+                            title={
+                                isRunning 
+                                    ? 'Code is running...' 
+                                    : save !== 'saved'
+                                    ? 'Save file before running'
+                                    : `Run ${
+                                        currFile.path.endsWith('.cpp') 
+                                            ? 'C++' 
+                                            : currFile.path.endsWith('.js')
+                                            ? 'JavaScript'
+                                            : 'Python'
+                                    } code`
+                            }
+                        >
+                            {isRunning ? (
+                                <>
+                                    <FaPlay className="animate-pulse" />
+                                    <span className="text-xs">Running...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <FaPlay />
+                                    <span className="text-xs">
+                                        {currFile.path.endsWith('.cpp') 
+                                            ? 'Run C++' 
+                                            : currFile.path.endsWith('.js')
+                                            ? 'Run JS'
+                                            : 'Run Python'}
+                                    </span>
+                                </>
+                            )}
+                        </button>
+                    )}
                 </div>
             </div>
 

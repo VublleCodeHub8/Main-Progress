@@ -7,10 +7,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { projectAction } from "@/store/main";
 import { ArrowLeft } from "lucide-react";
+import { FaChevronRight } from "react-icons/fa";
 
 export default function Project() {
   const [soc, setSoc] = useState(null);
-  const [terminalHeight, setTerminalHeight] = useState('330px');
+  const [terminalHeight, setTerminalHeight] = useState('350px');
+  const [isSidebarHidden, setIsSidebarHidden] = useState(false);
   const params = useParams();
   const token = useSelector((state) => state.misc.token);
   const dispatch = useDispatch();
@@ -102,18 +104,41 @@ export default function Project() {
             </Link>
           </div>
           <div
-            className="h-[calc(100vh-3.5rem)] w-full flex"
+            className="h-[calc(100vh-3.5rem)] w-full flex relative"
           >
-            <div id="our-fileSystem" className="h-full w-64 bg-zinc-800 border-r border-zinc-700 overflow-y-auto">
-              <FileSystem socket={soc}></FileSystem>
+            {/* Show button when sidebar is hidden */}
+            {isSidebarHidden && (
+              <button
+                onClick={() => setIsSidebarHidden(false)}
+                className="absolute left-0 top-4 z-10 p-2 bg-zinc-800 hover:bg-zinc-700 
+                         text-gray-400 hover:text-gray-200 rounded-r-lg transition-all duration-200
+                         border border-l-0 border-zinc-700"
+                title="Show Sidebar"
+              >
+                <FaChevronRight size={14} />
+              </button>
+            )}
+            <div 
+              id="our-fileSystem" 
+              className={`h-full transition-all duration-300 ease-in-out ${
+                isSidebarHidden ? 'w-0 opacity-0' : 'w-64 opacity-100'
+              } bg-zinc-800 border-r border-zinc-700 overflow-hidden`}
+            >
+              <FileSystem 
+                socket={soc} 
+                onSidebarToggle={setIsSidebarHidden} 
+                isHidden={isSidebarHidden}
+              />
             </div>
-            <div className="flex flex-col flex-grow h-full">
+            <div className={`flex flex-col h-full transition-all duration-300 ease-in-out ${
+              isSidebarHidden ? 'w-full' : 'flex-grow'
+            }`}>
               <div
                 id="our-codeEditor"
                 className="w-full flex-grow overflow-auto border-b border-gray-800"
                 style={{ height: `calc(100vh - ${terminalHeight})` }}
               >
-                <CodeEditor socket={soc}></CodeEditor>
+                <CodeEditor socket={soc} />
               </div>
               <div 
                 id="our-terminal" 
@@ -123,7 +148,7 @@ export default function Project() {
                 <Terminal 
                   socket={soc}
                   onHeightChange={setTerminalHeight}
-                ></Terminal>
+                />
               </div>
             </div>
           </div>
