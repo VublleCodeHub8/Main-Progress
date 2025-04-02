@@ -317,6 +317,48 @@ app.patch('/project/file/rename', async (req, res) => {
     }
 });
 
+// Route to find file path by filename
+app.get('/project/file/find/:filename', async (req, res) => {
+    try {
+        const filename = req.params.filename;
+        if (!filename) {
+            return res.status(400).json({ error: 'Filename is required' });
+        }
+
+        const rootDir = path.join(__dirname, FILE_ROOT);
+        let filePath = null;
+
+        // Function to search for file recursively
+        async function findFile(dir) {
+            const entries = await fs.readdir(dir, { withFileTypes: true });
+            
+            for (const entry of entries) {
+                const fullPath = path.join(dir, entry.name);
+                if (entry.isDirectory()) {
+                    const result = await findFile(fullPath);
+                    if (result) return result;
+                } else if (entry.name === filename) {
+                    return fullPath;
+                }
+            }
+            return null;
+        }
+
+        filePath = await findFile(rootDir);
+
+        if (!filePath) {
+            return res.status(404).json({ error: 'File not found' });
+        }
+
+        // Return relative path from FILE_ROOT
+        const relativePath = path.relative(rootDir, filePath);
+        res.json({ path: relativePath });
+    } catch (error) {
+        console.error('Error finding file:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 
 // DOCKER SERVER LOGIC
 
