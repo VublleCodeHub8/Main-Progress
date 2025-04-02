@@ -42,6 +42,24 @@
 
 Terminas is a powerful online IDE that revolutionizes the way developers work with containerized environments. Built with modern technologies, it offers:
 
+## 📚 API Documentation
+
+The project includes comprehensive API documentation using Swagger/OpenAPI:
+
+- **Access**: Visit `/api-docs` endpoint after starting the server 
+- **Features**:
+  - Interactive API testing interface
+  - Detailed endpoint descriptions
+  - Request/response schemas
+  - Authentication requirements
+- **Endpoints Categories**:
+  - 🔐 Authentication (signup, signin, etc.)
+  - 👤 User Management
+  - 🐳 Container Operations
+  - 👨‍💼 Admin Controls
+
+All API endpoints are secured with JWT authentication and proper error handling.
+
 <div align="center">
 <table>
 <tr>
