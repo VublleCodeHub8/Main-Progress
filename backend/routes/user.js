@@ -5,6 +5,13 @@ const multer = require("multer");
 const { isUser } = require('../middlewares/auth');
 const { addBugReportController, addContactUsController, getTop5NotificationsController } = require('../controllers/user');
 
+/**
+ * @swagger
+ * tags:
+ *   name: User
+ *   description: User management endpoints
+ */
+
 const storage = multer.memoryStorage();
 const upload = multer({
     storage,
@@ -20,12 +27,160 @@ const upload = multer({
 
 const addMoreDataMiddleware = [upload.single('profilePic')];
 
-
+/**
+ * @swagger
+ * /user/getuserdata:
+ *   get:
+ *     tags: [User]
+ *     summary: Get user profile data
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 email:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 bio:
+ *                   type: string
+ *                 profilePic:
+ *                   type: string
+ *       401:
+ *         description: Not authorized
+ *       500:
+ *         description: Server error
+ */
 router.get('/getuserdata', getUserData);
+
+/**
+ * @swagger
+ * /user/addbugreport:
+ *   post:
+ *     tags: [User]
+ *     summary: Submit a bug report
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - description
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Bug report submitted successfully
+ *       401:
+ *         description: Not authorized
+ *       500:
+ *         description: Server error
+ */
 router.post('/addbugreport', addBugReportController);
+
+/**
+ * @swagger
+ * /user/addcontactus:
+ *   post:
+ *     tags: [User]
+ *     summary: Submit a contact form
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - message
+ *             properties:
+ *               message:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Contact form submitted successfully
+ *       401:
+ *         description: Not authorized
+ *       500:
+ *         description: Server error
+ */
 router.post('/addcontactus', addContactUsController);
+
+/**
+ * @swagger
+ * /user/topnotification:
+ *   get:
+ *     tags: [User]
+ *     summary: Get top 5 notifications
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Notifications retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   message:
+ *                     type: string
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *       401:
+ *         description: Not authorized
+ *       500:
+ *         description: Server error
+ */
 router.get('/topnotification', getTop5NotificationsController);
 
+/**
+ * @swagger
+ * /user/addmoredata:
+ *   put:
+ *     tags: [User]
+ *     summary: Update user profile
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               bio:
+ *                 type: string
+ *               profilePic:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *       400:
+ *         description: Invalid file type or size
+ *       401:
+ *         description: Not authorized
+ *       500:
+ *         description: Server error
+ */
 router.put('/addmoredata',
     addMoreDataMiddleware[0], 
     async (req, res) => {
@@ -48,5 +203,6 @@ router.put('/addmoredata',
 
 // router.get('/getbilldetails', getBillDetails);
 
+exports.userRouter = router;
 
 exports.userRouter = router;

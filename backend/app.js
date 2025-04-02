@@ -23,7 +23,11 @@ const { allTemplate } = require("./models/template")
 
 const app = express();
 const bodyParser = require('body-parser');
-const server = http.createServer(app)
+const server = http.createServer(app);
+
+// Swagger Documentation
+const { swaggerServe, swaggerSetup } = require('./swagger');
+app.use('/api-docs', swaggerServe, swaggerSetup);
 
 // CSRF Protection setup
 const csrfProtection = csrf({ cookie: true });
