@@ -150,6 +150,7 @@ const getTop5NotificationsController = async (req, res) => {
     }
 };
 
+
 module.exports = {
     addMoreData,
     getUserData,
@@ -157,5 +158,5 @@ module.exports = {
     addContactUsController,
     getTop5NotificationsController,
     upload,
-    getTop5NotificationsController
+    getTop5NotificationsController,
 };

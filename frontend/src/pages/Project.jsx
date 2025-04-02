@@ -13,13 +13,36 @@ export default function Project() {
   const [soc, setSoc] = useState(null);
   const [terminalHeight, setTerminalHeight] = useState('350px');
   const [isSidebarHidden, setIsSidebarHidden] = useState(false);
+  const [templateName, setTemplateName] = useState("");
   const params = useParams();
   const token = useSelector((state) => state.misc.token);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    async function runContainer() {
+    async function fetchTemplateAndRunContainer() {
       const containerId = params.projectId;
+      
+      // Fetch template name
+      try {
+        const templateRes = await fetch(
+          `http://localhost:3000/container/templateName/${containerId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token.token,
+            },
+          }
+        );
+        if (templateRes.ok) {
+          const templateData = await templateRes.json();
+          setTemplateName(templateData.templateName);
+        }
+      } catch (error) {
+        console.error("Failed to fetch template name:", error);
+      }
+
+      // Run container
       const res = await fetch(
         `http://localhost:3000/container/runcontainer/${containerId}`,
         {
@@ -32,11 +55,9 @@ export default function Project() {
       );
       if (res.ok) {
         const data = await res.json();
-        // console.log(data);
         const socket = io(`http://localhost:${data.port}`);
 
         socket.on("connect", () => {
-          // console.log(socket);
           setSoc(socket);
           dispatch(projectAction.setPort(data.port));
         });
@@ -44,7 +65,7 @@ export default function Project() {
         setSoc(false);
       }
     }
-    runContainer();
+    fetchTemplateAndRunContainer();
   }, []);
 
   return (
@@ -84,6 +105,16 @@ export default function Project() {
         </div>
       ) : (
         <>
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 z-50 mt-2">
+            <div className="px-4 py-1.5 bg-zinc-800/90 backdrop-blur-sm rounded-lg border border-zinc-700 shadow-lg">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-blue-500" />
+                <span className="text-sm font-medium text-gray-200">
+                  {templateName || "Loading template..."}
+                </span>
+              </div>
+            </div>
+          </div>
           <div className="h-14 bg-gray-900 flex items-center justify-between px-6 shadow-md border-b border-gray-800">
             <Link to="/" className="flex items-center">
               <span className="text-xl font-bold text-white tracking-wide hover:text-gray-200 transition-colors">

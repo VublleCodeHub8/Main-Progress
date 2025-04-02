@@ -675,27 +675,29 @@ export default function FileSystem({ socket, onSidebarToggle, isHidden }) {
             </div>
 
             {/* Action Buttons */}
-            <div className="p-3 border-t border-zinc-700 bg-zinc-800/50">
-                <div className="flex items-center gap-2">
+            <div className="p-2 border-t border-zinc-700 bg-zinc-800/50">
+                <div className="flex items-center justify-center gap-3">
                     <button
                         onClick={() => setShowNewFileDialog(true)}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 
-                                 bg-blue-600 hover:bg-blue-500 rounded-lg transition-all duration-200
-                                 text-sm text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30
-                                 transform hover:-translate-y-0.5"
+                        className="flex items-center justify-center gap-1.5 py-1.5 px-3
+                                 bg-blue-600/90 hover:bg-blue-500 rounded-md transition-all duration-200
+                                 text-xs font-medium text-white shadow-sm hover:shadow-md hover:shadow-blue-500/20
+                                 transform hover:-translate-y-0.5 hover:scale-105"
+                        title="Create a new file"
                     >
-                        <FaFileMedical size={12} className="text-blue-200" />
-                        New File
+                        <FaFileMedical size={12} className="text-blue-100" />
+                        <span>New File</span>
                     </button>
                     <button
                         onClick={() => setShowNewFolderDialog(true)}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 
-                                 bg-amber-600 hover:bg-amber-500 rounded-lg transition-all duration-200
-                                 text-sm text-white shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30
-                                 transform hover:-translate-y-0.5"
+                        className="flex items-center justify-center gap-1.5 py-1.5 px-3
+                                 bg-amber-600/90 hover:bg-amber-500 rounded-md transition-all duration-200
+                                 text-xs font-medium text-white shadow-sm hover:shadow-md hover:shadow-amber-500/20
+                                 transform hover:-translate-y-0.5 hover:scale-105"
+                        title="Create a new folder"
                     >
-                        <FaFolderPlus size={12} className="text-amber-200" />
-                        New Folder
+                        <FaFolderPlus size={12} className="text-amber-100" />
+                        <span>New Folder</span>
                     </button>
                 </div>
             </div>

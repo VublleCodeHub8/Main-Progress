@@ -4,12 +4,7 @@ const { getContainerById, getContainerByPort, getContainersByEmail, createNewCon
 const { addContainerHistory } = require('../models/containerHistory');
 const { findUserByEmail, billIncrement } = require('../models/user');
 const { findTemplateByImage } = require('../models/template');
-
 const docker = new Docker();
-
-const mappingOfImages = {
-    "node": "project-server"
-}
 
 
 const createContainer = async (req, res) => {
@@ -457,6 +452,23 @@ const getContainerRuntime = async (req, res) => {
     }
 }
 
+const getTemplateNameFromContainerId = async (req, res) => {
+    try {
+        const contId = req.params.containerId;
+        const container = await getContainerById(contId);
+        if (!container) {
+            return res.status(404).json({ error: "Container not found" });
+        }
+        const template = await findTemplateByImage(container.template);
+        res.json({ templateName: template.name });
+    } catch (err) {
+        console.error('Error getting template name:', err);
+        res.status(500).json({ 
+            error: 'Failed to get template name',
+            message: err.message 
+        });
+    }
+}
 
 
 exports.createContainer = createContainer;
@@ -470,3 +482,4 @@ exports.deleteContainer = deleteContainer;
 exports.getContainerCPUandMemoryStats = getContainerCPUandMemoryStats;
 exports.getContainerDetails = getContainerDetails;
 exports.editContainer = editContainer;
+exports.getTemplateNameFromContainerId = getTemplateNameFromContainerId;

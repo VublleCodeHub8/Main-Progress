@@ -26,7 +26,6 @@ router.post('/addbugreport', addBugReportController);
 router.post('/addcontactus', addContactUsController);
 router.get('/topnotification', getTop5NotificationsController);
 
-
 router.put('/addmoredata',
     addMoreDataMiddleware[0], 
     async (req, res) => {
