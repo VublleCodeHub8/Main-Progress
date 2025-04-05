@@ -29,7 +29,7 @@ export const HoverEffect = ({
     containerId: null,
     containerName: ''
   });
-
+  // console.log(items);
   const initiateDelete = (containerId, containerName) => {
     setDeleteConfirmation({
       isOpen: true,
@@ -226,10 +226,15 @@ export const HoverEffect = ({
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-lg mb-2">{item.title}</CardTitle>
                       <LastUsed date={item.lastUsed} />
-                      {(
-                        <div className="mt-2 flex items-center text-sm text-gray-500">
+                    </div>
+
+                    <div className="flex items-center space-x-8">
+                      {/* Template */}
+                      <div className="text-center">
+                        <CardTitle className="text-sm mb-1">Template</CardTitle>
+                        <div className="flex items-center px-3 py-1 bg-blue-50 rounded-lg">
                           <svg 
-                            className="w-4 h-4 mr-1.5 text-gray-400" 
+                            className="w-4 h-4 mr-1.5 text-blue-500" 
                             fill="none" 
                             stroke="currentColor" 
                             viewBox="0 0 24 24"
@@ -241,12 +246,10 @@ export const HoverEffect = ({
                               d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
                             />
                           </svg>
-                          <span>Template: {item.Template}</span>
+                          <span className="text-sm font-medium text-blue-700">{item.Template}</span>
                         </div>
-                      )}
-                    </div>
+                      </div>
 
-                    <div className="flex items-center space-x-8">
                       {/* Status */}
                       <div className="text-center">
                         <CardTitle className="text-sm mb-1">Status</CardTitle>

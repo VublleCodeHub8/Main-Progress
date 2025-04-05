@@ -37,6 +37,13 @@ function Containers() {
         let data = await response.json();
         const userContainers = await Promise.all(data.map(async (container) => {
           const details = await getContainerStatus(container.id);
+          const temp = await fetch(`http://localhost:3000/container/templateName/${container.id}`, {
+            method: "GET",
+            headers: {
+              Authorization: "Bearer " + tok.token,
+            },
+          });
+          const templateData = await temp.json();
           return {
             id: container.id,
             title: container.name,
@@ -45,7 +52,7 @@ function Containers() {
             Status: details.status,
             CPU: details.cpu,
             Memory: details.memory,
-            Template: container.template,
+            Template: templateData.templateName,
           };
         }));
         setProjects(userContainers);
