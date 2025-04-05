@@ -96,7 +96,6 @@ export const HoverEffect = ({
       // Perform the delete action here
       // console.log(`Delete item at index ${index} with title ${items[index].id} `);
       handleDeleteContainer(items[index].id);
-      items.splice(index, 1);
       alert('Item deleted successfully');
     }
   };
@@ -227,6 +226,24 @@ export const HoverEffect = ({
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-lg mb-2">{item.title}</CardTitle>
                       <LastUsed date={item.lastUsed} />
+                      {(
+                        <div className="mt-2 flex items-center text-sm text-gray-500">
+                          <svg 
+                            className="w-4 h-4 mr-1.5 text-gray-400" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round" 
+                              strokeWidth="2" 
+                              d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
+                            />
+                          </svg>
+                          <span>Template: {item.Template}</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex items-center space-x-8">

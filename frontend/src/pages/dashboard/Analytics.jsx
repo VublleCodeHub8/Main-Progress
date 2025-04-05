@@ -118,44 +118,61 @@ function Analytics() {
 
   // Generate container data when templates and projects are loaded
   useEffect(() => {
-    if (templates.length > 0 && projects.length > 0) {
+    if (templates.length > 0) {
       try {
         const colors = generateColors(templates.length);
         
-        // Group projects by template and month
+        // Get container usage from user data
         const containerCounts = templates.map((template, index) => {
-          const templateProjects = projects.filter(p => p.template === template.image);
-          
-          const monthlyCounts = lastTwelveMonths.map(monthData => {
-            const monthStart = monthData.date;
-            const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
+          // Get container IDs for each month from user.containerUsage.monthlyUsage
+          const monthlyCounts = lastTwelveMonths.map(async (monthData) => {
+            const month = monthData.label.split(' ')[0];
+            const year = parseInt(monthData.label.split(' ')[1]);
             
-            return templateProjects.filter(project => {
-              const projectDate = new Date(project.First_used);
-              return projectDate >= monthStart && projectDate <= monthEnd;
-            }).length;
+            // Find matching monthly usage
+            const monthlyUsage = user?.containerUsage?.monthlyUsage?.find(
+              usage => usage.month === month && usage.year === year
+            );
+            
+            if (!monthlyUsage) return 0;
+            
+            // Count containers for this template in this month
+            let count = 0;
+            for (const imageName of monthlyUsage.imageNames) {
+              if (imageName === template.image) {
+                count++;
+              }
+            }
+            return count;
           });
-
+          
           return {
             label: template.name,
-            data: monthlyCounts,
+            data: Promise.all(monthlyCounts),
             backgroundColor: colors[index],
             borderColor: colors[index].replace("0.7", "1"),
             borderWidth: 1,
           };
         });
-
-        const billData = lastTwelveMonths.map((_, monthIndex) => {
-          return containerCounts.reduce((total, template, templateIndex) => {
-            const count = template.data[monthIndex] || 0;
-            const price = templates[templateIndex].price || 0;
-            return total + (count * price);
-          }, 0);
+        
+        // Get monthly bills from user data
+        const billData = lastTwelveMonths.map(monthData => {
+          const matchingBill = user?.billingInfo?.monthlyBills?.find(
+            bill => bill.month === monthData.label.split(' ')[0] && 
+                   bill.year === parseInt(monthData.label.split(' ')[1])
+          );
+          return matchingBill ? matchingBill.amount : 0;
         });
-
-        setContainerData({
-          containerCounts,
-          billData,
+        
+        // Resolve all promises
+        Promise.all(containerCounts.map(async (template) => {
+          template.data = await template.data;
+          return template;
+        })).then(resolvedContainerCounts => {
+          setContainerData({
+            containerCounts: resolvedContainerCounts,
+            billData,
+          });
         });
       } catch (error) {
         console.error("Error generating container data:", error);
@@ -164,8 +181,14 @@ function Analytics() {
           billData: []
         });
       }
+    } else {
+      // If no templates, set empty container data
+      setContainerData({
+        containerCounts: [],
+        billData: Array(lastTwelveMonths.length).fill(0)
+      });
     }
-  }, [templates, projects]);
+  }, [templates, user?.billingInfo?.monthlyBills, user?.containerUsage?.monthlyUsage]);
   // console.log(containerData);
   if (loading) {
     return (
@@ -226,11 +249,48 @@ function Analytics() {
 
   // Data for pie chart showing container distribution for selected month
   const generatePieData = (selectedMonthIndex) => {
+    if (!containerCounts || containerCounts.length === 0) {
+      return {
+        labels: ["No Data"],
+        datasets: [
+          {
+            data: [1],
+            backgroundColor: ["rgba(200, 200, 200, 0.7)"],
+            borderColor: ["rgba(200, 200, 200, 1)"],
+            borderWidth: 1,
+          },
+        ],
+      };
+    }
+    
+    // Ensure all data points are valid
+    const validData = containerCounts.map(template => {
+      if (!template || !template.data || template.data[selectedMonthIndex] === undefined) {
+        return 0;
+      }
+      return template.data[selectedMonthIndex];
+    });
+    
+    // If all data points are zero, show "No Data" instead
+    if (validData.every(value => value === 0)) {
+      return {
+        labels: ["No Data"],
+        datasets: [
+          {
+            data: [1],
+            backgroundColor: ["rgba(200, 200, 200, 0.7)"],
+            borderColor: ["rgba(200, 200, 200, 1)"],
+            borderWidth: 1,
+          },
+        ],
+      };
+    }
+    
     return {
       labels: templates.map(t => t.name),
       datasets: [
         {
-          data: containerCounts.map(template => template.data[selectedMonthIndex]),
+          data: validData,
           backgroundColor: templates.map((_, index) => generateColors(templates.length)[index]),
           borderColor: templates.map((_, index) => generateColors(templates.length)[index].replace("0.7", "1")),
           borderWidth: 1,
@@ -243,50 +303,57 @@ function Analytics() {
   const calculateMetrics = (selectedMonthIndex) => {
     try {
       const selectedMonthData = lastTwelveMonths[selectedMonthIndex];
-      const monthStart = selectedMonthData.date;
-      const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
+      const month = selectedMonthData.label.split(' ')[0];
+      const year = parseInt(selectedMonthData.label.split(' ')[1]);
       
-      // Change: Count all containers regardless of date
-      const totalContainers = projects.length; // This will count all containers
-
-      const totalBill = billData[selectedMonthIndex] || 0;
+      // Get active containers count from projects
+      const activeContainers = projects.length;
       
-      const avgCostPerContainer = totalContainers > 0 
-        ? (totalBill / totalContainers).toFixed(2) 
-        : '0.00';
+      // Get total containers from user data
+      const totalContainers = user?.containerUsage?.totalContainers || 0;
       
-      // Only count template usage for the selected month
-      const templateUsage = templates.map(template => ({
-        name: template.name,
-        count: projects.filter(project => 
-          project.template === template.image && 
-          new Date(project.First_used) >= monthStart && 
-          new Date(project.First_used) <= monthEnd
-        ).length
-      }));
-
+      // Get monthly bill from user data
+      const matchingBill = user?.billingInfo?.monthlyBills?.find(
+        bill => bill.month === month && bill.year === year
+      );
+      const totalBill = matchingBill ? matchingBill.amount : 0;
+      
+      // Get monthly container usage from user data
+      const monthlyUsage = user?.containerUsage?.monthlyUsage?.find(
+        usage => usage.month === month && usage.year === year
+      );
+      
+      // Count containers by template for the selected month
+      const templateUsage = templates.map(template => {
+        const templateData = containerCounts?.find(t => t.label === template.name);
+        return {
+          name: template.name,
+          count: templateData?.data?.[selectedMonthIndex] || 0
+        };
+      });
+      
       const mostUsedTemplate = templateUsage.reduce(
         (max, current) => current.count > max.count ? current : max,
         { name: "None", count: 0 }
       );
-
+      
       // Calculate total bill across all months
-      const totalBillTillNow = billData.reduce((total, monthlyBill) => total + monthlyBill, 0);
-
+      const totalBillTillNow = user?.billingInfo?.amount || 0;
+      
       return {
         totalContainers,
+        activeContainers,
         totalBill,
         totalBillTillNow,
-        avgCostPerContainer,
         mostUsedTemplate,
       };
     } catch (error) {
       console.error("Error calculating metrics:", error);
       return {
         totalContainers: 0,
+        activeContainers: 0,
         totalBill: 0,
         totalBillTillNow: 0,
-        avgCostPerContainer: '0.00',
         mostUsedTemplate: { name: "None", count: 0 }
       };
     }
@@ -312,7 +379,21 @@ function Analytics() {
           <CardContent>
             <div className="text-2xl font-bold">{metrics.totalContainers}</div>
             <p className="text-xs text-gray-500 mt-1">
-              Total containers built till now
+              Total containers created till now
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-500">
+              Active Containers
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics.activeContainers}</div>
+            <p className="text-xs text-gray-500 mt-1">
+              Currently active containers
             </p>
           </CardContent>
         </Card>
@@ -336,20 +417,6 @@ function Analytics() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">
-              Avg. Cost per Container
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${metrics.avgCostPerContainer}</div>
-            <p className="text-xs text-gray-500 mt-1">
-              Based on template pricing
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
               Most Used Template
             </CardTitle>
           </CardHeader>
@@ -364,7 +431,7 @@ function Analytics() {
 
       {/* Main Content with Tabs */}
       <Card className="overflow-hidden">
-        <CardHeader className="pb-0">
+        <CardHeader className="pb-2">
           <CardTitle>Usage & Billing Analysis</CardTitle>
         </CardHeader>
         <CardContent>
@@ -455,10 +522,7 @@ function Analytics() {
                         <div className="text-sm text-gray-500">per container/month</div>
                       </div>
                       <div className="mt-2 text-sm">
-                        Current usage: {containerCounts[index].data[selectedMonth]} containers
-                      </div>
-                      <div className="mt-2 text-sm text-gray-600">
-                        Monthly cost: ${(template.price * containerCounts[index].data[selectedMonth]).toFixed(2)}
+                        Current usage: {containerCounts && containerCounts[index] ? containerCounts[index].data[selectedMonth] : 0} containers
                       </div>
                     </CardContent>
                   </Card>

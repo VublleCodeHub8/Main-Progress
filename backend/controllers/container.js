@@ -2,7 +2,7 @@ const Docker = require('dockerode')
 const net = require('net');
 const { getContainerById, getContainerByPort, getContainersByEmail, createNewContainer, deleteOneContainer, setStartedAt } = require('../models/containers')
 const { addContainerHistory } = require('../models/containerHistory');
-const { findUserByEmail, billIncrement } = require('../models/user');
+const { findUserByEmail, billIncrement, containerUsageIncrement } = require('../models/user');
 const { findTemplateByImage } = require('../models/template');
 const docker = new Docker();
 
@@ -47,6 +47,7 @@ const createContainer = async (req, res) => {
 
     const saveRes = await createNewContainer(contEmail, contUserId, contId, contName, contPort, cont_Image);
     if (saveRes) {
+        await containerUsageIncrement(contEmail, cont_Image );
         res.json({ containerId: contId, containerName: contName, containerPort: contPort, containerTemplate: cont_Image });
     } else {
         res.status(500);

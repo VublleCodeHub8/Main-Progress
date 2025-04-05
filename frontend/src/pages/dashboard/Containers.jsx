@@ -45,6 +45,7 @@ function Containers() {
             Status: details.status,
             CPU: details.cpu,
             Memory: details.memory,
+            Template: container.template,
           };
         }));
         setProjects(userContainers);

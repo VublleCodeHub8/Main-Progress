@@ -112,7 +112,17 @@ const getUserData = async (req, res) => {
 
         // Ensure billingInfo exists and has amount
         if (!userResponse.billingInfo) {
-            userResponse.billingInfo = { amount: 0 };
+            userResponse.billingInfo = { amount: 0 , monthlyBills: [] };
+        }
+
+        // Ensure monthlyBills exists and has amount
+        if (!userResponse.monthlyBills) {
+            userResponse.monthlyBills = [];
+        }
+
+        // Ensure containerUsage exists and has amount
+        if (!userResponse.containerUsage) {
+            userResponse.containerUsage = { totalContainers: 0, monthlyUsage: [] };
         }
 
         res.json(userResponse);
