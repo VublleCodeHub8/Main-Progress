@@ -257,7 +257,7 @@ const Profile = () => {
       color: "bg-green-50"
     },
     {
-      label: "Total Containers",
+      label: "Active Containers",
       value: containerStats.totalContainers,
       icon: <Container className="h-4 w-4 text-blue-500" />,
       color: "bg-blue-50"

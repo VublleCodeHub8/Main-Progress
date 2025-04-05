@@ -30,7 +30,41 @@ const userSchema = mongoose.Schema({
         amount: {
             type: 'Number',
             default: 0,
-        }
+        },
+        monthlyBills: [{
+            month: {
+                type: 'String',
+                required: true
+            },
+            year: {
+                type: 'Number',
+                required: true
+            },
+            amount: {
+                type: 'Number',
+                required: true
+            }
+        }]
+    },
+    containerUsage: {
+        totalContainers: {
+            type: 'Number',
+            default: 0,
+        },
+        monthlyUsage: [{
+            month: {
+                type: 'String',
+                required: true
+            },
+            year: {
+                type: 'Number',
+                required: true
+            },
+            imageNames: [{
+                type: 'String',
+                required: true
+            }]
+        }]
     }
 })
 
@@ -70,10 +104,62 @@ async function billIncrement(email, amount) {
         if(!user){
             throw new Error("User not found");
         }
-        // console.log(user.billingInfo.amount);
-        // console.log(amount);
+
+        // Get current month and year
+        const currentDate = new Date();
+        const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
+        const currentYear = currentDate.getFullYear();
+
+        // Update total amount
         user.billingInfo.amount += amount;
-        // console.log(user.billingInfo.amount);
+
+        // Check if a bill for current month exists
+        const existingBillIndex = user.billingInfo.monthlyBills.findIndex(
+            bill => bill.month === currentMonth && bill.year === currentYear
+        );
+
+        if (existingBillIndex !== -1) {
+            // Update existing monthly bill
+            user.billingInfo.monthlyBills[existingBillIndex].amount += amount;
+        } else {
+            // Add new monthly bill
+            user.billingInfo.monthlyBills.push({
+                month: currentMonth,
+                year: currentYear,
+                amount: amount
+            });
+        }
+
+        await user.save();
+        return user;
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+}
+
+async function containerUsageIncrement(email, templateName) {
+    try {
+        const user = await User.findOne({ email: email });
+        if(!user){
+            throw new Error("User not found");
+        }
+        user.containerUsage.totalContainers += 1;
+        const currentDate = new Date();
+        const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
+        const currentYear = currentDate.getFullYear();
+
+        if(!user.containerUsage.monthlyUsage.find(usage => usage.month === currentMonth && usage.year === currentYear)){
+            user.containerUsage.monthlyUsage.push({
+                month: currentMonth,
+                year: currentYear,
+                imageNames: [templateName]
+            });
+        }
+        else{
+            user.containerUsage.monthlyUsage.find(usage => usage.month === currentMonth && usage.year === currentYear).imageNames.push(templateName);
+        }
+
         await user.save();
         return user;
     } catch (err) {
@@ -192,3 +278,4 @@ exports.changeRole = changeRole;
 exports.addtemplate = addtemplate;
 exports.removetemplate = removetemplate;
 exports.billIncrement = billIncrement;
+exports.containerUsageIncrement = containerUsageIncrement;

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { 
     FaUserAlt,
@@ -11,12 +11,11 @@ import {
     FaCog,
     FaBug
 } from "react-icons/fa";
-import { TailwindcssButtons } from "@/components/ui/tailwindcss-buttons";
 
-function Sidebar() {
-    const [isOpen, setIsOpen] = useState(true);
+function Sidebar({ isOpen }) {
     const token = useSelector((state) => state.misc.token);
-    const toggle = () => setIsOpen(!isOpen);
+    const location = useLocation();
+    
     const isActive = (path) => {
         if (path === '/') {
           return location.pathname === '/';
@@ -74,24 +73,54 @@ function Sidebar() {
     );
 
     return (
-        <div style={{ width: isOpen ? "w-full" : "115px" }} className="border-r-2 border-stone-400 text-slate-900 w-[18rem] p-4">
-            <div className='flex flex-col'>
+        <aside 
+            className={`fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white shadow-md transition-all duration-300 ease-in-out z-40
+                ${isOpen ? "w-[12rem]" : "w-[5rem]"}`}
+        >
+            {/* Navigation Items */}
+            <div className="flex-1 overflow-y-auto py-4 h-full">
                 {filteredMenuItems.map((item, index) => (
-                    <Link to={item.path} key={index}>
-                        <div className='my-2 rounded-md'>
-                            <TailwindcssButtons idx={0} className="w-full" isActive={isActive(item.path)}>
-                                <div className='flex flex-row items-center text-2xl hover:font-bold'>
-                                    <div className="icon m-2">{item.icon}</div>
-                                    <div style={{ display: isOpen ? "block" : "none" }} className="block pl-2">
-                                        {item.name}
-                                    </div>
+                    <Link to={item.path} key={index} className="block">
+                        <div className={`px-4 py-3 my-1 mx-2 rounded-md transition-all duration-200 
+                            ${isActive(item.path) 
+                                ? "bg-blue-50 text-blue-600" 
+                                : "text-gray-700 hover:bg-gray-100"
+                            }`}
+                        >
+                            <div className="flex items-center">
+                                <div className={`text-lg ${isActive(item.path) ? "text-blue-600" : "text-gray-500"}`}>
+                                    {item.icon}
                                 </div>
-                            </TailwindcssButtons>
+                                {isOpen && (
+                                    <span className={`ml-3 font-medium ${isActive(item.path) ? "font-semibold" : ""}`}>
+                                        {item.name}
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </Link>
                 ))}
             </div>
-        </div>
+            
+            {/* User Profile Section */}
+            {isOpen && (
+                <div className="p-4 border-t border-gray-200 mt-auto">
+                    <div className="flex items-center">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                            <FaUserAlt className="text-gray-600" />
+                        </div>
+                        <div className="ml-3">
+                            <p className="text-sm font-medium text-gray-800">
+                                {token?.name || "User"}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                                {token?.role || "User"}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </aside>
     );
 }
 
