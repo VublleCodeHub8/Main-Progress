@@ -78,10 +78,10 @@ function Sidebar({ isOpen }) {
                 ${isOpen ? "w-[12rem]" : "w-[5rem]"}`}
         >
             {/* Navigation Items */}
-            <div className="flex-1 overflow-y-auto py-4 h-full">
+            <div className="flex-1 py-4 h-full">
                 {filteredMenuItems.map((item, index) => (
                     <Link to={item.path} key={index} className="block">
-                        <div className={`px-4 py-3 my-1 mx-2 rounded-md transition-all duration-200 
+                        <div className={`px-4 py-4 my-1 mx-2 rounded-md transition-all duration-300 ease-in-out
                             ${isActive(item.path) 
                                 ? "bg-blue-50 text-blue-600" 
                                 : "text-gray-700 hover:bg-gray-100"
@@ -91,11 +91,11 @@ function Sidebar({ isOpen }) {
                                 <div className={`text-lg ${isActive(item.path) ? "text-blue-600" : "text-gray-500"}`}>
                                     {item.icon}
                                 </div>
-                                {isOpen && (
-                                    <span className={`ml-3 font-medium ${isActive(item.path) ? "font-semibold" : ""}`}>
+                                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "w-auto opacity-100 ml-3" : "w-0 opacity-0"}`}>
+                                    <span className={`font-medium whitespace-nowrap ${isActive(item.path) ? "font-semibold" : ""}`}>
                                         {item.name}
                                     </span>
-                                )}
+                                </div>
                             </div>
                         </div>
                     </Link>
