@@ -1,5 +1,5 @@
 import React from "react";
-import { Bar, Line, Pie } from "react-chartjs-2";
+import { Bar, Line, Pie, Scatter } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -35,7 +35,13 @@ const Chart = React.forwardRef(({ className, type = "bar", data, options, ...pro
     bar: Bar,
     line: Line,
     pie: Pie,
+    scatter: Scatter,
   }[type];
+
+  if (!ChartComponent) {
+    console.error(`Chart type "${type}" is not supported. Available types: bar, line, pie, scatter`);
+    return null;
+  }
 
   const defaultOptions = {
     responsive: true,
