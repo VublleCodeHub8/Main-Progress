@@ -120,6 +120,7 @@ export default function CodeEditor({ socket }) {
     const [themeIndex, setThemeIndex] = useState(0);
     const [fontSize, setFontSize] = useState(14);
     const [isRunning, setIsRunning] = useState(false);
+    const editorRef = React.useRef(null);
 
     const dispatch = useDispatch();
     const currFile = useSelector((state) => state.files.selected);
@@ -477,12 +478,33 @@ export default function CodeEditor({ socket }) {
             ) : (
                 <div className="flex-1 relative">
                     <AceEditor
+                        ref={editorRef}
                         mode={extentionMapping[currFile.extension]}
                         theme={isDarkMode ? themes.dark[themeIndex] : themes.light[themeIndex]}
                         onChange={fileChange}
                         fontSize={fontSize}
                         name="UNIQUE_ID_OF_DIV"
                         editorProps={{ $blockScrolling: true }}
+                        onLoad={(editor) => {
+                            editor.commands.addCommand({
+                                name: 'cutLineOrSelection',
+                                bindKey: { win: 'Ctrl-X', mac: 'Command-X' },
+                                exec: (editor) => {
+                                    const hasSelection = !editor.selection.isEmpty();
+                                    if (!hasSelection) {
+                                        // If no text is selected, select the entire line
+                                        editor.selection.selectLine();
+                                    }
+                                    // Cut the selected text (or line)
+                                    document.execCommand('cut');
+                                    if (!hasSelection) {
+                                        // Move cursor to the beginning of the next line
+                                        editor.selection.clearSelection();
+                                    }
+                                },
+                                readOnly: false
+                            });
+                        }}
                         width="100%"
                         height="100%"
                         value={val}
