@@ -45,6 +45,13 @@ useEffect(() => {
       let data = await response.json();
       const userContainers = await Promise.all(data.map(async (container) => {
         const details = await getContainerStatus(container.id);
+        const temp = await fetch(`http://localhost:3000/container/templateName/${container.id}`, {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + tok.token,
+          },
+        });
+        const templateData = await temp.json();
         return {
           id: container.id,
           title: container.name,
@@ -54,6 +61,7 @@ useEffect(() => {
           CPU: details.cpu,
           Memory: details.memory,
           MemoryUsage: details.memoryUsage,
+          Template: templateData.templateName,
         };
       }));
       setProjects(userContainers);
