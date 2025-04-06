@@ -232,7 +232,7 @@ function DashboardLayout() {
       <div className="flex flex-1 pt-16">
         <Sidebar isOpen={sidebarOpen} />
         <main className={`flex-1 transition-all duration-300 ease-in-out ${
-          sidebarOpen ? "ml-[12rem]" : "ml-[5rem]"
+          sidebarOpen ? "ml-[18rem]" : "ml-[5rem]"
         }`}>
           <div className="p-6 overflow-y-auto h-[calc(100vh-4rem)]">
             <Outlet />

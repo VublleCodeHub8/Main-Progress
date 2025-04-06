@@ -19,52 +19,29 @@ const getContainerStatus = async (containerId) => {
 };
 
 function Containers() {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false); // For potential future use
+  const [error, setError] = useState(null); // For potential future use
   const [searchQuery, setSearchQuery] = useState("");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [stats, setStats] = useState({
+    totalContainers: 0,
+    runningContainers: 0
+  });
 
-  useEffect(() => {
-    const fetchContainers = async () => {
-      try {
-        const tok = JSON.parse(localStorage.getItem("token"));
-        const response = await fetch("http://localhost:3000/container/listcontainers", {
-          method: "GET",
-          headers: {
-            Authorization: "Bearer " + tok.token,
-          },
-        });
-        let data = await response.json();
-        const userContainers = await Promise.all(data.map(async (container) => {
-          const details = await getContainerStatus(container.id);
-          return {
-            id: container.id,
-            title: container.name,
-            lastUsed: container.lastUsed,
-            link: `project/${container.id}`,
-            Status: details.status,
-            CPU: details.cpu,
-            Memory: details.memory,
-            Template: container.template,
-          };
-        }));
-        setProjects(userContainers);
-        if (data === null) {
-        }
-        setLoading(false);
-      } catch (error) {
-        setError(error);
-        setLoading(false);
-      }
-    };
+  // Function to update container stats from nested component
+  const updateContainerStats = (containers) => {
+    if (Array.isArray(containers)) {
+      setStats({
+        totalContainers: containers.length,
+        runningContainers: containers.filter(c => c.Status === 'running').length
+      });
+    }
+  };
 
-    fetchContainers();
-  }, []);
-
-  // Filter projects based on search query
-  const filteredProjects = projects.filter(project =>
-    project.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Function to trigger refresh of the HoverEffect component
+  const handleRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   return (
     <div className="p-8">
@@ -103,13 +80,13 @@ function Containers() {
               <div className="flex items-end justify-between">
                 <div>
                   <p className="text-2xl font-bold text-gray-900">
-                    {projects.filter(p => p.Status === 'running').length}
+                    {stats.runningContainers}
                   </p>
                   <p className="text-xs text-gray-500">Active containers</p>
                 </div>
                 <div className="text-right">
                   <p className="text-xs font-medium text-green-600">
-                    {((projects.filter(p => p.Status === 'running').length / Math.max(projects.length, 1)) * 100).toFixed(0)}%
+                    {((stats.runningContainers / Math.max(stats.totalContainers, 1)) * 100).toFixed(0)}%
                   </p>
                   <p className="text-xs text-gray-400">utilization</p>
                 </div>
@@ -118,7 +95,7 @@ function Containers() {
                 <div 
                   className="h-full bg-green-500 rounded-full transition-all duration-500"
                   style={{ 
-                    width: `${(projects.filter(p => p.Status === 'running').length / Math.max(projects.length, 1)) * 100}%` 
+                    width: `${(stats.runningContainers / Math.max(stats.totalContainers, 1)) * 100}%` 
                   }}
                 />
               </div>
@@ -139,18 +116,18 @@ function Containers() {
               <div className="flex items-end justify-between">
                 <div>
                   <p className="text-2xl font-bold text-gray-900">
-                    {projects.length}
+                    {stats.totalContainers}
                   </p>
                   <p className="text-xs text-gray-500">Total containers</p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <div className="flex items-center gap-1 text-xs text-gray-500">
                     <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-                    <span>{projects.filter(p => p.Status !== 'running').length} stopped</span>
+                    <span>{stats.totalContainers - stats.runningContainers} stopped</span>
                   </div>
                   <div className="flex items-center gap-1 text-xs text-green-600">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                    <span>{projects.filter(p => p.Status === 'running').length} running</span>
+                    <span>{stats.runningContainers} running</span>
                   </div>
                 </div>
               </div>
@@ -224,7 +201,7 @@ function Containers() {
 
           {/* Replace the buttons section with CreateContButton */}
           <div className="flex gap-3">
-            <CreateContButton>
+            <CreateContButton onContainerCreated={handleRefresh}>
               <button 
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl
                           bg-gray-900 text-white hover:bg-gray-800 
@@ -248,46 +225,13 @@ function Containers() {
 
       <div className="rounded-sm h-auto overflow-auto">
         <div className="text-black border-2 h-[700px] overflow-auto justify-center">
-          {loading ? (
-            <Loader 
-              title="Loading Containers" 
-              description="Please wait while we fetch your containers" 
-            />
-          ) : error ? (
-            <div className="flex flex-col items-center justify-center h-full">
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                Error: {error.message}
-              </h3>
-            </div>
-          ) : filteredProjects.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full">
-              <svg
-                className="w-32 h-32 text-gray-400 mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-                />
-              </svg>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                {searchQuery ? "No matching containers found" : "No Containers Found"}
-              </h3>
-              <p className="text-gray-500">
-                {searchQuery 
-                  ? "Try adjusting your search terms"
-                  : "Start by creating your first container"
-                }
-              </p>
-            </div>
-          ) : (
-            <HoverEffect items={filteredProjects} />
-          )}
+          {/* Use the self-fetching HoverEffect component */}
+          <HoverEffect 
+            searchQuery={searchQuery} 
+            key={refreshTrigger} // Force re-render on refresh trigger change
+            onRefresh={handleRefresh}
+            onStatsUpdate={updateContainerStats}
+          />
         </div>
       </div>
     </div>
