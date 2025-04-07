@@ -224,7 +224,7 @@ function Containers() {
       </div>
 
       <div className="rounded-sm h-auto overflow-auto">
-        <div className="text-black border-2 h-[700px] overflow-auto justify-center">
+        <div className="text-black  h-[700px] overflow-auto justify-center">
           {/* Use the self-fetching HoverEffect component */}
           <HoverEffect 
             searchQuery={searchQuery} 
