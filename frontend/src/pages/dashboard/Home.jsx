@@ -45,13 +45,6 @@ useEffect(() => {
       let data = await response.json();
       const userContainers = await Promise.all(data.map(async (container) => {
         const details = await getContainerStatus(container.id);
-        const temp = await fetch(`http://localhost:3000/container/templateName/${container.id}`, {
-          method: "GET",
-          headers: {
-            Authorization: "Bearer " + tok.token,
-          },
-        });
-        const templateData = await temp.json();
         return {
           id: container.id,
           title: container.name,
@@ -61,7 +54,6 @@ useEffect(() => {
           CPU: details.cpu,
           Memory: details.memory,
           MemoryUsage: details.memoryUsage,
-          Template: templateData.templateName,
         };
       }));
       setProjects(userContainers);
@@ -132,7 +124,6 @@ useEffect(() => {
       </div>
 
       <div>
-        {(projects && projects.length > 0) ? (
           <div className="space-y-6">
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -194,49 +185,6 @@ useEffect(() => {
               </div>
             </div>
           </div>
-        ) : (
-          <div className="bg-white rounded-xl shadow-sm p-12">
-            <div className="flex flex-col items-center justify-center max-w-2xl mx-auto text-center">
-              <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-8">
-                <svg
-                  className="w-12 h-12 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-4">Welcome to Container Management!</h3>
-              <p className="text-gray-500 mb-8">
-                Get started by creating your first container. Click the "Create Container" button above to begin your journey.
-              </p>
-              <div className="bg-gray-50 rounded-xl p-6 w-full">
-                <h4 className="text-left text-gray-800 font-semibold mb-4">Quick Start Guide:</h4>
-                <div className="space-y-4">
-                  {[
-                    'Click on "Create Container" at the top of the page',
-                    "Choose your preferred container template",
-                    "Configure your container settings"
-                  ].map((step, index) => (
-                    <div key={index} className="flex items-center space-x-3 text-left">
-                      <span className="flex-shrink-0 w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-500 font-semibold border border-gray-200">
-                        {index + 1}
-                      </span>
-                      <p className="text-gray-600">{step}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
