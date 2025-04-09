@@ -160,13 +160,14 @@ export const HoverEffect = ({
           showConfirmButton: false
         });
         
-        // Update state to remove the deleted container
-        const updatedItems = prevItems.filter(item => item.id !== containerId);
-        setItems(updatedItems);
-        // Update stats after deletion
-        if (typeof onStatsUpdate === 'function') {
-          onStatsUpdate(updatedItems);
-        }
+        // Update state to remove the deleted container and update stats
+        setItems(prevItems => {
+          const updatedItems = prevItems.filter(item => item.id !== containerId);
+          if (typeof onStatsUpdate === 'function') {
+            onStatsUpdate(updatedItems);
+          }
+          return updatedItems;
+        });
       } else {
         Swal.fire({
           icon: 'error',
@@ -207,17 +208,18 @@ export const HoverEffect = ({
           showConfirmButton: false
         });
         
-        // Update container status in the state
-        const updatedItems = prevItems.map(item => 
-          item.id === containerId 
-            ? { ...item, Status: 'stopped' } 
-            : item
-        );
-        setItems(updatedItems);
-        // Update stats after stopping container
-        if (typeof onStatsUpdate === 'function') {
-          onStatsUpdate(updatedItems);
-        }
+        // Update container status in the state and stats
+        setItems(prevItems => {
+          const updatedItems = prevItems.map(item => 
+            item.id === containerId 
+              ? { ...item, Status: 'stopped' } 
+              : item
+          );
+          if (typeof onStatsUpdate === 'function') {
+            onStatsUpdate(updatedItems);
+          }
+          return updatedItems;
+        });
       } else {
         Swal.fire({
           icon: 'error',
