@@ -35,7 +35,8 @@ const getContainerStatus = async (containerId, token) => {
 export const HoverEffect = ({
   className,
   searchQuery = "",
-  onRefresh = null
+  onRefresh = null,
+  onStatsUpdate = null
 }) => {
   let [hoveredIndex, setHoveredIndex] = useState(null);
   let [editIndex, setEditIndex] = useState(null);
@@ -93,6 +94,11 @@ export const HoverEffect = ({
       
       setItems(userContainers);
       setLoading(false);
+      
+      // Update parent component's stats
+      if (typeof onStatsUpdate === 'function') {
+        onStatsUpdate(userContainers);
+      }
     } catch (error) {
       console.error("Error fetching containers:", error);
       setError(error.message);
@@ -155,7 +161,12 @@ export const HoverEffect = ({
         });
         
         // Update state to remove the deleted container
-        setItems(prevItems => prevItems.filter(item => item.id !== containerId));
+        const updatedItems = prevItems.filter(item => item.id !== containerId);
+        setItems(updatedItems);
+        // Update stats after deletion
+        if (typeof onStatsUpdate === 'function') {
+          onStatsUpdate(updatedItems);
+        }
       } else {
         Swal.fire({
           icon: 'error',
@@ -197,11 +208,16 @@ export const HoverEffect = ({
         });
         
         // Update container status in the state
-        setItems(prevItems => prevItems.map(item => 
+        const updatedItems = prevItems.map(item => 
           item.id === containerId 
             ? { ...item, Status: 'stopped' } 
             : item
-        ));
+        );
+        setItems(updatedItems);
+        // Update stats after stopping container
+        if (typeof onStatsUpdate === 'function') {
+          onStatsUpdate(updatedItems);
+        }
       } else {
         Swal.fire({
           icon: 'error',

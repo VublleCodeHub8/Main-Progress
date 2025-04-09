@@ -19,15 +19,12 @@ const getContainerStatus = async (containerId) => {
 };
 
 function Containers() {
-  const [loading, setLoading] = useState(false); // For potential future use
-  const [error, setError] = useState(null); // For potential future use
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [stats, setStats] = useState({
     totalContainers: 0,
     runningContainers: 0
   });
-
   // Function to update container stats from nested component
   const updateContainerStats = (containers) => {
     if (Array.isArray(containers)) {
