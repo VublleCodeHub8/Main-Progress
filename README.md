@@ -172,6 +172,7 @@ npm run start  # 🔌 http://localhost:3000
 - 🐳 Docker API
 - 🔑 JWT Auth
 - 📦 Socket.IO
+- 🚀 Redis Cache
 </td>
 <td width="33%">
 <h3 align="center">🔧 DevOps</h3>
@@ -184,6 +185,22 @@ npm run start  # 🔌 http://localhost:3000
 </td>
 </tr>
 </table>
+
+## 🗄️ Redis Cache Setup
+
+```bash
+# Start Redis Stack (includes Redis + RedisInsight)
+docker run -d --name redis-stack -p 6380:6379 -p 8001:8001 redis/redis-stack:latest
+
+# If container stops, restart it
+docker start redis-stack
+
+# To view Redis logs
+docker logs redis-stack
+
+# Access RedisInsight dashboard
+# Open http://localhost:8001 in your browser
+```
 
 ## 🌟 Features
 
