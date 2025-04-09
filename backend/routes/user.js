@@ -3,7 +3,7 @@ const router = express.Router();
 const { getUserData, addMoreData } = require('../controllers/user');
 const multer = require("multer");
 const { isUser } = require('../middlewares/auth');
-const { addBugReportController, addContactUsController, getTop5NotificationsController } = require('../controllers/user');
+const { addBugReportController, addContactUsController, getTop5NotificationsController, getProfileData } = require('../controllers/user');
 
 /**
  * @swagger
@@ -151,6 +151,37 @@ router.get('/topnotification', getTop5NotificationsController);
 
 /**
  * @swagger
+ * /user/getprofiledata:
+ *   get:
+ *     tags: [User]
+ *     summary: Get user profile data
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 email:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 bio:
+ *                   type: string
+ *                 profilePic:
+ *                   type: string
+ *       401:
+ *         description: Not authorized
+ *       500:
+ *         description: Server error
+ */
+router.get('/getprofiledata', getProfileData);
+
+/**
+ * @swagger
  * /user/addmoredata:
  *   put:
  *     tags: [User]
@@ -181,6 +212,9 @@ router.get('/topnotification', getTop5NotificationsController);
  *       500:
  *         description: Server error
  */
+
+
+
 router.put('/addmoredata',
     addMoreDataMiddleware[0], 
     async (req, res) => {
@@ -200,6 +234,8 @@ router.put('/addmoredata',
         }
     }
 );
+
+
 
 // router.get('/getbilldetails', getBillDetails);
 

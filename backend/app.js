@@ -9,6 +9,7 @@ const morgan = require('morgan')
 const rfs = require('rotating-file-stream')
 const csrf = require('csurf')
 const cookieParser = require('cookie-parser')
+const Redis = require('ioredis')
 
 const { isAuth, isAdmin, isDev, isUser } = require('./middlewares/auth')
 
