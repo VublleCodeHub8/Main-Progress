@@ -3,7 +3,7 @@ const router = express.Router();
 const { getUserData, addMoreData } = require('../controllers/user');
 const multer = require("multer");
 const { isUser } = require('../middlewares/auth');
-const { addBugReportController, addContactUsController, getTop5NotificationsController, getProfileData } = require('../controllers/user');
+const { addBugReportController, addContactUsController, getTop5NotificationsController, getProfileData, updateAdditionalInfo } = require('../controllers/user');
 
 /**
  * @swagger
@@ -118,6 +118,75 @@ router.post('/addbugreport', addBugReportController);
  *         description: Server error
  */
 router.post('/addcontactus', addContactUsController);
+
+/**
+ * @swagger
+ * /user/updateadditionalinfo:
+ *   put:
+ *     tags: [User]
+ *     summary: Update user additional information
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - location
+ *               - occupation
+ *               - socialLinks
+ *             properties:
+ *               location:
+ *                 type: string
+ *               occupation:
+ *                 type: string
+ *               socialLinks:
+ *                 type: object
+ *                 properties:
+ *                   github:
+ *                     type: string
+ *                   twitter:
+ *                     type: string
+ *                   linkedin:
+ *                     type: string
+ *                   website:
+ *                     type: string
+ *     responses:
+ *       200:
+ *         description: Additional info updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 additionalInfo:
+ *                   type: object
+ *                   properties:
+ *                     location:
+ *                       type: string
+ *                     occupation:
+ *                       type: string
+ *                     socialLinks:
+ *                       type: object
+ *                       properties:
+ *                         github:
+ *                           type: string
+ *                         twitter:
+ *                           type: string
+ *                         linkedin:
+ *                           type: string
+ *                         website:
+ *                           type: string
+ *       401:
+ *         description: Not authorized
+ *       500:
+ *         description: Server error
+ */
+router.put('/updateadditionalinfo', updateAdditionalInfo);
 
 /**
  * @swagger

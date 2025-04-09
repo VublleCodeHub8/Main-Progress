@@ -71,6 +71,13 @@ export const HoverEffect = ({
       
       let data = await response.json();
       const userContainers = await Promise.all(data.map(async (container) => {
+        const templateName = await fetch('http://localhost:3000/container/templateName/' + container.id, {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + token.token,
+          },
+        });
+        const templateNameResponse = await templateName.json();
         const details = await getContainerStatus(container.id, token.token);
         return {
           id: container.id,
@@ -80,7 +87,7 @@ export const HoverEffect = ({
           Status: details.status,
           CPU: details.cpu,
           Memory: details.memory,
-          Template: container.template,
+          Template: templateNameResponse.templateName,
         };
       }));
       

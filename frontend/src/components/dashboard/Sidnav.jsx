@@ -23,7 +23,8 @@ function Sidebar({ isOpen }) {
     const dispatch = useDispatch();
     const [activeHover, setActiveHover] = useState(null);
     const [isHovering, setIsHovering] = useState(false);
-    
+    const [profileData, setProfileData] = useState(null);
+
     const isActive = (path) => {
         if (path === '/') {
           return location.pathname === '/';
@@ -80,10 +81,31 @@ function Sidebar({ isOpen }) {
         item.showFor.includes(token?.role || 'user')
     );
 
-    // Get user initials for avatar
-    const getUserInitials = () => {
-        const name = token?.name || "User";
-        return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    const fetchProfileData = async () => {
+        try {
+            const response = await fetch("http://localhost:3000/user/getprofiledata", {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token.token}`,
+                },
+            });
+            const data = await response.json();
+            setProfileData(data);
+        } catch (error) {
+            console.error("Error fetching profile data:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (token) {
+            fetchProfileData();
+        }
+    }, [token]);
+
+    // Get first letter of name for avatar
+    const getNameInitial = () => {
+        const name = profileData?.name || "User";
+        return name.charAt(0).toUpperCase();
     };
 
     // Animation variants with refined parameters for smoother transitions
@@ -260,7 +282,7 @@ function Sidebar({ isOpen }) {
                 </div>
                 
                 {/* User Profile Section */}
-                <div className="mt-auto border-t border-gray-200">
+                <div className="mt-auto border-t border-gray-200 bg-gradient-to-b from-white to-gray-50">
                     <AnimatePresence mode="wait">
                         {isOpen ? (
                             <motion.div 
@@ -273,58 +295,70 @@ function Sidebar({ isOpen }) {
                                     stiffness: 200,
                                     damping: 25,
                                     mass: 0.8,
-                                    delay: 0.1 // Reduced delay
+                                    delay: 0.1
                                 }}
-                                className="p-4"
+                                className="p-4 relative"
                             >
-                                <div className="flex items-center">
+                                <div className="flex items-center p-2 rounded-lg hover:bg-white/80 transition-all duration-300 group">
                                     <motion.div 
-                                        className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-md"
-                                        whileHover={{ scale: 1.1 }}
-                                        whileTap={{ scale: 0.9 }}
+                                        className="w-11 h-11 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg ring-2 ring-white"
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
                                     >
-                                        {getUserInitials()}
+                                        {getNameInitial()}
                                     </motion.div>
-                                    <div className="ml-3">
-                                        <p className="text-sm font-medium text-gray-800">
-                                            {token?.name || "User"}
-                                        </p>
-                                        <p className="text-xs text-gray-500 flex items-center">
-                                            <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1"></span>
-                                            {token?.role || "User"}
-                                        </p>
+                                    <div className="ml-3 flex-1">
+                                        <motion.p 
+                                            className="text-sm font-medium text-gray-800"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ delay: 0.2 }}
+                                        >
+                                            {profileData?.name || "User"}
+                                        </motion.p>
+                                        <motion.div 
+                                            className="flex items-center gap-2"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ delay: 0.3 }}
+                                        >
+                                            <span className="flex items-center gap-1">
+                                                <span className="inline-block w-2 h-2 rounded-full bg-green-500 ring-2 ring-green-200"></span>
+                                                <span className="text-xs text-gray-600">
+                                                    {token?.role === "admin" ? "Administrator" : token?.role === "dev" ? "Developer" : "User"}
+                                                </span>
+                                            </span>
+                                        </motion.div>
                                     </div>
                                 </div>
-                                <div className="mt-3 pt-2 border-t border-gray-100">
+                                <motion.div 
+                                    className="mt-3 pt-3 border-t border-gray-200"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.4 }}
+                                >
                                     <motion.button 
-                                        className="flex items-center text-sm text-gray-600 hover:text-red-500 transition-colors"
-                                        whileHover={{ x: 5 }}
-                                        whileTap={{ scale: 0.95 }}
+                                        className="flex items-center w-full px-2 py-1.5 text-sm text-gray-600 hover:text-red-500 rounded hover:bg-red-50 transition-all duration-300"
+                                        whileHover={{ x: 4 }}
+                                        whileTap={{ scale: 0.98 }}
                                         onClick={handleSignOut}
                                     >
                                         <FaSignOutAlt className="mr-2" />
                                         <span>Sign Out</span>
                                     </motion.button>
-                                </div>
+                                </motion.div>
                             </motion.div>
                         ) : (
                             <motion.div 
                                 key="collapsed-profile"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ 
-                                    duration: 0.3,
-                                    ease: customEase
-                                }}
-                                className="p-3 flex justify-center"
+                                className="p-4 flex justify-center"
                             >
                                 <motion.div 
-                                    className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-md"
+                                    className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg ring-2 ring-white"
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
                                 >
-                                    {getUserInitials()}
+                                    {getNameInitial()}
                                 </motion.div>
                             </motion.div>
                         )}

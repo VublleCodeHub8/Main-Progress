@@ -9,12 +9,12 @@ const redis = new Redis({
     }
 });
 
-function generateCacheKey(req, email) {
+function generateCacheKey(req, data) {
     const baseUrl = req.path
         .replace(/^\/+|\/+$/g, '')  // remove leading/trailing slashes
         .replace(/\//g, ':');       // convert slashes to colons
 
-    return `${baseUrl}:${email}`;
+    return `${baseUrl}:${data}`;
 }
 
 module.exports = { redis, generateCacheKey };

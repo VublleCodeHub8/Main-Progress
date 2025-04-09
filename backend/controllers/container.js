@@ -71,7 +71,6 @@ const runContainer = async (req, res) => {
 
         await container.start();
         await setStartedAt(contId);
-        // console.log(contId, " started");
 
         const doc = await getContainerById(contId);
         res.json({

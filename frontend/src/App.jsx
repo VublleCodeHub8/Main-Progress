@@ -29,6 +29,7 @@ import ContainerHistory from "./pages/admin/containerHistory";
 import AdminContactUs from "./pages/admin/adminContactUs";
 import Notification from "./pages/dev/notification";
 import DevBugReports from "./pages/dev/bugReports";
+import AdditionalInfo from "./pages/dashboard/AdditionalInfo";
 const router = createBrowserRouter([
   {
     path: "auth",
@@ -73,6 +74,10 @@ const router = createBrowserRouter([
           {
             path: "analytics",
             element: <Analytics />
+          },
+          {
+            path: "additionalinfo",
+            element: <AdditionalInfo />,
           },
           // {
           //   path : "settings",

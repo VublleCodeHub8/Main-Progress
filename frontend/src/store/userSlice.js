@@ -6,7 +6,7 @@ export const fetchUserData = createAsyncThunk(
   "user/fetchUserData",
   async (token, { rejectWithValue }) => {
     try {
-      const response = await fetch("http://localhost:3000/user/getuserdata", {
+      const response = await fetch("http://localhost:3000/user/getprofiledata", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token.token}`,
@@ -32,6 +32,26 @@ export const fetchUserData = createAsyncThunk(
     }
   }
 );
+
+const fetchUserAnalyticsData = createAsyncThunk(
+  "user/fetchUserAnalyticsData",
+  async (token, { rejectWithValue }) => {
+    try {
+      const response = await fetch("http://localhost:3000/user/getuserdata", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token.token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      console.log("kk : ",data);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+)
 
 export const updateUserData = createAsyncThunk(
   "user/updateUserData",
@@ -78,6 +98,7 @@ const userSlice = createSlice({
     user: null,
     status: "idle",
     isEditMode: false,
+    userAnalytics: null,
     error: null,
   },
   reducers: {
@@ -111,6 +132,12 @@ const userSlice = createSlice({
         state.isEditMode = false;
       })
       .addCase(updateUserData.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      .addCase(fetchUserAnalyticsData.fulfilled, (state, action) => {
+        state.userAnalytics = action.payload;
+      })
+      .addCase(fetchUserAnalyticsData.rejected, (state, action) => {
         state.error = action.payload;
       });
   },

@@ -65,6 +65,40 @@ const userSchema = mongoose.Schema({
                 required: true
             }]
         }]
+    },
+    additionalInfo: {
+        location: {
+            type: String,
+            trim: true,
+            default: ''
+        },
+        occupation: {
+            type: String,
+            trim: true,
+            default: ''
+        },
+        socialLinks: {
+            github: {
+                type: String,
+                trim: true,
+                default: ''
+            },
+            twitter: {
+                type: String,
+                trim: true,
+                default: ''
+            },
+            linkedin: {
+                type: String,
+                trim: true,
+                default: ''
+            },
+            website: {
+                type: String,
+                trim: true,
+                default: ''
+            }
+        }
     }
 })
 
@@ -83,6 +117,51 @@ async function addUser(email, password, username, role) {
         await newUser.save();
     } catch (err) {
         console.log(err);
+        throw err;
+    }
+}
+
+async function addAdditionalInfo(email, updates = {}) {
+    try {
+        const user = await User.findOne({ email: email });
+        if (!user) {
+            throw new Error("User not found");
+        }
+        
+        // Initialize additionalInfo if it doesn't exist
+        if (!user.additionalInfo) {
+            user.additionalInfo = {};
+        }
+        
+        // Update location if provided and not empty
+        if (updates.location !== undefined && updates.location !== '') {
+            user.additionalInfo.location = updates.location;
+        }
+        
+        // Update occupation if provided and not empty
+        if (updates.occupation !== undefined && updates.occupation !== '') {
+            user.additionalInfo.occupation = updates.occupation;
+        }
+        
+        // Handle socialLinks as an object with platform keys
+        if (updates.socialLinks !== undefined && typeof updates.socialLinks === 'object') {
+            // Initialize socialLinks if doesn't exist
+            if (!user.additionalInfo.socialLinks) {
+                user.additionalInfo.socialLinks = {};
+            }
+            
+            // Update each social link platform if provided and not empty
+            for (const platform in updates.socialLinks) {
+                if (updates.socialLinks[platform] !== undefined && updates.socialLinks[platform] !== '') {
+                    user.additionalInfo.socialLinks[platform] = updates.socialLinks[platform];
+                }
+            }
+        }
+        
+        await user.save();
+        return user;
+    } catch (err) {
+        console.error('Update additional info error:', err);
         throw err;
     }
 }
@@ -279,3 +358,4 @@ exports.addtemplate = addtemplate;
 exports.removetemplate = removetemplate;
 exports.billIncrement = billIncrement;
 exports.containerUsageIncrement = containerUsageIncrement;
+exports.addAdditionalInfo = addAdditionalInfo;

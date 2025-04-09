@@ -1,7 +1,5 @@
-const express = require('express');
 const multer = require('multer');
-const mongoose = require('mongoose');
-const { getUserByEmail } = require('../models/user');
+const { getUserByEmail, addAdditionalInfo } = require('../models/user');
 const User = require('../models/user').userModel;
 const { addBugReport } = require('../models/bugReport');
 const { addContactUs } = require('../models/contactUs');
@@ -62,6 +60,17 @@ const addMoreData = async ({email, username, bio, file}) => {
         if (!updatedUser) {
             return res.status(404).json({ message: "User not found" });
         }
+
+        // Delete the user's cached data
+        try {
+            const cacheKey = generateCacheKey({ path: 'getprofiledata' }, email);
+            await redis.del(cacheKey);
+            console.log('Cache cleared for user:', email);
+        } catch (redisError) {
+            console.warn('Failed to clear Redis cache:', redisError);
+            // Continue execution even if cache clearing fails
+        }
+
         const responseUser = updatedUser.toObject();
         if (responseUser.profilePic && responseUser.profilePic.data) {
             responseUser.profilePic = {
@@ -108,11 +117,21 @@ const getProfileData = async (req, res) => {
             email: userResponse.email,
             name: userResponse.username,
             bio: userResponse.bio,
-            profilePic: userResponse.profilePic
+            profilePic: userResponse.profilePic,
+            additionalInfo: userResponse.additionalInfo || {
+                location: '',
+                occupation: '',
+                socialLinks: {
+                    github: '',
+                    twitter: '',
+                    linkedin: '',
+                    website: ''
+                }
+            }
         };
 
         try {
-            await redis.set(cacheKey, JSON.stringify(selectedData), 'EX', 3600); // Cache for 1 hour
+            await redis.set(cacheKey, JSON.stringify(selectedData));
         } catch (redisError) {
             console.warn('Redis cache set error:', redisError);
         }
@@ -126,32 +145,45 @@ const getProfileData = async (req, res) => {
     }
 }
 
+const updateAdditionalInfo = async (req, res) => {
+    const email = req.userData.email;
+    const { location, occupation, socialLinks } = req.body;
+    try {
+        const cacheKey = generateCacheKey({ path: 'getprofiledata' }, email);
+        try {
+            await redis.del(cacheKey);
+        } catch (redisError) {
+            console.warn('Failed to clear Redis cache:', redisError);
+        }
+
+        const updatedUser = await addAdditionalInfo(email, { location, occupation, socialLinks });
+        res.json({
+            message: 'Additional info updated successfully',
+            additionalInfo: updatedUser.additionalInfo
+        });
+    } catch (err) {
+        console.error('Update additional info error:', err);
+        res.status(500).json({ 
+            error: 'An error occurred while updating additional info',
+            message: err.message 
+        });
+    }
+};
+
 const getUserData = async (req, res) => {
     const email = req.userData.email;
 
     try {
         const user = await getUserByEmail(email);
-        
         if (!user) {
             return res.status(404).json({ error: 'User not found.' });
         }
-        const userResponse = user.toObject();
-        if (userResponse.profilePic && userResponse.profilePic.data) {
-            userResponse.profilePic = {
-                contentType: userResponse.profilePic.contentType,
-                data: userResponse.profilePic.data.toString('base64')
-            };
-        }
-        if (!userResponse.billingInfo) {
-            userResponse.billingInfo = { amount: 0 , monthlyBills: [] };
-        }
-        if (!userResponse.monthlyBills) {
-            userResponse.monthlyBills = [];
-        }
-        if (!userResponse.containerUsage) {
-            userResponse.containerUsage = { totalContainers: 0, monthlyUsage: [] };
-        }
-        res.json(userResponse);
+
+        res.json({
+            billingInfo: user.billingInfo || { amount: 0, monthlyBills: [] },
+            monthlyBills: user.monthlyBills || [],
+            containerUsage: user.containerUsage || { totalContainers: 0, monthlyUsage: [] }
+        });
     } catch (err) {
         console.error('Get user data error:', err);
         res.status(500).json({ 
@@ -194,6 +226,6 @@ module.exports = {
     addContactUsController,
     getTop5NotificationsController,
     upload,
-    getTop5NotificationsController,
-    getProfileData
+    getProfileData,
+    updateAdditionalInfo
 };

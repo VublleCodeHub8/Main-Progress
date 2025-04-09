@@ -1,4 +1,4 @@
-import { Outlet, useNavigate, Navigate } from "react-router-dom";
+import { Outlet, useNavigate, Navigate, Link } from "react-router-dom";
 import Sidebar from "@/components/dashboard/Sidnav";
 import { useDispatch, useSelector } from "react-redux";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { fetchUserData, updateUserData, setEditMode } from "../store/userSlice";
-import { User, Box, BarChart, Shield, Code, LogOut, Menu } from "lucide-react";
+import { User, Box, BarChart, Shield, Code, LogOut, Menu, Settings } from "lucide-react";
 import NotificationBell from "@/components/ui/notificationBell";
 
 const useAuth = () => {
@@ -94,6 +94,13 @@ function DashboardLayout() {
 
           <div className="flex items-center gap-4">
             <NotificationBell />
+            <Link 
+              to="/additionalinfo"
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 text-gray-600 hover:text-gray-900 inline-flex items-center justify-center"
+              title="Additional Information"
+            >
+              <Settings className="h-5 w-5" />
+            </Link>
             <DropdownMenu>
               <DropdownMenuTrigger className="group flex items-center gap-3 px-3 py-2 
                                     bg-white border border-gray-200 rounded-xl
@@ -103,16 +110,16 @@ function DashboardLayout() {
                   <Avatar className="w-10 h-10 ring-2 ring-white shadow-sm">
                     <AvatarImage
                       src={user?.profilePicUrl || "https://github.com/shadcn.png"}
-                      alt={user?.username}
+                      alt={user?.name}
                       className="object-cover"
                     />
                     <AvatarFallback className="bg-gray-100 text-gray-600 font-medium">
-                      {user?.username?.charAt(0).toUpperCase()}
+                      {user?.name?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col items-start">
                     <span className="text-sm font-semibold text-gray-700">
-                      {user?.username}
+                      {user?.name}
                     </span>
                     <span className="text-xs text-gray-500">
                       {token.role === "admin" ? "Administrator" : 
@@ -145,15 +152,15 @@ function DashboardLayout() {
                     <Avatar className="h-8 w-8 ring-1 ring-white shadow-sm">
                       <AvatarImage
                         src={user?.profilePicUrl || "https://github.com/shadcn.png"}
-                        alt={user?.username}
+                        alt={user?.name}
                         className="object-cover"
                       />
                       <AvatarFallback className="bg-gray-100 text-gray-600 text-sm">
-                        {user?.username?.charAt(0).toUpperCase()}
+                        {user?.name?.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{user?.username}</p>
+                      <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                       <p className="text-xs text-gray-500">{user?.email}</p>
                     </div>
                   </div>

@@ -57,11 +57,44 @@ function Analytics() {
   const [selectedMonth, setSelectedMonth] = useState(lastTwelveMonths.length - 1);
   const [templates, setTemplates] = useState([]);
   const [projects, setProjects] = useState([]);
-  const { user, status, isEditMode } = useSelector((state) => state.user);
+  const [ userAnalytics, setuserAnalytics] = useState(null)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [containerData, setContainerData] = useState(null);
-   
+
+  const fetchUserAnalyticsData = async () => {
+    try {
+      setLoading(true);
+      const tok = JSON.parse(localStorage.getItem("token"));
+      if (!tok?.token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch("http://localhost:3000/user/getuserdata", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${tok.token}`,
+          "Content-Type": "application/json"
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch analytics data');
+      }
+
+      const data = await response.json();
+      setuserAnalytics(data);
+    } catch (error) {
+      console.error("Error fetching analytics data:", error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchUserAnalyticsData();
+  }, []);
 
   // Fetch templates
   useEffect(() => {
@@ -138,15 +171,15 @@ function Analytics() {
       try {
         const colors = generateColors(templates.length);
         
-        // Get container usage from user data
+        // Get container usage from userAnalytics data
         const containerCounts = templates.map((template, index) => {
-          // Get container IDs for each month from user.containerUsage.monthlyUsage
+          // Get container IDs for each month from userAnalytics.containerUsage.monthlyUsage
           const monthlyCounts = lastTwelveMonths.map(async (monthData) => {
             const month = monthData.label.split(' ')[0];
             const year = parseInt(monthData.label.split(' ')[1]);
             
             // Find matching monthly usage
-            const monthlyUsage = user?.containerUsage?.monthlyUsage?.find(
+            const monthlyUsage = userAnalytics?.containerUsage?.monthlyUsage?.find(
               usage => usage.month === month && usage.year === year
             );
             
@@ -171,9 +204,9 @@ function Analytics() {
           };
         });
         
-        // Get monthly bills from user data
+        // Get monthly bills from userAnalytics data
         const billData = lastTwelveMonths.map(monthData => {
-          const matchingBill = user?.billingInfo?.monthlyBills?.find(
+          const matchingBill = userAnalytics?.billingInfo?.monthlyBills?.find(
             bill => bill.month === monthData.label.split(' ')[0] && 
                    bill.year === parseInt(monthData.label.split(' ')[1])
           );
@@ -204,7 +237,7 @@ function Analytics() {
         billData: Array(lastTwelveMonths.length).fill(0)
       });
     }
-  }, [templates, user?.billingInfo?.monthlyBills, user?.containerUsage?.monthlyUsage]);
+  }, [templates, userAnalytics?.billingInfo?.monthlyBills, userAnalytics?.containerUsage?.monthlyUsage]);
   // console.log(containerData);
   if (loading) {
     return (
@@ -345,14 +378,14 @@ function Analytics() {
       // Get active containers count from projects
       const activeContainers = projects.length;
       
-      // Get total containers from user data
-      const totalContainers = user?.containerUsage?.totalContainers || 0;
+      // Get total containers from userAnalytics data
+      const totalContainers = userAnalytics?.containerUsage?.totalContainers || 0;
       
       // Calculate container growth (compared to previous month)
       const containerGrowth = calculateGrowthRate(selectedMonthIndex);
       
-      // Get monthly bill from user data
-      const matchingBill = user?.billingInfo?.monthlyBills?.find(
+      // Get monthly bill from userAnalytics data
+      const matchingBill = userAnalytics?.billingInfo?.monthlyBills?.find(
         bill => bill.month === month && bill.year === year
       );
       const totalBill = matchingBill ? matchingBill.amount : 0;
@@ -360,8 +393,8 @@ function Analytics() {
       // Calculate bill growth (compared to previous month)
       const billGrowth = calculateBillGrowthRate(selectedMonthIndex);
       
-      // Get monthly container usage from user data
-      const monthlyUsage = user?.containerUsage?.monthlyUsage?.find(
+      // Get monthly container usage from userAnalytics data
+      const monthlyUsage = userAnalytics?.containerUsage?.monthlyUsage?.find(
         usage => usage.month === month && usage.year === year
       );
       
@@ -380,7 +413,7 @@ function Analytics() {
       );
       
       // Calculate total bill across all months
-      const totalBillTillNow = user?.billingInfo?.amount || 0;
+      const totalBillTillNow = userAnalytics?.billingInfo?.amount || 0;
       
       return {
         totalContainers,
@@ -703,7 +736,7 @@ function Analytics() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
-              {user?.billingInfo?.amount ? `$${user.billingInfo.amount.toFixed(2)}` : "$0.00"}
+              {userAnalytics?.billingInfo?.amount ? `$${userAnalytics.billingInfo.amount.toFixed(2)}` : "$0.00"}
             </div>
             <div className="flex items-center mt-1 text-xs">
               <Badge variant={metrics.billGrowth > 0 ? "warning" : "success"} className="text-xs px-1 py-0">

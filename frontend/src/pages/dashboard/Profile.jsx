@@ -202,6 +202,9 @@ const Profile = () => {
     activeTime: 0
   });
 
+  // Add new state for billing data
+  const [billingData, setBillingData] = useState(null);
+
   // Add this function to calculate time difference in hours
   const calculateActiveTime = (startedAt) => {
     if (!startedAt) return 0;
@@ -237,6 +240,22 @@ const Profile = () => {
     }
   };
 
+  const fetchotherdata = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/user/getuserdata", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token.token}`,
+        },
+      });
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching other data:", error);
+      return null;
+    }
+  }
+
   // Update the userStats to format the active time better
   const formatActiveTime = (hours) => {
     if (hours < 24) {
@@ -252,7 +271,7 @@ const Profile = () => {
   const userStats = [
     {
       label: "Total Bill",
-      value: user?.billingInfo?.amount ? `$${user.billingInfo.amount.toFixed(2)}` : "$0.00",
+      value: billingData?.billingInfo?.amount ? `$${billingData.billingInfo.amount.toFixed(2)}` : "$0.00",
       icon: <DollarSign className="h-4 w-4 text-green-500" />,
       color: "bg-green-50"
     },
@@ -288,17 +307,27 @@ const Profile = () => {
   useEffect(() => {
     if (user) {
       setUpdatedUser({
-        username: user.username || "",
+        username: user.name || "",
         bio: user.bio || "",
-        profilePic: user.profilePicUrl || ""
+        profilePic: user.profilePicUrl || "",
+        location: user.additionalInfo.location || "",
+        occupation: user.additionalInfo.occupation || "",
+        socialLinks: user.additionalInfo.socialLinks || {}
       });
     }
+    console.log(updatedUser)
   }, [user]);
 
   // Add to useEffect
   useEffect(() => {
     if (token) {
       fetchContainerStats();
+      // Fetch billing data
+      fetchotherdata().then(data => {
+        if (data) {
+          setBillingData(data);
+        }
+      });
     }
   }, [token]);
 
@@ -451,7 +480,7 @@ const Profile = () => {
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
                       <User className="h-5 w-5 text-gray-400" />
-                      <h1 className="text-2xl font-bold text-gray-900">{user?.username}</h1>
+                      <h1 className="text-2xl font-bold text-gray-900">{user?.name}</h1>
                     </div>
                     <div className="flex items-center gap-2">
                       <Mail className="h-5 w-5 text-gray-400" />
@@ -525,11 +554,11 @@ const Profile = () => {
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <MapPin className="h-5 w-5 text-gray-400" />
-                  <span className="text-gray-600">{additionalInfo.location || "Location not set"}</span>
+                  <span className="text-gray-600">{updatedUser.location || "Location not set"}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Briefcase className="h-5 w-5 text-gray-400" />
-                  <span className="text-gray-600">{additionalInfo.occupation || "Occupation not set"}</span>
+                  <span className="text-gray-600">{updatedUser.occupation || "Occupation not set"}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Calendar className="h-5 w-5 text-gray-400" />
@@ -544,19 +573,47 @@ const Profile = () => {
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Social Links</h3>
               <div className="space-y-4">
-                {Object.entries(socialLinks).map(([platform, link]) => (
-                  <div key={platform} className="flex items-center gap-3">
-                    {platform === 'github' && <Github className="h-5 w-5 text-gray-400" />}
-                    {platform === 'twitter' && <Twitter className="h-5 w-5 text-gray-400" />}
-                    {platform === 'linkedin' && <Linkedin className="h-5 w-5 text-gray-400" />}
-                    {platform === 'website' && <Globe className="h-5 w-5 text-gray-400" />}
+                {Object.entries(updatedUser.socialLinks || {}).map(([platform, link]) => (
+                  <div key={platform} className="group">
                     {link ? (
-                      <a href={link} target="_blank" rel="noopener noreferrer" 
-                         className="text-blue-600 hover:underline">
-                        {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                      <a
+                        href={link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 hover:bg-gray-50 p-2 rounded-lg transition-all duration-200"
+                        title={`Visit ${platform} profile`}
+                      >
+                        <div className="text-gray-400 group-hover:text-gray-900 transition-colors duration-200">
+                          {platform === 'github' && (
+                            <Github className="h-6 w-6 transform group-hover:scale-110 transition-transform duration-200" />
+                          )}
+                          {platform === 'twitter' && (
+                            <Twitter className="h-6 w-6 transform group-hover:scale-110 transition-transform duration-200" />
+                          )}
+                          {platform === 'linkedin' && (
+                            <Linkedin className="h-6 w-6 transform group-hover:scale-110 transition-transform duration-200" />
+                          )}
+                          {platform === 'website' && (
+                            <Globe className="h-6 w-6 transform group-hover:scale-110 transition-transform duration-200" />
+                          )}
+                        </div>
+                        <span className="text-gray-700 group-hover:text-gray-900 capitalize transition-colors duration-200">
+                          {platform}
+                        </span>
                       </a>
                     ) : (
-                      <span className="text-gray-400">Add {platform}</span>
+                      <div className="flex items-center gap-3 p-2">
+                        <span className="text-gray-300">
+                          {platform === 'github' && <Github className="h-6 w-6" />}
+                          {platform === 'twitter' && <Twitter className="h-6 w-6" />}
+                          {platform === 'linkedin' && <Linkedin className="h-6 w-6" />}
+                          {platform === 'website' && <Globe className="h-6 w-6" />}
+                        </span>
+                        <span className="text-gray-400 capitalize">
+                          {platform}
+                          <span className="text-gray-400 text-sm italic ml-2">Not added</span>
+                        </span>
+                      </div>
                     )}
                   </div>
                 ))}

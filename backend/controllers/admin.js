@@ -5,6 +5,7 @@ const { addtemplate, removetemplate } = require('../models/user');
 const { getAllBugReports, deleteBugReport, toggleSeenStatus } = require('../models/bugReport');
 const { getAllContainerHistory } = require('../models/containerHistory');
 const { getAllContactUs, deleteContactUs } = require('../models/contactUs');
+const { redis, generateCacheKey } = require('../redis-server');
 
 const getAllUsers = async (req, res) => {
     const data = await allUsers();
@@ -82,6 +83,7 @@ const removeTemplate = async (req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 }
+
 const getAllBugReportsController = async (req, res) => {
     const bugReports = await getAllBugReports();
     if (!bugReports) {
@@ -89,6 +91,7 @@ const getAllBugReportsController = async (req, res) => {
     }
     res.status(200).json(bugReports);
 }
+
 const deleteBugReportController = async (req, res) => {
     const { id } = req.body;
     if (!id) {
@@ -99,17 +102,37 @@ const deleteBugReportController = async (req, res) => {
 }
 
 const getAllContainerHistoryController = async (req, res) => {
+    const cacheKey = generateCacheKey(req, 'admin');
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
     const containerHistory = await getAllContainerHistory();
     if (!containerHistory) {
         return res.status(500).json({ error: "Failed to get container history" });
+    }
+    try {
+        await redis.set(cacheKey, JSON.stringify(containerHistory), 'EX', 3600); 
+    } catch (redisError) {
+        console.warn('Redis cache set error:', redisError);
     }
     res.status(200).json(containerHistory);
 }
 
 const getAllContactUsController = async (req, res) => {
+    const cacheKey = generateCacheKey(req, 'admin');
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
     const contactUs = await getAllContactUs();
     if (!contactUs) {
         return res.status(500).json({ error: "Failed to get contact us" });
+    }
+    try {
+        await redis.set(cacheKey, JSON.stringify(contactUs), 'EX', 3600); 
+    } catch (redisError) {
+        console.warn('Redis cache set error:', redisError);
     }
     res.status(200).json(contactUs);
 }
