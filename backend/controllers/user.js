@@ -7,6 +7,7 @@ const { addBugReport } = require('../models/bugReport');
 const { addContactUs } = require('../models/contactUs');
 const { gettop5Notification } = require('../models/notification');
 const storage = multer.memoryStorage();
+const { redis, generateCacheKey } = require('../redis-server');
 
 const upload = multer({
     storage: storage,
@@ -36,29 +37,20 @@ const addContactUsController = async (req, res) => {
 
 
 const addMoreData = async ({email, username, bio, file}) => {
-    
-
     try {
-        // Input validation
         if (!username) {
             return res.status(400).json({ message: "Username is required" });
         }
-
-        // Prepare update fields
         const updateFields = { 
             username: username.trim(), 
             ...(bio && { bio: bio.trim() }) 
         };
-
-        // Handle profile picture
         if (file) {
             updateFields.profilePic = {
                 data: file.buffer,
                 contentType: file.mimetype,
             };
         }
-
-        // Find and update user
         const updatedUser = await User.findOneAndUpdate(
             { email },
             { $set: updateFields },
@@ -67,12 +59,9 @@ const addMoreData = async ({email, username, bio, file}) => {
                 runValidators: true 
             }
         );
-
         if (!updatedUser) {
             return res.status(404).json({ message: "User not found" });
         }
-
-        // Prepare response
         const responseUser = updatedUser.toObject();
         if (responseUser.profilePic && responseUser.profilePic.data) {
             responseUser.profilePic = {
@@ -80,7 +69,6 @@ const addMoreData = async ({email, username, bio, file}) => {
                 data: responseUser.profilePic.data.toString('base64')
             };
         }
-
         return responseUser;
     } 
     catch (err) {
@@ -88,6 +76,55 @@ const addMoreData = async ({email, username, bio, file}) => {
         throw err;
     }
 };
+
+const getProfileData = async (req, res) => {
+    const email = req.userData.email;
+    const cacheKey = generateCacheKey(req, email);
+    try {
+        let userData;
+        try {
+            const cachedData = await redis.get(cacheKey);
+            if(cachedData) {
+                return res.json(JSON.parse(cachedData));
+            }
+        } catch (redisError) {
+            console.warn('Redis cache error:', redisError);
+        }
+
+        const user = await getUserByEmail(email);
+        if(!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const userResponse = user.toObject();
+        if(userResponse.profilePic && userResponse.profilePic.data) {
+            userResponse.profilePic = {
+                contentType: userResponse.profilePic.contentType,
+                data: userResponse.profilePic.data.toString('base64')
+            };
+        }
+
+        const selectedData = {
+            email: userResponse.email,
+            name: userResponse.username,
+            bio: userResponse.bio,
+            profilePic: userResponse.profilePic
+        };
+
+        try {
+            await redis.set(cacheKey, JSON.stringify(selectedData), 'EX', 3600); // Cache for 1 hour
+        } catch (redisError) {
+            console.warn('Redis cache set error:', redisError);
+        }
+        res.json(selectedData);
+    } catch (err) {
+        console.error('Get profile data error:', err);
+        res.status(500).json({ 
+            error: 'An error occurred while retrieving profile data.',
+            message: err.message 
+        });
+    }
+}
 
 const getUserData = async (req, res) => {
     const email = req.userData.email;
@@ -98,33 +135,22 @@ const getUserData = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: 'User not found.' });
         }
-
-        // Create a copy of user to avoid modifying the original document
         const userResponse = user.toObject();
-        
-        // Handle profile picture
         if (userResponse.profilePic && userResponse.profilePic.data) {
             userResponse.profilePic = {
                 contentType: userResponse.profilePic.contentType,
                 data: userResponse.profilePic.data.toString('base64')
             };
         }
-
-        // Ensure billingInfo exists and has amount
         if (!userResponse.billingInfo) {
             userResponse.billingInfo = { amount: 0 , monthlyBills: [] };
         }
-
-        // Ensure monthlyBills exists and has amount
         if (!userResponse.monthlyBills) {
             userResponse.monthlyBills = [];
         }
-
-        // Ensure containerUsage exists and has amount
         if (!userResponse.containerUsage) {
             userResponse.containerUsage = { totalContainers: 0, monthlyUsage: [] };
         }
-
         res.json(userResponse);
     } catch (err) {
         console.error('Get user data error:', err);
@@ -169,4 +195,5 @@ module.exports = {
     getTop5NotificationsController,
     upload,
     getTop5NotificationsController,
+    getProfileData
 };

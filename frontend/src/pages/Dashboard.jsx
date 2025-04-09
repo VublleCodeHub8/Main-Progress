@@ -50,7 +50,7 @@ function DashboardLayout() {
     const fetchUserData = async () => {
       try {
         const tok = JSON.parse(localStorage.getItem("token"));
-        const response = await fetch("http://localhost:3000/getuser", {
+        const response = await fetch("http://localhost:3000/user/getprofiledata", {
           method: "GET",
           headers: {
             Authorization: "Bearer " + tok.token,
