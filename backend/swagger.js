@@ -1,3 +1,4 @@
+require('dotenv').config();
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
@@ -11,7 +12,7 @@ const options = {
         },
         servers: [
             {
-                url: 'http://localhost:3000',
+                url: process.env.DEPLOY_URL,
                 description: 'Development server',
             },
         ],
@@ -24,11 +25,13 @@ const options = {
                 },
             },
         },
-        security: [{
-            bearerAuth: [],
-        }],
+        security: [
+            {
+                bearerAuth: [],
+            },
+        ],
     },
-    apis: ['./routes/*.js'], // Path to the API routes
+    apis: ['./routes/*.js'], // Path to your API route files
 };
 
 const specs = swaggerJsdoc(options);
