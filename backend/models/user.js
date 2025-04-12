@@ -168,8 +168,14 @@ async function addAdditionalInfo(email, updates = {}) {
 
 async function allUsers() {
     try {
-        const res = await User.find();
-        // console.log(res);
+        const res = await User.find({}, {
+            username: 1,
+            email: 1,
+            role: 1,
+            assignedTemplates: 1,
+            _id: 1,
+            billingInfo: 1
+        });
         return res;
     } catch (err) {
         console.log(err);

@@ -38,10 +38,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use(cookieParser()) // Required for CSRF
 
 // Configure CORS with credentials
-app.use(cors({
-    origin: 'http://localhost:5173', // Your frontend URL
-    credentials: true
-}));
+app.use(cors());
 
 // Logging by morgan
 const logsDir = path.join(__dirname, 'logs');

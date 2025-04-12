@@ -8,12 +8,30 @@ const { getAllContactUs, deleteContactUs } = require('../models/contactUs');
 const { redis, generateCacheKey } = require('../redis-server');
 
 const getAllUsers = async (req, res) => {
-    const data = await allUsers();
-    if (!data) {
-        res.status(500);
-        res.send();
+    try{
+        const cacheKey = generateCacheKey(req, 'admin');
+        const cachedData = await redis.get(cacheKey);
+        if (cachedData) {
+            return res.status(200).json(JSON.parse(cachedData));
+        }
+        const data = await allUsers();
+        if (!data) {
+            res.status(500);
+            res.send();
+        }
+        try {
+            await redis.set(cacheKey, JSON.stringify(data), 'EX', 3600); 
+        } catch (redisError) {
+            console.warn('Redis cache set error:', redisError);
+        }
+        res.status(200).json(data);
+    } catch (err) {
+        console.error('Get all users error:', err);
+        res.status(500).json({ 
+            error: 'An error occurred while getting all users',
+            message: err.message 
+        });
     }
-    res.json(data);
 }
 
 const addTemplate = async (req, res) => {
@@ -23,7 +41,12 @@ const addTemplate = async (req, res) => {
         if (!email || !templateId) {
             return res.status(400).json({ error: "Email and Template ID are required" });
         }
-
+        const cacheKey = generateCacheKey({path: 'getAllUsers'}, 'admin');
+        try{
+            await redis.del(cacheKey);
+        } catch (redisError) {
+            console.warn('Failed to clear Redis cache:', redisError);
+        }
         const data = await addtemplate(email, templateId);
         res.status(200).json({ message: "Template assigned successfully", data });
 
@@ -43,7 +66,6 @@ const addTemplate = async (req, res) => {
 
 const getAllContainers = async (req, res) => {
     const data = await allContainers();
-    // console.log(data);
     if (!data) {
         res.status(500);
         res.send();
@@ -52,22 +74,53 @@ const getAllContainers = async (req, res) => {
 }
 
 const getAllAuth = async (req, res) => {
-    const data = await allAuth();
-    // console.log(data);
-    res.json(data);
+    try{
+        const cacheKey = generateCacheKey(req, 'admin');
+        const cachedData = await redis.get(cacheKey);
+        if (cachedData) {
+            return res.status(200).json(JSON.parse(cachedData));
+        }
+        const data = await allAuth();
+        if (!data) {
+            res.status(500);
+            res.send();
+        }
+        try {
+            await redis.set(cacheKey, JSON.stringify(data), 'EX', 3600); 
+        } catch (redisError) {
+            console.warn('Redis cache set error:', redisError);
+        }
+        res.status(200).json(data);
+    } catch (err) {
+        console.error('Get all auth error:', err);
+        res.status(500).json({ 
+            error: 'An error occurred while getting all auth',
+            message: err.message 
+        });
+    }
 }
 
 const roleChange = async (req, res) => {
     const email = req.body.email;
+    const cacheKey = generateCacheKey({path: 'getAllUsers'}, 'admin');
+    try{
+        await redis.del(cacheKey);
+    } catch (redisError) {
+        console.warn('Failed to clear Redis cache:', redisError);
+    }
     const data = await changeRole(email);
-    // console.log(data);
     res.json(data);
 }
 
 const adminLogout = async (req, res) => {
     const email = req.body.email;
+    const cacheKey = generateCacheKey({path: 'getAllAuth'}, 'admin');
+    try{
+        await redis.del(cacheKey);
+    } catch (redisError) {
+        console.warn('Failed to clear Redis cache:', redisError);
+    }
     const data = await deleteToken(email);
-    // console.log(data);
     res.json(data);
 }
 
@@ -76,6 +129,12 @@ const removeTemplate = async (req, res) => {
         const { email, templateId } = req.body;
         if(!email || !templateId){
             return res.status(400).json({ error: "Email and Template ID are required" });
+        }
+        const cacheKey = generateCacheKey({path: 'getAllUsers'}, 'admin');
+        try{
+            await redis.del(cacheKey);
+        } catch (redisError) {
+            console.warn('Failed to clear Redis cache:', redisError);
         }
         const data = await removetemplate(email, templateId);
         res.status(200).json({ message: "Template removed successfully", data });

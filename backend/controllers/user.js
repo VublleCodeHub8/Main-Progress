@@ -131,7 +131,7 @@ const getProfileData = async (req, res) => {
         };
 
         try {
-            await redis.set(cacheKey, JSON.stringify(selectedData));
+            await redis.set(cacheKey, JSON.stringify(selectedData), 'EX', 3600);
         } catch (redisError) {
             console.warn('Redis cache set error:', redisError);
         }
@@ -155,7 +155,6 @@ const updateAdditionalInfo = async (req, res) => {
         } catch (redisError) {
             console.warn('Failed to clear Redis cache:', redisError);
         }
-
         const updatedUser = await addAdditionalInfo(email, { location, occupation, socialLinks });
         res.json({
             message: 'Additional info updated successfully',

@@ -3,52 +3,100 @@ const { allContainers } = require('../models/containers');
 const { getUserByEmail } = require('../models/user');
 const { createNotification, getAllNotification, deleteNotification } = require('../models/notification');
 const { getAllBugReports } = require('../models/bugReport');
+const { redis, generateCacheKey } = require('../redis-server');
 
 const getAllTemplates = async (req, res) => {
+    const cacheKey = generateCacheKey(req, 'dev');
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
     const data = await allTemplate();
-    // console.log(data);
     if (!data) {
         res.status(500);
         res.send();
+    }
+    try {
+        await redis.set(cacheKey, JSON.stringify(data), 'EX', 3600); 
+    } catch (redisError) {
+        console.warn('Redis cache set error:', redisError);
     }
     res.json(data);
 }
 
 const addNewTemplate = async (req, res) => {
     const dataToAdd = req.body;
-    const data = await addTemplate(dataToAdd.name, dataToAdd.image, dataToAdd.phase, dataToAdd.description, dataToAdd.price);
-    // console.log(data);
-    if (!data) {
-        res.status(500);
+    try{
+        const cacheKey = generateCacheKey({path: 'getAllTemplates'}, 'dev');
+        try {
+            await redis.del(cacheKey);
+        } catch (redisError) {
+            console.warn('Failed to clear Redis cache:', redisError);   
+        }
+        const data = await addTemplate(dataToAdd.name, dataToAdd.image, dataToAdd.phase, dataToAdd.description, dataToAdd.price);
+        if (!data) {
+            res.status(500);
+            res.send();
+        }
+        res.status(200);
         res.send();
+    } catch (err) {
+        console.error('Add new template error:', err);
+        res.status(500).json({ 
+            error: 'An error occurred while adding new template',
+            message: err.message 
+        });
     }
-    res.status(200);
-    res.send();
 }
 
 const updateTemplate = async (req, res) => {
     const dataToUpdate = req.body;
-    // console.log(dataToUpdate);  
-    const data = await updateTemplates(dataToUpdate.id, dataToUpdate);
-    // console.log(data);
-    if (!data) {
-        res.status(500);
+    try{
+        const cacheKey = generateCacheKey({path: 'getAllTemplates'}, 'dev');
+        try {
+            await redis.del(cacheKey);
+        } catch (redisError) {
+            console.warn('Failed to clear Redis cache:', redisError);   
+        }
+        const data = await updateTemplates(dataToUpdate.id, dataToUpdate);
+        if (!data) {
+            res.status(500);
+            res.send();
+        }
+        res.status(200);
         res.send();
+    } catch (err) {
+        console.error('Update template error:', err);
+        res.status(500).json({ 
+            error: 'An error occurred while updating template',
+            message: err.message 
+        });
     }
-    res.status(200);
-    res.send();
 }
 
 const deleteTemplate = async (req, res) => {
     const id = req.params.id;
-    const data = await deleteTemplates(id);
-    // console.log(data);
-    if (!data) {
-        res.status(500);
+    try{
+        const cacheKey = generateCacheKey({path: 'getAllTemplates'}, 'dev');
+        try {
+            await redis.del(cacheKey);
+        } catch (redisError) {
+            console.warn('Failed to clear Redis cache:', redisError);   
+        }
+        const data = await deleteTemplates(id);
+        if (!data) {
+            res.status(500);
+            res.send();
+        }
+        res.status(200);
         res.send();
+    } catch (err) {
+        console.error('Delete template error:', err);
+        res.status(500).json({ 
+            error: 'An error occurred while deleting template',
+            message: err.message 
+        });
     }
-    res.status(200);
-    res.send();
 }
 
 const getAllContainers = async (req, res) => {
