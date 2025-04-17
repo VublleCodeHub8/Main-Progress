@@ -296,30 +296,50 @@ npm test
 
 ## 📂 Project Structure
 
-```
-📦 terminas/
-├── 📁 frontend/
-│   ├── 📁 src/
-│   │   ├── 📁 components/   # UI components
-│   │   ├── 📁 pages/       # Route pages
-│   │   ├── 📁 hooks/       # Custom hooks
-│   │   ├── 📁 utils/       # Helper functions
-│   │   ├── 📁 store/       # Redux store
-│   │   └── 📁 styles/      # Global styles
-│   └── 📄 package.json
+<pre>
+📦 <b>Main-Progress/</b>
+├── <span title="Frontend"><b>🖥️ frontend/</b></span>
+│   ├── <b>📂 public/</b>           <i>// Static assets</i>
+│   ├── <b>📂 src/</b>
+│   │   ├── <b>🖼️ assets/</b>      <i>// Images and static assets</i>
+│   │   ├── <b>🧩 components/</b>  <i>// Reusable UI components</i>
+│   │   ├── <b>📄 pages/</b>       <i>// Route pages</i>
+│   │   ├── <b>🗃️ store/</b>       <i>// Redux store setup</i>
+│   │   ├── <b>🛠️ utils/</b>       <i>// Utility functions</i>
+│   │   ├── <b>📚 lib/</b>         <i>// Library/helper code</i>
+│   │   ├── <b>🧪 newComp/</b>     <i>// Experimental components</i>
+│   │   ├── <b>📄 App.jsx</b>, ... <i>// Main app files</i>
+│   ├── <b>📄 package.json</b>     <i>// Frontend dependencies</i>
+│   └── ...
 │
-├── 📁 backend/
-│   ├── 📁 src/
-│   │   ├── 📁 controllers/ # Route controllers
-│   │   ├── 📁 models/      # Data models
-│   │   ├── 📁 routes/      # API routes
-│   │   ├── 📁 services/    # Business logic
-│   │   └── 📁 utils/       # Helper functions
-│   ├── 📄 Dockerfile
-│   └── 📄 package.json
+├── <span title="Backend"><b>🗄️ backend/</b></span>
+│   ├── <b>📂 controllers/</b>     <i>// Route controllers</i>
+│   ├── <b>📂 models/</b>          <i>// Data models</i>
+│   ├── <b>📂 routes/</b>          <i>// API routes</i>
+│   ├── <b>📂 middlewares/</b>     <i>// Express middlewares</i>
+│   ├── <b>📂 util/</b>            <i>// Utility modules</i>
+│   ├── <b>📂 public/</b>          <i>// Static/public files</i>
+│   ├── <b>📄 app.js</b>           <i>// Main server entry</i>
+│   ├── <b>📄 swagger.js</b>       <i>// Swagger/OpenAPI setup</i>
+│   ├── <b>📄 redis-server.js</b>  <i>// Redis integration</i>
+│   ├── <b>📄 .env</b>             <i>// Backend environment</i>
+│   └── <b>📄 package.json</b>     <i>// Backend dependencies</i>
 │
-└── 📄 README.md
-```
+├── <span title="Dockerized Language Environments"><b>🐳 dockerBackend/</b></span>
+│   ├── <b>📂 GCC/</b>             <i>// GCC C/C++ env</i>
+│   ├── <b>📂 Node/</b>            <i>// Node.js env</i>
+│   ├── <b>📂 Python/</b>          <i>// Python env</i>
+│   ├── <b>📂 Ubutnu/</b>          <i>// Ubuntu base env</i>
+│   └── <b>📂 tesing/</b>          <i>// Testing env</i>
+│
+├── <b>📝 .gitignore</b>           <i>// Git ignore rules</i>
+├── <b>📄 LICENSE</b>              <i>// License info</i>
+├── <b>📄 package.json</b>         <i>// Root dependencies/meta</i>
+├── <b>📄 package-lock.json</b>    <i>// Root lockfile</i>
+└── <b>📄 README.md</b>            <i>// Project documentation</i>
+</pre>
+
+> <b>Tip:</b> Each main folder contains its own <code>package.json</code> and configuration files as needed. See individual folders for more details.
 
 ---
 
