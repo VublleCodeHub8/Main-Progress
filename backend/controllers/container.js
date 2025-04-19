@@ -13,20 +13,12 @@ const createContainer = async (req, res) => {
     let mainPort;
     let secondaryPort;
     
-    // Find two available ports for container exposure
-    for (let i = 5000; i <= 8000; ++i) {
-        const doc = await getContainerByPort(i);
-        if (!doc) {
-            const status = await isPortAvailable(i);
-            if (status) {
-                if (!mainPort) {
-                    mainPort = i;
-                } else if (!secondaryPort) {
-                    secondaryPort = i;
-                    break;
-                }
-            }
-        }
+    // Find two available ports for container exposure using binary search
+    try {
+        mainPort = await findAvailablePortBinarySearch(5000, 11000);
+        secondaryPort = await findAvailablePortBinarySearch(5000, 11000, [mainPort]);
+    } catch (error) {
+        console.error('Error finding available ports:', error);
     }
 
     if (!mainPort || !secondaryPort) {
@@ -375,6 +367,61 @@ async function isPortAvailable(port) {
     });
 }
 
+/**
+ * Find an available port using binary search algorithm
+ * @param {number} min - Minimum port number in range
+ * @param {number} max - Maximum port number in range
+ * @param {array} excludePorts - Array of ports to exclude from search
+ * @returns {Promise<number>} - Available port
+ * @throws {Error} - If no available ports found
+ */
+async function findAvailablePortBinarySearch(min, max, excludePorts = []) {
+    // Track all ports we've already checked to avoid redundant checks
+    const checkedPorts = new Set(excludePorts);
+    
+    // Using a queue-based approach for binary search to find first available port
+    let queue = [{min, max}];
+    
+    while (queue.length > 0) {
+        const {min, max} = queue.shift();
+        
+        // If range is invalid or fully checked, continue
+        if (min > max || (max - min + 1) <= checkedPorts.size) {
+            continue;
+        }
+        
+        // Calculate midpoint
+        const mid = Math.floor((min + max) / 2);
+        
+        // Skip if we've already checked this port
+        if (checkedPorts.has(mid)) {
+            // Split and continue searching both halves
+            if (mid > min) queue.push({min, max: mid - 1});
+            if (mid < max) queue.push({min: mid + 1, max});
+            continue;
+        }
+        
+        // Mark as checked
+        checkedPorts.add(mid);
+        
+        // Check if port is available
+        const doc = await getContainerByPort(mid);
+        if (!doc) {
+            const available = await isPortAvailable(mid);
+            if (available) {
+                return mid; // Found available port
+            }
+        }
+        
+        // Port not available, search both halves
+        // Check lower half first (typically more lower ports are available)
+        if (mid > min) queue.push({min, max: mid - 1});
+        if (mid < max) queue.push({min: mid + 1, max});
+    }
+    
+    throw new Error('No available ports found in range');
+}
+
 const editContainer = async (req, res) => {
     try {
         const { containerId } = req.params;
@@ -507,3 +554,4 @@ exports.getContainerCPUandMemoryStats = getContainerCPUandMemoryStats;
 exports.getContainerDetails = getContainerDetails;
 exports.editContainer = editContainer;
 exports.getTemplateNameFromContainerId = getTemplateNameFromContainerId;
+exports.findAvailablePortBinarySearch = findAvailablePortBinarySearch; // Export for testing
