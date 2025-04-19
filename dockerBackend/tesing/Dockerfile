@@ -3,7 +3,7 @@ FROM ubuntu:latest
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y gcc g++ make nodejs npm && \
+    apt-get install -y gcc g++ make nodejs npm lsof && \
     apt-get clean
 
 COPY package-lock.json /server/package-lock.json

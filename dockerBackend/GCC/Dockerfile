@@ -5,6 +5,7 @@ WORKDIR /app
 RUN apt-get update && \
     apt-get install -y gcc g++ make nodejs npm && \
     apt-get clean
+RUN apt-get install -y lsof
 
 COPY package-lock.json /server/package-lock.json
 COPY package.json /server/package.json

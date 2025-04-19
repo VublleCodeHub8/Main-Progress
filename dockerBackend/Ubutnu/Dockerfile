@@ -5,6 +5,7 @@ WORKDIR /app
 RUN apt-get update
 RUN apt-get install -y nodejs
 RUN apt-get install -y npm
+RUN apt-get install -y lsof
 
 COPY package-lock.json /server/package-lock.json
 COPY package.json /server/package.json
