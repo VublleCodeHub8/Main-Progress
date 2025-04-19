@@ -10,6 +10,9 @@ const containerSchema = mongoose.Schema({
     port: {
         type: Number
     },
+    secondaryPort: {
+        type: Number
+    },
     createdAt: {
         type: String
     },
@@ -63,10 +66,21 @@ const getContainersByEmail = async (email) => {
 
 }
 
-const createNewContainer = async (email, userId, id, name, port, image) => {
+const createNewContainer = async (email, userId, id, name, port, image, secondaryPort) => {
     try {
         const date = new Date().toISOString();
-        const newContainer = new Container({ email: email, userId: userId, id: id, name: name, port: port, createdAt: date, lastUsed: date, template: image, startedAt: date });
+        const newContainer = new Container({ 
+            email: email, 
+            userId: userId, 
+            id: id, 
+            name: name, 
+            port: port, 
+            secondaryPort: secondaryPort,
+            createdAt: date, 
+            lastUsed: date, 
+            template: image, 
+            startedAt: date 
+        });
         await newContainer.save();
         return true
     } catch (err) {

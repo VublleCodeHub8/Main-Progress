@@ -10,29 +10,46 @@ const docker = new Docker();
 const createContainer = async (req, res) => {
     const cont_Name = req.headers['title'];
     const cont_Image = req.headers['template'];
-    let thePort;
+    let mainPort;
+    let secondaryPort;
+    
+    // Find two available ports for container exposure
     for (let i = 5000; i <= 8000; ++i) {
         const doc = await getContainerByPort(i);
         if (!doc) {
             const status = await isPortAvailable(i);
             if (status) {
-                thePort = i;
-                break;
+                if (!mainPort) {
+                    mainPort = i;
+                } else if (!secondaryPort) {
+                    secondaryPort = i;
+                    break;
+                }
             }
         }
     }
 
+    if (!mainPort || !secondaryPort) {
+        return res.status(500).json({ error: "Not enough available ports for container creation" });
+    }
+
     const container = await docker.createContainer({
         Image: cont_Image,
-        name: `${cont_Name}_${thePort}`,
+        name: `${cont_Name}_${mainPort}`,
         ExposedPorts: {
-            '4000/tcp': {}
+            '4000/tcp': {},
+            '4001/tcp': {}
         },
         HostConfig: {
             PortBindings: {
                 '4000/tcp': [
                     {
-                        HostPort: `${thePort}`
+                        HostPort: `${mainPort}`
+                    }
+                ],
+                '4001/tcp': [
+                    {
+                        HostPort: `${secondaryPort}`
                     }
                 ]
             }
@@ -41,14 +58,21 @@ const createContainer = async (req, res) => {
     // console.log(container);
     const contName = (await docker.getContainer(container.id).inspect()).Name.substring(1);
     const contId = container.id;
-    const contPort = thePort;
+    const contPort = mainPort;
+    const contSecondaryPort = secondaryPort;
     const contEmail = req.userData.email;
     const contUserId = req.userData.userId;
 
-    const saveRes = await createNewContainer(contEmail, contUserId, contId, contName, contPort, cont_Image);
+    const saveRes = await createNewContainer(contEmail, contUserId, contId, contName, contPort, cont_Image, contSecondaryPort);
     if (saveRes) {
         await containerUsageIncrement(contEmail, cont_Image );
-        res.json({ containerId: contId, containerName: contName, containerPort: contPort, containerTemplate: cont_Image });
+        res.json({ 
+            containerId: contId, 
+            containerName: contName, 
+            containerPort: contPort, 
+            containerSecondaryPort: contSecondaryPort,
+            containerTemplate: cont_Image 
+        });
     } else {
         res.status(500);
         res.send();
