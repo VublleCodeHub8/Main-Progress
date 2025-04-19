@@ -1,21 +1,20 @@
-FROM node:18
-
-RUN apt-get update && apt-get install -y \
-    python3 \
-    make \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
-RUN apt-get install -y lsof
+FROM ubuntu:latest
 
 WORKDIR /app
 
-COPY package*.json /server/
+RUN apt-get update && \
+    apt-get install -y gcc g++ make nodejs npm && \
+    apt-get clean
+RUN apt-get install -y lsof
 
-RUN cd /server && npm install
-
-COPY index.js /server/
+COPY package-lock.json /server/package-lock.json
+COPY package.json /server/package.json
+COPY index.js /server/index.js
 COPY /util /server/util
 COPY /public /server/public
 COPY /user /user
+
+
+RUN cd /server && npm install
 
 ENTRYPOINT ["node", "/server/index.js"]
