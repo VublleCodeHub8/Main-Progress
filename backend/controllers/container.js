@@ -541,6 +541,20 @@ const getTemplateNameFromContainerId = async (req, res) => {
     }
 }
 
+const getcontainerById = async (req, res) => {
+    const { containerId } = req.params;
+
+    try {
+        const container = await getContainerById(containerId);
+        if (!container) {
+            return res.status(404).json({ error: 'Container not found' });
+        }
+        res.json(container);
+    } catch (error) {
+        console.error('Error fetching container:', error);
+        res.status(500).json({ error: 'Unable to fetch container' });
+    }
+}
 
 exports.createContainer = createContainer;
 exports.runContainer = runContainer;
@@ -555,3 +569,5 @@ exports.getContainerDetails = getContainerDetails;
 exports.editContainer = editContainer;
 exports.getTemplateNameFromContainerId = getTemplateNameFromContainerId;
 exports.findAvailablePortBinarySearch = findAvailablePortBinarySearch; // Export for testing
+exports.getContainerRuntime = getContainerRuntime;
+exports.getcontainerById = getcontainerById;

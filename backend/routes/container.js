@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const { runContainer, createContainer, listAllContainers, continerInspects, stopContainer, restartContainer, startContainer, deleteContainer, getContainerCPUandMemoryStats, getContainerDetails, editContainer, getTemplateNameFromContainerId } = require('../controllers/container')
+const { runContainer, createContainer, listAllContainers, continerInspects, stopContainer, restartContainer, startContainer, 
+    deleteContainer, getContainerCPUandMemoryStats, getContainerDetails, editContainer, getTemplateNameFromContainerId, getcontainerById } = require('../controllers/container')
 
 /**
  * @swagger
@@ -121,6 +122,55 @@ router.get('/inspect/:containerId', continerInspects)
  */
 router.get('/stop/:containerId', stopContainer)
 
+/**
+ * @swagger
+ * /container/getContainerById/{containerId}:
+ *   get:
+ *     tags: [Containers]
+ *     summary: Get container by ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: containerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the container to retrieve
+ *     responses:
+ *       200:
+ *         description: Container details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 containerId:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 port:
+ *                   type: string
+ *                 secondaryPort:
+ *                   type: string
+ *                 image:
+ *                   type: string
+ *                 createdAt:
+ *                   type: string
+ *                 lastUsed:
+ *                   type: string
+ *                 template:
+ *                   type: string
+ *                 startedAt:
+ *                   type: string
+ *                   format: date-time
+ *       404:
+ *         description: Container not found
+ *       500:
+ *         description: Server error
+ */
+
+router.get('/getContainerById/:containerId', getcontainerById)
 /**
  * @swagger
  * /container/restart/{containerId}:
