@@ -427,11 +427,13 @@ io.on('connection', (socket) => {
 
 // File System Update
 chokidar.watch(FILE_ROOT, {
-    ignored: ['**/node_modules/**', '**/node_modules'], // Ignore node_modules to reduce socket load
-    persistent: true
-}).on('all', (event, path) => {
+    ignored: /(^|[\/\\])node_modules/,
+    persistent: true,
+    ignoreInitial: true,
+    depth: 10
+  }).on('all', (event, path) => {
     io.emit('file:refresh', path);
-})
+  });
 
 // Start the server
 const main = async () => {
