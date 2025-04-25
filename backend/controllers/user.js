@@ -6,6 +6,7 @@ const { addContactUs } = require('../models/contactUs');
 const { gettop5Notification } = require('../models/notification');
 const storage = multer.memoryStorage();
 const { redis, generateCacheKey } = require('../redis-server');
+const { createPublish, getAllPublish, makepublic, makeprivate, deletePublic, getstatus, getpublishBycontainerId, checkflag } = require('../models/public');
 
 const upload = multer({
     storage: storage,
@@ -19,6 +20,89 @@ const upload = multer({
         }
     },
 });
+
+const addPublicController = async (req, res) => {
+    const { title, owner, description, port, containerId } = req.body;
+    if (!title || !owner || !description || !port || !containerId) {
+        return res.status(400).json({ error: "All fields are required" });
+    }
+    const result = await createPublish(title, owner, description, port, containerId);
+    if (!result) {
+        return res.status(500).json({ error: "Failed to add public" });
+    }
+    res.status(200).json({ message: "Public added successfully" });
+}
+
+const getAllPublicController = async (req, res) => {
+    try {
+        const publics = await getAllPublish();
+        res.status(200).json(publics);
+    } catch (error) {
+        console.error('Error getting all public:', error);
+        res.status(500).json({ error: "Failed to get all public" });
+    }
+}
+
+const makePublicController = async (req, res) => {
+    const { containerId } = req.params;
+    const result = await makepublic(containerId);
+    if (!result) {
+        return res.status(500).json({ error: "Failed to make public" });
+    }
+    res.status(200).json({ message: "Public made successfully" });
+}
+
+const makePrivateController = async (req, res) => {
+    const { containerId } = req.params;
+    const result = await makeprivate(containerId);
+    if (!result) {
+        return res.status(500).json({ error: "Failed to make private" });
+    }
+    res.status(200).json({ message: "Public made successfully" });
+}
+
+const deletePublicController = async (req, res) => {
+    const { containerId } = req.params;
+    const result = await deletePublic(containerId);
+    if (!result) {
+        return res.status(500).json({ error: "Failed to delete public" });
+    }
+    res.status(200).json({ message: "Public deleted successfully" });
+}
+
+const getPublicStatusController = async (req, res) => {
+    const { containerId } = req.params;
+    try {
+        const result = await getstatus(containerId);
+        if (result === false) {
+            return res.status(404).json({ error: "Public status not found" });
+        }
+        res.status(200).json({ publishStatus: result });
+    } catch (error) {
+        console.error('Error in getPublicStatusController:', error);
+        res.status(500).json({ error: "Failed to get public status" });
+    }
+}
+
+const getPublicByContainerIdController = async (req, res) => {
+    const { containerId } = req.params;
+    const result = await getpublishBycontainerId(containerId);
+    if (!result) {
+        return res.status(500).json({ error: "Failed to get public by containerId" });
+    }
+    res.status(200).json({ message: "Public retrieved successfully" });
+}
+
+const getPublicFlagController = async (req, res) => {
+    const { containerId } = req.params;
+    try {
+        const result = await checkflag(containerId);
+        res.status(200).json({ flag: result });
+    } catch (error) {
+        console.error('Error in getPublicFlagController:', error);
+        res.status(500).json({ error: "Failed to get public flag" });
+    }
+}
 
 const addContactUsController = async (req, res) => {
     const { name, email, subject, message } = req.body;
@@ -226,5 +310,13 @@ module.exports = {
     getTop5NotificationsController,
     upload,
     getProfileData,
-    updateAdditionalInfo
+    updateAdditionalInfo,
+    addPublicController,
+    getAllPublicController,
+    makePublicController,
+    makePrivateController,
+    deletePublicController,
+    getPublicStatusController,
+    getPublicByContainerIdController,
+    getPublicFlagController
 };

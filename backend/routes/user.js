@@ -3,7 +3,10 @@ const router = express.Router();
 const { getUserData, addMoreData } = require('../controllers/user');
 const multer = require("multer");
 const { isUser } = require('../middlewares/auth');
-const { addBugReportController, addContactUsController, getTop5NotificationsController, getProfileData, updateAdditionalInfo } = require('../controllers/user');
+const { addBugReportController, addContactUsController, getTop5NotificationsController, 
+    getProfileData, updateAdditionalInfo, addPublicController, getAllPublicController, 
+    makePublicController, makePrivateController, deletePublicController, getPublicStatusController, 
+    getPublicByContainerIdController, getPublicFlagController } = require('../controllers/user');
 
 /**
  * @swagger
@@ -57,6 +60,253 @@ const addMoreDataMiddleware = [upload.single('profilePic')];
  *         description: Server error
  */
 router.get('/getuserdata', getUserData);
+
+/**
+ * @swagger
+ * /user/addpublic:
+ *   post:
+ *     tags: [User]
+ *     summary: Add a new public entry
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - owner
+ *               - description
+ *               - port
+ *               - containerId
+ *             properties:
+ *               title:
+ *                 type: string
+ *               owner:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               port:
+ *                 type: integer
+ *               containerId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Public added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: All fields are required
+ *       500:
+ *         description: Server error
+ */
+router.post('/addpublic', addPublicController);
+
+/**
+ * @swagger
+ * /user/getallpublic:
+ *   get:
+ *     tags: [User]
+ *     summary: Get all public entries
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all public entries
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       500:
+ *         description: Failed to get all public
+ */
+router.get('/getallpublic', getAllPublicController);
+
+/**
+ * @swagger
+ * /user/makepublic/{containerId}:
+ *   patch:
+ *     tags: [User]
+ *     summary: Make a container public
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: containerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Public made successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Failed to make public
+ */
+router.put('/makepublic/:containerId', makePublicController);
+
+/**
+ * @swagger
+ * /user/makeprivate/{containerId}:
+ *   patch:
+ *     tags: [User]
+ *     summary: Make a public entry private
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: containerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Public made successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Failed to make private
+ */
+router.put('/makeprivate/:containerId', makePrivateController);
+
+/**
+ * @swagger
+ * /user/deletepublic/{containerId}:
+ *   delete:
+ *     tags: [User]
+ *     summary: Delete a public entry
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: containerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Public deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Failed to delete public
+ */
+router.delete('/deletepublic/:containerId', deletePublicController);
+
+/**
+ * @swagger
+ * /user/getpublicstatus/{containerId}:
+ *   get:
+ *     tags: [User]
+ *     summary: Get the publish status of a public entry
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: containerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Public status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Failed to get public status
+ */
+router.get('/getpublicstatus/:containerId', getPublicStatusController);
+
+/**
+ * @swagger
+ * /user/getpublicbycontainerid/{containerId}:
+ *   get:
+ *     tags: [User]
+ *     summary: Get public entry by containerId
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: containerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Public retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Failed to get public by containerId
+ */
+router.get('/getpublicbycontainerid/:containerId', getPublicByContainerIdController)
+
+/**
+ * @swagger
+ * /user/getpublicflag/{containerId}:
+ *   get:
+ *     tags: [User]
+ *     summary: Get the public flag (visibility) status of a container
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: containerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Public flag retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 flag:
+ *                   type: boolean
+ *                   description: Indicates if the container is public (true) or private (false)
+ *       404:
+ *         description: Public flag not found
+ *       500:
+ *         description: Failed to get public flag
+ */
+router.get('/getpublicflag/:containerId', getPublicFlagController)
 
 /**
  * @swagger
