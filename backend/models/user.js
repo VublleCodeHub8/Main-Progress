@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { deleteToken } = require('./auth');
 
 
 const userSchema = mongoose.Schema({
@@ -117,6 +118,22 @@ async function addUser(email, password, username, role) {
         await newUser.save();
     } catch (err) {
         console.log(err);
+        throw err;
+    }
+}
+
+async function changePassword(email, newpass){
+    try {
+        const user = await User.findOne({ email: email });
+        if(!user){
+            throw new Error("User not found");
+        }
+        user.password = newpass;
+        await user.save();
+        await deleteToken(email);
+        return user;
+    } catch (err) {
+        console.error(err);
         throw err;
     }
 }
@@ -365,3 +382,4 @@ exports.removetemplate = removetemplate;
 exports.billIncrement = billIncrement;
 exports.containerUsageIncrement = containerUsageIncrement;
 exports.addAdditionalInfo = addAdditionalInfo;
+exports.changePassword = changePassword;

@@ -126,7 +126,6 @@ async function deleteToken(email) {
         if (!preExisting) {
             return true;
         }
-        // console.log(email);
         const res = await Auth.updateOne({ email: email }, { loginTokens: [] });
         return true;
     } catch (err) {

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { signUp, signIn, signOut, logIn } = require('../controllers/auth');
+const { signUp, signIn, signOut, logIn, changePass } = require('../controllers/auth');
 
 /**
  * @swagger
@@ -135,5 +135,38 @@ router.get('/signout', signOut)
  */
 router.get('/login', logIn)
 
+/**
+ * @swagger
+ * /auth/change-password:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Change user password
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - newPass
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: User's email address
+ *               newPass:
+ *                 type: string
+ *                 format: password
+ *                 description: User's new password
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *       400:
+ *         description: Failed to update password
+ *       500:
+ *         description: Server error
+ */
+router.post('/changepass', changePass);
+
 exports.authRouter = router;
-exports.authRouter = router
