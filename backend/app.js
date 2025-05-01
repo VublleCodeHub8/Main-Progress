@@ -49,9 +49,15 @@ morgan.token('custom-date', () => {
 morgan.token('user-email', (req) => {
     return req.userData ? req.userData.email : 'anonymous';
 });
-const customLogFormat = ':custom-date [:method] :url :status :response-time ms - User::user-email - :res[content-length]';
+morgan.token('request-id', (req) => {
+    return req.id || '-';
+});
+morgan.token('remote-addr', (req) => {
+    return req.headers['x-forwarded-for'] || req.socket.remoteAddress || '-';
+});
+const customLogFormat = '[:custom-date] ":method :url" :status (:response-time ms) | IP::remote-addr | User::user-email | ReqID::request-id | :res[content-length] bytes';
 const accessLogStream = rfs.createStream('access.log', {
-    interval: '3h', // rotate every 3 hours
+    interval: '1d', // rotate every 3 hours
     path: logsDir,
     size: '10M', // rotate if size exceeds 10 MB
 });
