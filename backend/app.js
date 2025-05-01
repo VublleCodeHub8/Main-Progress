@@ -63,13 +63,10 @@ app.get('/csrf-token', (req, res) => {
     res.json({ csrfToken: req.csrfToken() });
 });
 
-// Apply CSRF protection to all routes except auth routes
 app.use('/auth', authRouter)
 
 app.use(isAuth);
-// app.use(csrfProtection); // Apply CSRF protection after auth middleware
 
-// Error handler for CSRF token errors
 app.use((err, req, res, next) => {
     if (err.code === 'EBADCSRFTOKEN') {
         // Handle CSRF token errors
@@ -95,7 +92,6 @@ app.get("/getuser", async (req, res) => {
 
 app.get('/getAllTemplates', async (req, res) => {
     const data = await allTemplate();
-    // console.log(data);
     if (!data) {
         res.status(500);
         res.send();
@@ -110,7 +106,6 @@ app.use('/admin', isAdmin, adminRouter)
 app.use('/dev', isDev, devRouter)
 
 app.use('/user', userRouter);
-
 
 app.use((req, res) => {
     res.status(404);
