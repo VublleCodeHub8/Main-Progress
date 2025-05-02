@@ -34,7 +34,7 @@ const addMoreDataMiddleware = [upload.single('profilePic')];
  * @swagger
  * /user/getuserdata:
  *   get:
- *     tags: [User]
+ *     tags: [B2C, User]
  *     summary: Get user profile data
  *     security:
  *       - bearerAuth: []
@@ -65,7 +65,7 @@ router.get('/getuserdata', getUserData);
  * @swagger
  * /user/addpublic:
  *   post:
- *     tags: [User]
+ *     tags: [B2C, User]
  *     summary: Add a new public entry
  *     security:
  *       - bearerAuth: []
@@ -113,7 +113,7 @@ router.post('/addpublic', addPublicController);
  * @swagger
  * /user/getallpublic:
  *   get:
- *     tags: [User]
+ *     tags: [B2B, User]
  *     summary: Get all public entries
  *     security:
  *       - bearerAuth: []
@@ -135,7 +135,7 @@ router.get('/getallpublic', getAllPublicController);
  * @swagger
  * /user/makepublic/{containerId}:
  *   patch:
- *     tags: [User]
+ *     tags: [B2C, User]
  *     summary: Make a container public
  *     security:
  *       - bearerAuth: []
@@ -164,7 +164,7 @@ router.put('/makepublic/:containerId', makePublicController);
  * @swagger
  * /user/makeprivate/{containerId}:
  *   patch:
- *     tags: [User]
+ *     tags: [B2C, User]
  *     summary: Make a public entry private
  *     security:
  *       - bearerAuth: []

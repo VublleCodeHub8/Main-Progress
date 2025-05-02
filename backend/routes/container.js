@@ -15,7 +15,7 @@ const { runContainer, createContainer, listAllContainers, continerInspects, stop
  * @swagger
  * /container/createcontainer:
  *   get:
- *     tags: [Containers]
+ *     tags: [B2C, Containers]
  *     summary: Create a new container
  *     security:
  *       - bearerAuth: []
@@ -31,7 +31,7 @@ router.get('/createcontainer', createContainer)
  * @swagger
  * /container/runcontainer/{containerId}:
  *   get:
- *     tags: [Containers]
+ *     tags: [B2C, Containers]
  *     summary: Run a specific container
  *     security:
  *       - bearerAuth: []
@@ -56,7 +56,7 @@ router.get('/runcontainer/:containerId', runContainer)
  * @swagger
  * /container/listcontainers:
  *   get:
- *     tags: [Containers]
+ *     tags: [B2B, Containers]
  *     summary: List all containers
  *     security:
  *       - bearerAuth: []
@@ -78,7 +78,7 @@ router.get('/listcontainers', listAllContainers)
  * @swagger
  * /container/inspect/{containerId}:
  *   get:
- *     tags: [Containers]
+ *     tags: [B2C, Containers]
  *     summary: Inspect a specific container
  *     security:
  *       - bearerAuth: []
@@ -102,7 +102,7 @@ router.get('/inspect/:containerId', continerInspects)
  * @swagger
  * /container/stop/{containerId}:
  *   get:
- *     tags: [Containers]
+ *     tags: [B2C, Containers]
  *     summary: Stop a running container
  *     security:
  *       - bearerAuth: []
@@ -126,7 +126,7 @@ router.get('/stop/:containerId', stopContainer)
  * @swagger
  * /container/getContainerById/{containerId}:
  *   get:
- *     tags: [Containers]
+ *     tags: [B2C, Containers]
  *     summary: Get container by ID
  *     security:
  *       - bearerAuth: []
@@ -175,7 +175,7 @@ router.get('/getContainerById/:containerId', getcontainerById)
  * @swagger
  * /container/restart/{containerId}:
  *   get:
- *     tags: [Containers]
+ *     tags: [B2C, Containers]
  *     summary: Restart a container
  *     security:
  *       - bearerAuth: []
@@ -199,7 +199,7 @@ router.get('/restart/:containerId', restartContainer)
  * @swagger
  * /container/start/{containerId}:
  *   get:
- *     tags: [Containers]
+ *     tags: [B2C, Containers]
  *     summary: Start a stopped container
  *     security:
  *       - bearerAuth: []
@@ -223,7 +223,7 @@ router.get('/start/:containerId', startContainer)
  * @swagger
  * /container/delete/{containerId}:
  *   delete:
- *     tags: [Containers]
+ *     tags: [B2C, Containers]
  *     summary: Delete a container
  *     security:
  *       - bearerAuth: []
@@ -247,7 +247,7 @@ router.delete('/delete/:containerId', deleteContainer)
  * @swagger
  * /container/stats/{containerId}:
  *   get:
- *     tags: [Containers]
+ *     tags: [B2C, Containers]
  *     summary: Get container CPU and memory statistics
  *     security:
  *       - bearerAuth: []
@@ -280,7 +280,7 @@ router.get('/stats/:containerId', getContainerCPUandMemoryStats)
  * @swagger
  * /container/details/{containerId}:
  *   get:
- *     tags: [Containers]
+ *     tags: [B2C, Containers]
  *     summary: Get detailed information about a container
  *     security:
  *       - bearerAuth: []
@@ -304,7 +304,7 @@ router.get('/details/:containerId', getContainerDetails)
  * @swagger
  * /container/templateName/{containerId}:
  *   get:
- *     tags: [Containers]
+ *     tags: [B2C, Containers]
  *     summary: Get template name for a container
  *     security:
  *       - bearerAuth: []
@@ -335,7 +335,7 @@ router.get('/templateName/:containerId', getTemplateNameFromContainerId)
  * @swagger
  * /container/edit/{containerId}:
  *   put:
- *     tags: [Containers]
+ *     tags: [B2C, Containers]
  *     summary: Edit container configuration
  *     security:
  *       - bearerAuth: []

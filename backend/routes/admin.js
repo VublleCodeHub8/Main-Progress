@@ -17,7 +17,7 @@ const { getAllAuth, getAllUsers, getAllContainers , adminLogout , roleChange, ad
  * @swagger
  * /admin/getAllUsers:
  *   get:
- *     tags: [Admin]
+ *     tags: [B2B, Admin]
  *     summary: Get all users in the system
  *     security:
  *       - bearerAuth: []
@@ -48,7 +48,7 @@ router.get('/getAllUsers', getAllUsers)
  * @swagger
  * /admin/getAllContainers:
  *   get:
- *     tags: [Admin]
+ *     tags: [B2B, Admin]
  *     summary: Get all containers in the system
  *     security:
  *       - bearerAuth: []
@@ -66,7 +66,7 @@ router.get('/getAllContainers', getAllContainers)
  * @swagger
  * /admin/getAllAuth:
  *   get:
- *     tags: [Admin]
+ *     tags: [B2B, Admin]
  *     summary: Get all authentication records
  *     security:
  *       - bearerAuth: []
@@ -84,7 +84,7 @@ router.get('/getAllAuth', getAllAuth)
  * @swagger
  * /admin/adminLogout:
  *   post:
- *     tags: [Admin]
+ *     tags: [B2B, Admin]
  *     summary: Logout admin user
  *     security:
  *       - bearerAuth: []
@@ -102,7 +102,7 @@ router.post('/adminLogout', adminLogout)
  * @swagger
  * /admin/roleChange:
  *   post:
- *     tags: [Admin]
+ *     tags: [B2B, Admin]
  *     summary: Change user role
  *     security:
  *       - bearerAuth: []
@@ -135,7 +135,7 @@ router.post('/roleChange', roleChange)
  * @swagger
  * /admin/addTemplate:
  *   post:
- *     tags: [Admin]
+ *     tags: [B2B, Admin]
  *     summary: Add a new template
  *     security:
  *       - bearerAuth: []
@@ -167,7 +167,7 @@ router.post('/addTemplate', addTemplate)
  * @swagger
  * /admin/removeTemplate:
  *   post:
- *     tags: [Admin]
+ *     tags: [B2B, Admin]
  *     summary: Remove a template
  *     security:
  *       - bearerAuth: []
@@ -196,7 +196,7 @@ router.post('/removeTemplate', removeTemplate)
  * @swagger
  * /admin/getAllBugReports:
  *   get:
- *     tags: [Admin]
+ *     tags: [B2B, Admin]
  *     summary: Get all bug reports
  *     security:
  *       - bearerAuth: []
@@ -214,7 +214,7 @@ router.get('/getAllBugReports', getAllBugReportsController)
  * @swagger
  * /admin/deleteBugReport:
  *   delete:
- *     tags: [Admin]
+ *     tags: [B2B, Admin]
  *     summary: Delete a bug report
  *     security:
  *       - bearerAuth: []
@@ -243,7 +243,7 @@ router.delete('/deleteBugReport', deleteBugReportController)
  * @swagger
  * /admin/getAllContainerHistory:
  *   get:
- *     tags: [Admin]
+ *     tags: [B2B, Admin]
  *     summary: Get container history
  *     security:
  *       - bearerAuth: []
@@ -261,7 +261,7 @@ router.get('/getAllContainerHistory', getAllContainerHistoryController)
  * @swagger
  * /admin/getAllContactUs:
  *   get:
- *     tags: [Admin]
+ *     tags: [B2B, Admin]
  *     summary: Get all contact us messages
  *     security:
  *       - bearerAuth: []
@@ -279,7 +279,7 @@ router.get('/getAllContactUs', getAllContactUsController)
  * @swagger
  * /admin/deleteContactUs:
  *   delete:
- *     tags: [Admin]
+ *     tags: [B2B, Admin]
  *     summary: Delete a contact us message
  *     security:
  *       - bearerAuth: []
@@ -308,7 +308,7 @@ router.delete('/deleteContactUs', deleteContactUsController)
  * @swagger
  * /admin/toggleBugReportSeen:
  *   post:
- *     tags: [Admin]
+ *     tags: [B2B, Admin]
  *     summary: Toggle bug report seen status
  *     security:
  *       - bearerAuth: []

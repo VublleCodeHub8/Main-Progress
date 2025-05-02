@@ -13,7 +13,7 @@ const { signUp, signIn, signOut, logIn, changePass } = require('../controllers/a
  * @swagger
  * /auth/signup:
  *   post:
- *     tags: [Authentication]
+ *     tags: [B2C, Authentication]
  *     summary: Register a new user
  *     requestBody:
  *       required: true
@@ -51,7 +51,7 @@ router.post('/signup', signUp)
  * @swagger
  * /auth/signin:
  *   post:
- *     tags: [Authentication]
+ *     tags: [B2C, Authentication]
  *     summary: Sign in an existing user
  *     requestBody:
  *       required: true
@@ -91,7 +91,7 @@ router.post('/signin', signIn)
  * @swagger
  * /auth/signout:
  *   get:
- *     tags: [Authentication]
+ *     tags: [B2C, Authentication]
  *     summary: Sign out the current user
  *     security:
  *       - bearerAuth: []
@@ -109,7 +109,7 @@ router.get('/signout', signOut)
  * @swagger
  * /auth/login:
  *   get:
- *     tags: [Authentication]
+ *     tags: [B2C, Authentication]
  *     summary: Check if user is logged in
  *     security:
  *       - bearerAuth: []
@@ -139,7 +139,7 @@ router.get('/login', logIn)
  * @swagger
  * /auth/change-password:
  *   post:
- *     tags: [Authentication]
+ *     tags: [B2C, Authentication]
  *     summary: Change user password
  *     requestBody:
  *       required: true

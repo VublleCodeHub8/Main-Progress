@@ -16,6 +16,16 @@ const options = {
                 description: 'Development server',
             },
         ],
+        tags: [
+            {
+                name: 'B2C',
+                description: 'Business to Customer APIs - User, Container, and Authentication services'
+            },
+            {
+                name: 'B2B',
+                description: 'Business to Business APIs - Admin and Developer services'
+            }
+        ],
         components: {
             securitySchemes: {
                 bearerAuth: {

@@ -16,7 +16,7 @@ const { getAllTemplates, addNewTemplate, updateTemplate, deleteTemplate, getAllC
  * @swagger
  * /dev/getAllTemplates:
  *   get:
- *     tags: [Developer]
+ *     tags: [B2B, Developer]
  *     summary: Get all templates
  *     security:
  *       - bearerAuth: []
@@ -32,7 +32,7 @@ router.get('/getAllTemplates', getAllTemplates)
  * @swagger
  * /dev/addNewTemplate:
  *   post:
- *     tags: [Developer]
+ *     tags: [B2B, Developer]
  *     summary: Add a new template
  *     security:
  *       - bearerAuth: []
@@ -62,7 +62,7 @@ router.post('/addNewTemplate', addNewTemplate)
  * @swagger
  * /dev/updateTemplate:
  *   post:
- *     tags: [Developer]
+ *     tags: [B2B, Developer]
  *     summary: Update an existing template
  *     security:
  *       - bearerAuth: []
@@ -89,7 +89,7 @@ router.post('/updateTemplate', updateTemplate)
  * @swagger
  * /dev/deleteTemplate/{id}:
  *   delete:
- *     tags: [Developer]
+ *     tags: [B2B, Developer]
  *     summary: Delete a template
  *     security:
  *       - bearerAuth: []
@@ -111,7 +111,7 @@ router.delete('/deleteTemplate/:id', deleteTemplate)
  * @swagger
  * /dev/getAllContainers:
  *   get:
- *     tags: [Developer]
+ *     tags: [B2B, Developer]
  *     summary: Get all containers
  *     security:
  *       - bearerAuth: []
@@ -127,7 +127,7 @@ router.get('/getAllContainers', getAllContainers)
  * @swagger
  * /dev/getUserTemplates/{email}:
  *   get:
- *     tags: [Developer]
+ *     tags: [B2B, Developer]
  *     summary: Get templates by user email
  *     security:
  *       - bearerAuth: []
@@ -149,7 +149,7 @@ router.get('/getUserTemplates/:email', getUserTemplates)
  * @swagger
  * /dev/getAllBugReports:
  *   get:
- *     tags: [Developer]
+ *     tags: [B2B, Developer]
  *     summary: Get all bug reports
  *     security:
  *       - bearerAuth: []
@@ -165,7 +165,7 @@ router.get('/getAllBugReports', getAllBugReportsController);
  * @swagger
  * /dev/notification:
  *   post:
- *     tags: [Developer]
+ *     tags: [B2B, Developer]
  *     summary: Create a new notification
  *     security:
  *       - bearerAuth: []
@@ -192,7 +192,7 @@ router.post('/notification', createNotificationController);
  * @swagger
  * /dev/notifications:
  *   get:
- *     tags: [Developer]
+ *     tags: [B2B, Developer]
  *     summary: Get all notifications
  *     security:
  *       - bearerAuth: []
@@ -208,7 +208,7 @@ router.get('/notifications', getAllNotificationController);
  * @swagger
  * /dev/notification/{id}:
  *   delete:
- *     tags: [Developer]
+ *     tags: [B2B, Developer]
  *     summary: Delete a notification
  *     security:
  *       - bearerAuth: []
