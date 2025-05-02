@@ -371,7 +371,7 @@ const io = new socketServer({
     cors: '*'
 })
 
-
+// Attach the socket server to the HTTP server
 io.attach(server);
 io.on('connection', (socket) => {
     console.log('Socket Connected', socket.id, io.sockets.sockets.size);
@@ -425,13 +425,17 @@ io.on('connection', (socket) => {
     })
 })
 
-
 // File System Update
-chokidar.watch(FILE_ROOT).on('all', (event, path) => {
+chokidar.watch(FILE_ROOT, {
+    ignored: /(^|[\/\\])node_modules/,
+    persistent: true,
+    ignoreInitial: true,
+    depth: 10
+  }).on('all', (event, path) => {
     io.emit('file:refresh', path);
-})
+  });
 
-
+// Start the server
 const main = async () => {
     try {
         server.listen(4000);
