@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 const { runContainer, createContainer, listAllContainers, continerInspects, stopContainer, restartContainer, startContainer, 
-    deleteContainer, getContainerCPUandMemoryStats, getContainerDetails, editContainer, getTemplateNameFromContainerId, getcontainerById } = require('../controllers/container')
+    deleteContainer, getContainerCPUandMemoryStats, getContainerDetails, editContainer, getTemplateNameFromContainerId, getcontainerById } = require('../controllers/container');
+const verifyContainerOwnership = require('../middlewares/verifyContainerOwnership');
 
 /**
  * @swagger
@@ -50,7 +51,7 @@ router.get('/createcontainer', createContainer)
  *       500:
  *         description: Server error
  */
-router.get('/runcontainer/:containerId', runContainer)
+router.get('/runcontainer/:containerId', verifyContainerOwnership, runContainer)
 
 /**
  * @swagger
@@ -96,7 +97,7 @@ router.get('/listcontainers', listAllContainers)
  *       500:
  *         description: Server error
  */
-router.get('/inspect/:containerId', continerInspects)
+router.get('/inspect/:containerId', verifyContainerOwnership, continerInspects)
 
 /**
  * @swagger
@@ -120,7 +121,7 @@ router.get('/inspect/:containerId', continerInspects)
  *       500:
  *         description: Server error
  */
-router.get('/stop/:containerId', stopContainer)
+router.get('/stop/:containerId', verifyContainerOwnership, stopContainer)
 
 /**
  * @swagger
@@ -170,7 +171,7 @@ router.get('/stop/:containerId', stopContainer)
  *         description: Server error
  */
 
-router.get('/getContainerById/:containerId', getcontainerById)
+router.get('/getContainerById/:containerId', verifyContainerOwnership, getcontainerById)
 /**
  * @swagger
  * /container/restart/{containerId}:
@@ -193,7 +194,7 @@ router.get('/getContainerById/:containerId', getcontainerById)
  *       500:
  *         description: Server error
  */
-router.get('/restart/:containerId', restartContainer)
+router.get('/restart/:containerId', verifyContainerOwnership, restartContainer)
 
 /**
  * @swagger
@@ -217,7 +218,7 @@ router.get('/restart/:containerId', restartContainer)
  *       500:
  *         description: Server error
  */
-router.get('/start/:containerId', startContainer)
+router.get('/start/:containerId', verifyContainerOwnership, startContainer)
 
 /**
  * @swagger
@@ -241,7 +242,7 @@ router.get('/start/:containerId', startContainer)
  *       500:
  *         description: Server error
  */
-router.delete('/delete/:containerId', deleteContainer)
+router.delete('/delete/:containerId', verifyContainerOwnership, deleteContainer)
 
 /**
  * @swagger
@@ -274,7 +275,7 @@ router.delete('/delete/:containerId', deleteContainer)
  *       500:
  *         description: Server error
  */
-router.get('/stats/:containerId', getContainerCPUandMemoryStats)
+router.get('/stats/:containerId', verifyContainerOwnership, getContainerCPUandMemoryStats)
 
 /**
  * @swagger
@@ -298,7 +299,7 @@ router.get('/stats/:containerId', getContainerCPUandMemoryStats)
  *       500:
  *         description: Server error
  */
-router.get('/details/:containerId', getContainerDetails)
+router.get('/details/:containerId', verifyContainerOwnership, getContainerDetails)
 
 /**
  * @swagger
@@ -329,7 +330,7 @@ router.get('/details/:containerId', getContainerDetails)
  *       500:
  *         description: Server error
  */
-router.get('/templateName/:containerId', getTemplateNameFromContainerId)
+router.get('/templateName/:containerId', verifyContainerOwnership, getTemplateNameFromContainerId)
 
 /**
  * @swagger
@@ -364,6 +365,6 @@ router.get('/templateName/:containerId', getTemplateNameFromContainerId)
  *       500:
  *         description: Server error
  */
-router.put('/edit/:containerId', editContainer)
+router.put('/edit/:containerId', verifyContainerOwnership, editContainer)
 
 exports.containerRouter = router;
