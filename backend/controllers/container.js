@@ -4,7 +4,7 @@ const { getContainerById, getContainerByPort, getContainersByEmail, createNewCon
 const { addContainerHistory } = require('../models/containerHistory');
 const { findUserByEmail, billIncrement, containerUsageIncrement } = require('../models/user');
 const { findTemplateByImage } = require('../models/template');
-const { deletePublic } = require('../models/public');
+const { deletePublic, makeprivate } = require('../models/public');
 const docker = new Docker();
 
 
@@ -152,6 +152,12 @@ const stopContainer = async (req, res) => {
             const amount = hours * template.price + minutes * (template.price / 60) + seconds * (template.price / 3600);
             await billIncrement(user.email, amount);
             await container.stop();
+            // Make container private when stopped
+            try {
+                await makeprivate(contId);
+            } catch (error) {
+                console.error('Error making container private:', error);
+            }
             res.json({
                 status: "stopped"
             });
@@ -265,12 +271,10 @@ const deleteContainer = async (req, res) => {
             await billIncrement(user.email, amount);
         }
 
-        // Delete the public entry associated with this container
         try {
             await deletePublic(contId);
         } catch (publicErr) {
             console.error("Error deleting public entry:", publicErr);
-            // Continue with deletion even if deletePublic fails
         }
 
         await deleteOneContainer(contId);
