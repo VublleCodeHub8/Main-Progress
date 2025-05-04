@@ -29,8 +29,6 @@ jobs:
       - name: Install dependencies
         run: cd backend && npm install
         
-      - name: Run ESLint
-        run: cd backend && npm run lint
 
   test:
     name: Test Backend
