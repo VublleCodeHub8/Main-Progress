@@ -4,8 +4,13 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js"
+    "test": "vitest run",
+    "test:pass": "vitest run basic.test.js validators.test.js utils.test.js integration.test.js",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "start": "nodemon app.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "author": "",
   "license": "ISC",
@@ -37,6 +42,9 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "@vitest/coverage-v8": "^0.34.6",
+    "eslint": "^8.53.0",
+    "nodemon": "^3.1.4",
+    "vitest": "^0.34.6"
   }
 }
