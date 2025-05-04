@@ -31,6 +31,12 @@ const containerSchema = mongoose.Schema({
     startedAt: {
         type: Date,
         default: Date.now
+    },
+    ideUrlPrefix: {
+        type: String
+    },
+    projectUrlPrefix: {
+        type: String
     }
 
 });
@@ -65,6 +71,10 @@ const getContainersByEmail = async (email) => {
 const createNewContainer = async (email, userId, id, name, port, image, secondaryPort) => {
     try {
         const date = new Date().toISOString();
+        // Generate URL prefixes for IDE and project
+        const ideUrlPrefix = `ide-${name}`;
+        const projectUrlPrefix = `project-${name}`;
+        
         const newContainer = new Container({ 
             email: email, 
             userId: userId, 
@@ -75,7 +85,9 @@ const createNewContainer = async (email, userId, id, name, port, image, secondar
             createdAt: date, 
             lastUsed: date, 
             template: image, 
-            startedAt: date 
+            startedAt: date,
+            ideUrlPrefix: ideUrlPrefix,
+            projectUrlPrefix: projectUrlPrefix
         });
         await newContainer.save();
         return true

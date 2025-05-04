@@ -1,31 +1,163 @@
 const Docker = require('dockerode')
 const net = require('net');
-const { getContainerById, getContainerByPort, getContainersByEmail, createNewContainer, deleteOneContainer, setStartedAt } = require('../models/containers')
+const fs = require('fs');
+const path = require('path');
+const { exec } = require('child_process');
+const { getContainerById, getContainerByPort, getContainersByEmail, createNewContainer, deleteOneContainer, setStartedAt, allContainers } = require('../models/containers')
 const { addContainerHistory } = require('../models/containerHistory');
 const { findUserByEmail, billIncrement, containerUsageIncrement } = require('../models/user');
 const { findTemplateByImage } = require('../models/template');
 const { deletePublic, makeprivate } = require('../models/public');
 const docker = new Docker();
 
+// Updates Nginx configuration and writes to a local file
+const updateNginxConfig = async () => {
+    try {
+        console.log('=== Starting Nginx configuration update ===');
+        // Get all containers
+        const containers = await allContainers();
+        console.log(`Found ${containers.length} containers to configure in Nginx`);
+        
+        // Start building Nginx config with the predefined structure
+        console.log('Building Nginx configuration...');
+        let nginxConfig = `
+server {
+	listen 80;
+    server_name www.codeterminus.me codeterminus.me;
+
+    location / {
+        proxy_pass http://localhost:4173;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    location /api/ {
+        proxy_pass http://localhost:3000/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+`;
+
+        // Add container-specific locations
+        containers.forEach(container => {
+            if (container.ideUrlPrefix && container.port) {
+                console.log(`Adding IDE route for container: ${container.name} (${container.ideUrlPrefix} -> port ${container.port})`);
+                nginxConfig += `
+    # IDE for container: ${container.name}
+    location /${container.ideUrlPrefix}/ {
+        proxy_pass http://localhost:${container.port}/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        
+        # Add CORS headers to match backend configuration
+        add_header 'Access-Control-Allow-Origin' '$http_origin' always;
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization, X-CSRF-Token' always;
+    }
+`;
+            }
+            
+            if (container.projectUrlPrefix && container.secondaryPort) {
+                console.log(`Adding Project route for container: ${container.name} (${container.projectUrlPrefix} -> port ${container.secondaryPort})`);
+                nginxConfig += `
+    # Project for container: ${container.name}
+    location /${container.projectUrlPrefix}/ {
+        proxy_pass http://localhost:${container.secondaryPort}/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        
+        # Add CORS headers to match backend configuration
+        add_header 'Access-Control-Allow-Origin' '$http_origin' always;
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization, X-CSRF-Token' always;
+    }
+`;
+            }
+        });
+        
+        // Close server block
+        nginxConfig += `}\n`;
+        
+        // Write config to a file in the project directory where we have permissions
+        const projectConfigPath = path.join(__dirname, '..', 'nginx', 'containers.conf');
+        
+        // Ensure the directory exists
+        const nginxDir = path.dirname(projectConfigPath);
+        if (!fs.existsSync(nginxDir)) {
+            fs.mkdirSync(nginxDir, { recursive: true });
+        }
+        
+        // Write the configuration
+        fs.writeFileSync(projectConfigPath, nginxConfig);
+        console.log(`Nginx configuration written to: ${projectConfigPath}`);
+        console.log('To apply this configuration on your Digital Ocean droplet, run:');
+        console.log(`sudo ./update-nginx.sh`);
+        
+        // For development/testing - attempt to run the update script if possible
+        try {
+            console.log('Attempting to automatically update Nginx configuration...');
+            exec(`sudo /home/yogi/Collage/Sem6/WBD/Main-Progress/update-nginx.sh`, (error, stdout, stderr) => {
+                if (error) {
+                    console.log('Could not automatically update Nginx. Please run the update script manually.');
+                    console.error(`Error: ${error.message}`);
+                    return;
+                }
+                if (stderr) {
+                    console.error(`Error output: ${stderr}`);
+                    return;
+                }
+                console.log(`Nginx update successful: ${stdout}`);
+            });
+        } catch (error) {
+            console.log('Could not automatically update Nginx configuration. Please run the update script manually.');
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Error updating Nginx configuration:', error);
+        return false;
+    }
+};
 
 const createContainer = async (req, res) => {
+    console.log('=== Starting container creation process ===');
     const cont_Name = req.headers['title'];
     const cont_Image = req.headers['template'];
+    console.log(`Container request: Name=${cont_Name}, Image=${cont_Image}`);
+    
     let mainPort;
     let secondaryPort;
     
     // Find two available ports for container exposure using binary search
     try {
+        console.log('Finding available ports...');
         mainPort = await findAvailablePortBinarySearch(5000, 11000);
         secondaryPort = await findAvailablePortBinarySearch(5000, 11000, [mainPort]);
+        console.log(`Selected ports: Main=${mainPort}, Secondary=${secondaryPort}`);
     } catch (error) {
         console.error('Error finding available ports:', error);
     }
 
     if (!mainPort || !secondaryPort) {
+        console.error('Not enough available ports for container creation');
         return res.status(500).json({ error: "Not enough available ports for container creation" });
     }
 
+    console.log('Creating Docker container...');
     const container = await docker.createContainer({
         Image: cont_Image,
         name: `${cont_Name}_${mainPort}`,
@@ -48,7 +180,8 @@ const createContainer = async (req, res) => {
             }
         }
     })
-    // console.log(container);
+    console.log(`Docker container created with ID: ${container.id}`);
+    
     const contName = (await docker.getContainer(container.id).inspect()).Name.substring(1);
     const contId = container.id;
     const contPort = mainPort;
@@ -56,17 +189,33 @@ const createContainer = async (req, res) => {
     const contEmail = req.userData.email;
     const contUserId = req.userData.userId;
 
+    console.log('Saving container to database...');
     const saveRes = await createNewContainer(contEmail, contUserId, contId, contName, contPort, cont_Image, contSecondaryPort);
     if (saveRes) {
         await containerUsageIncrement(contEmail, cont_Image );
+        
+        // Get the container with URL prefixes
+        const containerDoc = await getContainerById(contId);
+        console.log(`Generated URL prefixes: IDE=${containerDoc.ideUrlPrefix}, Project=${containerDoc.projectUrlPrefix}`);
+        
+        // Update Nginx configuration after creating a new container
+        console.log('Updating Nginx configuration...');
+        updateNginxConfig()
+            .then(() => console.log('Nginx configuration updated successfully'))
+            .catch(err => console.error('Failed to update Nginx config:', err));
+        
+        console.log('=== Container creation process completed successfully ===');
         res.json({ 
             containerId: contId, 
             containerName: contName, 
             containerPort: contPort, 
             containerSecondaryPort: contSecondaryPort,
-            containerTemplate: cont_Image 
+            containerTemplate: cont_Image,
+            ideUrlPrefix: containerDoc.ideUrlPrefix,
+            projectUrlPrefix: containerDoc.projectUrlPrefix
         });
     } else {
+        console.error('Failed to save container to database');
         res.status(500);
         res.send();
     }
@@ -180,6 +329,10 @@ const restartContainer = async (req, res) => {
         const containerDetails = await docker.getContainer(contId).inspect();
         if (containerDetails.State.Running) {
             await container.restart();
+            
+            // Update Nginx configuration when container is restarted
+            updateNginxConfig().catch(err => console.error('Failed to update Nginx config:', err));
+            
             res.json({
                 status: "restarted"
             });
@@ -207,6 +360,10 @@ const startContainer = async (req, res) => {
         } else {
             await container.start();
             await setStartedAt(contId);
+            
+            // Update Nginx configuration when container is started
+            updateNginxConfig().catch(err => console.error('Failed to update Nginx config:', err));
+            
             res.json({
                 status: "started"
             });
@@ -278,6 +435,10 @@ const deleteContainer = async (req, res) => {
         }
 
         await deleteOneContainer(contId);
+
+        // Update Nginx configuration after deleting a container
+        updateNginxConfig().catch(err => console.error('Failed to update Nginx config:', err));
+
         res.json({ 
             status: "deleted",
             containerExistedInDocker: containerExists
@@ -288,7 +449,6 @@ const deleteContainer = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 };
-
 
 const getContainerCPUandMemoryStats = async (req, res) => {
     const { containerId } = req.params;
@@ -513,6 +673,9 @@ const editContainer = async (req, res) => {
         updated.name = title;
         await updated.save();
 
+        // Update Nginx configuration after container details are edited
+        updateNginxConfig().catch(err => console.error('Failed to update Nginx config:', err));
+        
         res.json({ 
             status: "success",
             message: "Container updated successfully",
