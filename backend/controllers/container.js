@@ -327,43 +327,85 @@ const getContainerDetails = async (req, res) => {
 
     try {
         const container = docker.getContainer(containerId);
-        const containerDetails = await container.inspect();
-        const stats = await container.stats({ stream: false });
-        // console.log(stats);
-        const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
-        const systemCpuDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
-        const numberCpus = stats.cpu_stats.online_cpus || 1; // Default to 1 if not defined
-        const cpuUsagePercentage = ((cpuDelta / systemCpuDelta) * 100) / numberCpus;
-        const memoryUsage = stats.memory_stats.usage; 
-        const memoryLimit = stats.memory_stats.limit;
-        const memoryUsagePercentage = (memoryUsage / memoryLimit) * 100;
+        const [containerDetails, stats] = await Promise.all([
+            container.inspect().catch(err => {
+                console.error('Error inspecting container:', err);
+                throw new Error('Failed to inspect container');
+            }),
+            container.stats({ stream: false }).catch(err => {
+                console.error('Error getting container stats:', err);
+                throw new Error('Failed to get container stats');
+            })
+        ]);
+
+        // Calculate CPU usage with improved accuracy
+        let cpuUsagePercentage = 0;
+        if (stats.cpu_stats && stats.precpu_stats) {
+            // Get CPU usage delta
+            const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
+            // Get system CPU delta
+            const systemCpuDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
+            // Get number of CPUs
+            const numberCpus = stats.cpu_stats.online_cpus || 1;
+            // Avoid division by zero
+            if (systemCpuDelta > 0 && cpuDelta >= 0) {
+                // Calculate CPU percentage with higher precision
+                cpuUsagePercentage = ((cpuDelta / systemCpuDelta) * numberCpus * 100);
+                // Cap at 100% per core
+                cpuUsagePercentage = Math.min(cpuUsagePercentage, numberCpus * 100);
+            }
+        }
+
+        // Calculate memory usage with improved accuracy
+        let memoryUsage = 0;
+        let memoryLimit = 1;
+        let memoryUsagePercentage = 0;
+        
+        if (stats.memory_stats) {
+            // Account for cache if available for more accurate representation
+            const cache = stats.memory_stats.stats ? (stats.memory_stats.stats.cache || 0) : 0;
+            // Calculate actual memory usage (excluding cache if possible)
+            memoryUsage = stats.memory_stats.usage - cache;
+            memoryLimit = stats.memory_stats.limit || 1; // Avoid division by zero
+            memoryUsagePercentage = (memoryUsage / memoryLimit) * 100;
+        }
+        // Format response with more detailed information
         res.json({
             status: containerDetails.State.Status,
             cpuUsagePercentage: cpuUsagePercentage.toFixed(2) + '%',
             memoryUsagePercentage: memoryUsagePercentage.toFixed(2) + '%',
             memoryUsage: memoryUsage,
+            memoryLimit: memoryLimit,
+            memoryUsageMB: (memoryUsage / (1024 * 1024)).toFixed(2) + ' MB',
+            memoryLimitMB: (memoryLimit / (1024 * 1024)).toFixed(2) + ' MB',
+            containerUptime: containerDetails.State.StartedAt ? formatUptime(new Date(containerDetails.State.StartedAt)) : 'N/A'
         });
     } catch (error) {
         console.error('Error fetching container details:', error);
-        res.status(500).json({ error: 'Unable to fetch container details' });
+        res.status(500).json({ error: 'Unable to fetch container details: ' + error.message });
     }
 }
 
-
-
-// const listAllTemplates=async (req,res) => {
-//     try{
-//         const userEmail=req.userData.email;
-//         const containers = await getContainersByEmail(userEmail);
-//         console.log(containers);
-//         res.json(containers);
-//         }catch(err){
-//             console.log(err);
-//             res.status(500);
-//             res.send();
-//         }
-// }
-
+// Helper function to format container uptime in a readable format
+function formatUptime(startTime) {
+    const now = new Date();
+    const uptimeMs = now - startTime;
+    
+    const seconds = Math.floor(uptimeMs / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    if (days > 0) {
+        return `${days}d ${hours % 24}h ${minutes % 60}m`;
+    } else if (hours > 0) {
+        return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
+    } else if (minutes > 0) {
+        return `${minutes}m ${seconds % 60}s`;
+    } else {
+        return `${seconds}s`;
+    }
+}
 
 async function isPortAvailable(port) {
     return new Promise((resolve) => {
@@ -540,11 +582,20 @@ const getContainerRuntime = async (req, res) => {
 const getTemplateNameFromContainerId = async (req, res) => {
     try {
         const contId = req.params.containerId;
+        if (!contId) {
+            return res.status(400).json({ error: "Container ID is required" });
+        }
         const container = await getContainerById(contId);
         if (!container) {
             return res.status(404).json({ error: "Container not found" });
         }
+        if (!container.template) {
+            return res.status(404).json({ error: "Container has no associated template" });
+        }
         const template = await findTemplateByImage(container.template);
+        if (!template) {
+            return res.status(404).json({ error: "Template not found for this container" });
+        }
         res.json({ templateName: template.name });
     } catch (err) {
         console.error('Error getting template name:', err);

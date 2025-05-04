@@ -46,13 +46,9 @@ const getContainerByPort = async (port) => {
 }
 
 const getContainerById = async (id) => {
-    const status = await Container.exists({ id: id })
-    if (status) {
-        const container = await Container.findOne({ id: id });
-        return container;
-    } else {
-        return null;
-    }
+    // Replacing two sequential queries with a single query
+    // This directly returns the container or null if not found
+    return await Container.findOne({ id: id });
 }
 
 const getContainersByEmail = async (email) => {

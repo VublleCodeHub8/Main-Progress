@@ -34,14 +34,9 @@ async function findTemplateByName(name) {
 
 async function findTemplateByImage(image) {
     try {
-        const res = await Template.exists({ image: image });
-        if (res) {
-            const doc = await Template.findById(res);
-            return doc;
-        }
-        return null;
+        return await Template.findOne({ image: image });
     } catch (err) {
-        console.log(err);
+        console.error('Error finding template by image:', err);
         return null;
     }
 }
