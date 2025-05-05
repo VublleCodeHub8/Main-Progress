@@ -32,8 +32,19 @@ const containerSchema = mongoose.Schema({
         type: Date,
         default: Date.now
     }
-
 });
+
+// Add indexes for optimizing container queries
+// 1. ID index - unique container identifier used in multiple queries
+containerSchema.index({ id: 1 }, { unique: true, name: 'container_id_index' });
+// 2. Port index - frequently used for container lookups
+containerSchema.index({ port: 1 }, { unique: true, name: 'port_index' });
+// 3. Email index - for finding all containers by user email
+containerSchema.index({ email: 1 }, { name: 'email_index' });
+// 4. Name index - for searching containers by name
+containerSchema.index({ name: 1 }, { name: 'name_index' });
+// 5. Compound index for template-based and user container management
+containerSchema.index({ template: 1, email: 1 }, { name: 'template_email_index' });
 
 const getContainerByPort = async (port) => {
     const status = await Container.exists({ port: port })
@@ -112,11 +123,7 @@ const setStartedAt = async (id) => {
     }
 }
 
-
-
-
 const Container = mongoose.model('Container', containerSchema);
-
 
 exports.containerModel = Container;
 exports.getContainerById = getContainerById;

@@ -1,0 +1,8 @@
+Team members :
+
+Adarsh Singh        - S20220010004  (user Dashboard : frontend , backend , analytics (billing management) , CI/CD pipeline , unit test cases, )
+Himanshu Saraswat   - S20220010082  (admin Dashboard, developer dashbaord, IDE page , redis caching, deployement,database indexing & query optimization)
+Amulya Jain         - S20220010015  (user authentication sevice, IDE terminal layout , file and folder structure)
+Aditya Pal          - S20220010006  (user profile page forntend / backend, landing page , solr implementation, )
+Adda Saranya        - S20220010005  (bug report page frontend / backend (bug report management), documentation page)
+Pendlimarri Manvith - S20220010169  (contact us page frontend / backend, and notification bar)
