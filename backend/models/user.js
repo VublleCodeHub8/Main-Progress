@@ -103,6 +103,14 @@ const userSchema = mongoose.Schema({
     }
 })
 
+// Add indexes for frequently queried fields
+// 1. Email index - unique constraint for email lookups (main identifier for users)
+userSchema.index({ email: 1 }, { unique: true, name: 'email_index' });
+// 2. Username index - for username searches
+userSchema.index({ username: 1 }, { name: 'username_index' });
+// 3. Compound index for role-based user management
+userSchema.index({ role: 1, email: 1 }, { name: 'role_email_index' });
+
 async function findUserByEmail(email) {
     const res = await User.exists({ email: email });
     if (res) {

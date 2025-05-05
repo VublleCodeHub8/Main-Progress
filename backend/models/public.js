@@ -31,6 +31,12 @@ const publicModel = new mongoose.Schema({
     }
 });
 
+// Adding indexes for common search and lookup operations
+// 1. Title index for frontend search with text capabilities
+publicModel.index({ title: 'text' }, { name: 'title_text_index' });
+// 2. ContainerId index for frequent lookups in multiple functions
+publicModel.index({ containerId: 1 }, { name: 'containerId_index' });
+
 const Public = mongoose.model('Public', publicModel);
 
 const createPublish = async (title, owner, description, port, containerId) => {
