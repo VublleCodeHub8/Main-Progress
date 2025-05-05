@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { signUp, signIn, signOut, logIn, changePass } = require('../controllers/auth');
+const { signUp, signIn, signOut, logIn, changePass, sendOtp } = require('../controllers/auth');
 
 /**
  * @swagger
@@ -168,5 +168,7 @@ router.get('/login', logIn)
  *         description: Server error
  */
 router.post('/changepass', changePass);
+
+router.post('/send-otp', sendOtp);
 
 exports.authRouter = router;

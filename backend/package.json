@@ -29,12 +29,14 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "node-pty": "^1.0.0",
+    "nodemailer": "^7.0.2",
     "react-query": "^3.39.3",
     "rotating-file-stream": "^3.2.6",
     "socket.io": "^4.8.0",
     "strip-ansi": "^7.1.0",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"
