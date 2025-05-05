@@ -12,7 +12,7 @@ vi.mock('mongoose', async () => {
 });
 
 // take from env
-vi.stubEnv('CONNECTION_STR', 'mongodb+srv://amulyajain123:keIKxE6nIKwGzyt8@cluster0.sqnga.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
+vi.stubEnv('CONNECTION_STR');
 
 describe('Database Connection', () => {
   beforeEach(() => {
@@ -33,7 +33,7 @@ describe('Database Connection', () => {
 
     // Assert that mongoose.connect was called with the correct connection string
     expect(mongoose.connect).toHaveBeenCalledTimes(1);
-    expect(mongoose.connect).toHaveBeenCalledWith('mongodb+srv://amulyajain123:keIKxE6nIKwGzyt8@cluster0.sqnga.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
+    expect(mongoose.connect).toHaveBeenCalledWith('mongodb+srv://');
   });
 
   it('should throw an error if connection fails', async () => {
