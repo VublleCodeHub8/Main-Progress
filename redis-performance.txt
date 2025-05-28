@@ -1,0 +1,7 @@
+/getAllUsers, 752ms, 135ms
+/getAllAut, 844ms, 167ms
+/getAllContainerHistory, 960ms, 133ms
+/getAllContactUs, 1080ms, 125ms
+/getAllTemplates, 1130ms, 136ms
+/getUserTemplates, 1280ms, 150ms
+/getprofiledata, 3740ms, 199ms

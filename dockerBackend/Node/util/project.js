@@ -6,6 +6,10 @@ const getFileStruct = async function getFileStructure(dir) {
     async function solver(curPathname, currArr, level) {
         const files = await fs.readdir(curPathname);
         for (let i of files) {
+            // Skip node_modules directories to reduce socket load
+            if (i === 'node_modules') {
+                continue;
+            }
             const newPathname = path.join(curPathname, i);
             const stats = await fs.stat(newPathname);
             const fullPath = path.resolve(newPathname);
