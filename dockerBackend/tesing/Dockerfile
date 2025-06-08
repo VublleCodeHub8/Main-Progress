@@ -17,7 +17,7 @@ COPY /user /user
 RUN cd /server && npm install
 
 # Add a startup script to set inotify limit
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# COPY entrypoint.sh /entrypoint.sh
+# RUN chmod +x /entrypoint.sh
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["node", "/server/index.js"]
