@@ -11,6 +11,7 @@ COPY package.json /server/package.json
 COPY index.js /server/index.js
 COPY /util /server/util
 COPY /public /server/public
+COPY .env /server/.env
 COPY /user /user
 
 RUN cd /server && npm install

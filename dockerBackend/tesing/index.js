@@ -15,6 +15,7 @@ const bodyParser = require('body-parser');
 const server = http.createServer(app)
 
 const { getFileStruct } = require('./util/project')
+const { runSmartAgent } = require('./util/smartAgent')
 const FILE_ROOT = '../user'
 
 app.use(bodyParser.json())
@@ -41,6 +42,31 @@ app.post('/project/file', (req, res) => {
     })
 
 })
+
+// Endpoint to interact with the smart agent
+app.post('/agent/query', async (req, res) => {
+    const { initialUserQuery } = req.body;
+
+    if (!initialUserQuery) {
+        return res.status(400).json({ error: 'initialUserQuery is required in the request body.' });
+    }
+
+    try {
+        console.log(`[Agent Query] Received query: ${initialUserQuery}`);
+        const agentResult = await runSmartAgent(initialUserQuery);
+
+        if (agentResult && typeof agentResult === 'object' && agentResult.error) {
+            console.error('[Agent Query] Error from smart agent:', agentResult.error);
+            return res.status(500).json({ error: 'Agent processing failed.', details: agentResult.error });
+        }
+
+        console.log('[Agent Query] Success. Sending agent response.');
+        res.json(agentResult);
+    } catch (error) {
+        console.error('[Agent Query] Unexpected error:', error);
+        res.status(500).json({ error: 'An unexpected error occurred while processing your query.' });
+    }
+});
 
 app.post('/project/file/create', async (req, res) => {
     const data = req.body;
