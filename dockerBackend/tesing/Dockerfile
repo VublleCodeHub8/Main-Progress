@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-WORKDIR /app
+WORKDIR /user
 
 RUN apt-get update && \
     apt-get install -y gcc g++ make nodejs npm lsof procps && \
@@ -17,7 +17,7 @@ COPY /user /user
 RUN cd /server && npm install
 
 # Add a startup script to set inotify limit
-# COPY entrypoint.sh /entrypoint.sh
-# RUN chmod +x /entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-ENTRYPOINT ["node", "/server/index.js"]
+ENTRYPOINT ["/entrypoint.sh"]
