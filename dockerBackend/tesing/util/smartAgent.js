@@ -6,7 +6,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 dotenv.config();
 
-const API_KEY = "AIzaSyCx9GoXpPBIuQmRuQkCIbSAu5RdDy-KwW4";
+const API_KEY = "AIzaSyAOB6qAsJqKQc84gnt2cCTAH6-ii9elB48";
 
 if (!API_KEY) {
   console.error("API_KEY not found. Please set it in your environment variables.");
