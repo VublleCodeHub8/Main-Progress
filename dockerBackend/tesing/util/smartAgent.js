@@ -158,7 +158,7 @@ async function agentConversationInternal(initialUserQuery) { // Renamed and adde
     // Removed hardcoded initialUserQuery
 
     // Note: SYSTEM_PROMPT and TOOLS_MAP are already defined globally in this file.
-    initialUserQuery = "first go inside the user folder and then " + initialUserQuery;
+    // initialUserQuery = "first go inside the user folder and then " + initialUserQuery;
     let conversationHistory = [
         {
             role: "user",
