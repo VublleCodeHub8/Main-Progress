@@ -2,10 +2,10 @@
   <img src="https://img.shields.io/badge/-%F0%9F%9A%80%20TERMINAS%20IDE-000000?style=for-the-badge&logoColor=white" alt="Terminas Banner" />
 </p>
 
-<h1 align="center">🌐 Online IDE (Terminas)</h1>
+<h1 align="center">🌐 Terminas - Cloud-Based Development Environment</h1>
 
 <p align="center">
-  <em>The next generation cloud development environment</em>
+  <em>A powerful online IDE that brings containerized development environments to your browser</em>
 </p>
 
 <p align="center">
@@ -25,321 +25,507 @@
 
 <p align="center">
   <b>🔥 Code Anywhere</b> &nbsp;•&nbsp;
-  <b>🚀 Deploy Instantly</b> &nbsp;•&nbsp;
-  <b>🤝 Collaborate Seamlessly</b>
+  <b>🐳 Instant Containers</b> &nbsp;•&nbsp;
+  <b>📊 Real-time Analytics</b>
 </p>
 
 <p align="center">
+  <a href="#-what-is-terminas">About</a> •
+  <a href="#-key-features">Features</a> •
   <a href="#-quick-start">Getting Started</a> •
-  <a href="#-features">Features</a> •
-  <a href="docs/">Documentation</a> •
-  <a href="CONTRIBUTING.md">Contributing</a>
+  <a href="#-how-it-works">How It Works</a>
 </p>
 
 <hr>
 
-## ⚡ Overview
+## 🎯 What is Terminas?
 
-Terminas is a powerful online IDE that revolutionizes the way developers work with containerized environments. Built with modern technologies, it offers:
+**Terminas** is a web-based Integrated Development Environment (IDE) that allows developers to write, run, and test code directly in their browser without installing anything locally. Think of it as having a complete development machine accessible from anywhere with an internet connection.
 
-## 📚 API Documentation
+### 💡 The Problem It Solves
 
-The project includes comprehensive API documentation using Swagger/OpenAPI:
+- **No Setup Hassles**: Skip the "works on my machine" problem - everyone gets the same environment
+- **Instant Access**: Start coding in seconds, not hours of setup time
+- **Resource Efficient**: Run heavy development environments without taxing your local machine
+- **Collaboration Made Easy**: Share your exact development environment with teammates
+- **Multi-Language Support**: Switch between Python, Node.js, C/C++, and more without configuration
 
-- **Access**: Visit `/api-docs` endpoint after starting the server 
-- **Features**:
-  - Interactive API testing interface
-  - Detailed endpoint descriptions
-  - Request/response schemas
-  - Authentication requirements
-- **Endpoints Categories**:
-  - 🔐 Authentication (signup, signin, etc.)
-  - 👤 User Management
-  - 🐳 Container Operations
-  - 👨‍💼 Admin Controls
+### 🎓 Perfect For
 
-All API endpoints are secured with JWT authentication and proper error handling.
+| User Type | Use Case |
+|-----------|----------|
+| 👨‍🎓 **Students** | Learn programming without complex setup, access labs from anywhere |
+| 👨‍💻 **Developers** | Quickly test code in isolated environments, collaborate with teams |
+| 👨‍🏫 **Educators** | Provide consistent environments for all students, track progress |
+| 🏢 **Teams** | Standardize development environments, onboard new members faster |
 
-<div align="center">
+---
+
+## 🌟 Key Features
+
+### 🔥 Core Functionality
+
 <table>
 <tr>
-<td align="center" width="50%">
+<td width="50%">
 
-### 🎯 Key Highlights
+#### 🐳 **Container Management**
+- Create isolated development environments in seconds
+- Pre-configured templates for Python, Node.js, GCC, and Ubuntu
+- Real-time terminal access with full shell capabilities
+- Automatic cleanup and resource management
 
-<p align="left">
-  
-- 🔥 **Real-time collaboration** with zero latency
-- 🐳 **Instant containers** with auto-scaling
-- 🎨 **Custom workspaces** with themes
-- 🔒 **Enterprise security** with SSO
-- 🚀 **One-click deployment** to any cloud
-
-</p>
+#### 🔐 **User Authentication & Roles**
+- Secure JWT-based authentication
+- Three-tier role system: User, Developer, Admin
+- Profile management with customizable settings
+- Password reset with OTP verification
 
 </td>
-<td align="center" width="50%">
+<td width="50%">
 
-### 💡 Perfect for
+#### 📊 **Analytics & Monitoring**
+- Real-time container usage statistics
+- User activity tracking and insights
+- Resource consumption monitoring
+- Visual charts and graphs for data analysis
 
-<p align="left">
-
-- 👥 **Teams**
-  - Real-time collaboration
-  - Shared environments
-- 🎓 **Education**
-  - Virtual classrooms
-  - Assignment tracking
-- 🏢 **Enterprise**
-  - Custom deployment
-  - Advanced security
-
-</p>
+#### 🎨 **Template System**
+- Pre-built environments for popular languages
+- Custom template creation and sharing
+- Template versioning and management
+- Quick-start configurations
 
 </td>
 </tr>
 </table>
-</div>
+
+### ✨ Advanced Features
+
+<table>
+<tr>
+<td width="50%">
+
+#### 👥 **Collaboration Tools**
+- Share containers with team members
+- Public project showcase
+- Container history tracking
+- Activity logs and audit trails
+
+#### 🔔 **Notification System**
+- Real-time updates on container status
+- System announcements
+- Developer notifications
+- Email integration
+
+</td>
+<td width="50%">
+
+#### 🛠️ **Developer Tools**
+- Integrated code editor with syntax highlighting
+- Terminal emulator with full shell access
+- File management system
+- Bug reporting and feedback system
+
+#### 🎯 **Admin Dashboard**
+- User management and role assignment
+- Template approval and moderation
+- System analytics and insights
+- Bug report management
+- Contact form submissions
+
+</td>
+</tr>
+</table>
+
+---
 
 ## 🚀 Quick Start
 
 ### 📦 Prerequisites
 
-<table>
-<tr>
-<td width="60%">
+Before you begin, ensure you have the following installed:
 
-Make sure you have these essential tools installed:
+| Tool | Version | Download Link |
+|:-----|:--------|:--------------|
+| **Node.js** | v16 or higher | [nodejs.org](https://nodejs.org/) |
+| **Docker** | Latest stable | [docker.com](https://www.docker.com/get-started) |
+| **Git** | Latest | [git-scm.com](https://git-scm.com/downloads) |
+| **MongoDB** | 4.0+ | [mongodb.com](https://www.mongodb.com/try/download/community) |
 
-| Tool | Version | Purpose |
-|:-----|:--------|:---------|
-| [Node.js](https://nodejs.org/) | v16+ | Runtime Environment |
-| [Docker](https://www.docker.com/get-started) | Latest | Containerization |
-| [Git](https://git-scm.com/downloads) | Latest | Version Control |
-| [npm](https://www.npmjs.com/) | Latest | Package Manager |
+**System Requirements:**
+- CPU: 2+ cores
+- RAM: 4GB minimum (8GB recommended)
+- Storage: 2GB free space
+- OS: Linux, macOS, or Windows with WSL2
 
-</td>
-<td width="40%">
-
-### 📊 System Requirements
-
-- **CPU**: 2+ cores
-- **RAM**: 4GB minimum
-- **Storage**: 1GB free space
-- **OS**: Linux/macOS/Windows
-- **Network**: Broadband connection
-
-</td>
-</tr>
-</table>
-
-### 🔄 Installation & Setup
+### 🔄 Installation Steps
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/VublleCodeHub8/Main-Progress.git
 cd Main-Progress
 
-# 2. Frontend setup
-cd frontend
-npm install
-npm run dev    # 🌐 http://localhost:5173
+# 2. Set up Redis (for caching)
+docker run -d --name redis-stack -p 6380:6379 -p 8001:8001 redis/redis-stack:latest
 
 # 3. Backend setup
-cd ../backend
+cd backend
 npm install
-npm run start  # 🔌 http://localhost:3000
+
+# Create .env file with your configuration
+# See backend/.env.example for required variables
+
+npm run start  # Server runs on http://localhost:3000
+
+# 4. Frontend setup (in a new terminal)
+cd ../frontend
+npm install
+npm run dev    # App runs on http://localhost:5173
 ```
+
+### 🔑 Environment Configuration
+
+Create a `.env` file in the `backend` directory:
+
+```env
+# Database
+MONGODB_URI=mongodb://localhost:27017/terminas
+
+# JWT Secret
+JWT_SECRET=your_secret_key_here
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6380
+
+# Email (for OTP)
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_app_password
+```
+
+### ✅ Verify Installation
+
+1. Open http://localhost:5173 in your browser
+2. Create a new account
+3. Log in and create your first container
+4. Access the terminal and run a command
+
+---
+
+## 🏗️ How It Works
+
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         User Browser                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │   React UI   │  │   Terminal   │  │  Code Editor │      │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘      │
+│         │                  │                  │              │
+└─────────┼──────────────────┼──────────────────┼──────────────┘
+          │                  │                  │
+          ▼                  ▼                  ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    Express.js Backend                        │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
+│  │   REST   │  │ Socket.IO│  │   Auth   │  │  Redis   │   │
+│  │   API    │  │  Server  │  │   JWT    │  │  Cache   │   │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘   │
+└───────┼─────────────┼─────────────┼─────────────┼──────────┘
+        │             │             │             │
+        ▼             ▼             ▼             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    Docker Engine                             │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
+│  │  Python  │  │  Node.js │  │   GCC    │  │  Ubuntu  │   │
+│  │Container │  │Container │  │Container │  │Container │   │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+                    ┌──────────────┐
+                    │   MongoDB    │
+                    │   Database   │
+                    └──────────────┘
+```
+
+### 🔄 Workflow
+
+1. **User Authentication**: Users sign up/login with JWT-based authentication
+2. **Container Creation**: Select a template (Python, Node.js, etc.) and create a container
+3. **Real-time Terminal**: Connect to the container via WebSocket for interactive shell access
+4. **Code Execution**: Write and run code directly in the containerized environment
+5. **Resource Management**: Containers are automatically managed and cleaned up
+6. **Data Persistence**: User data, container history, and analytics stored in MongoDB
+
+---
 
 ## 🛠️ Technology Stack
 
-<table>
-<tr>
-<td width="33%">
-<h3 align="center">🎨 Frontend</h3>
+### Frontend
+- **React 18** - Modern UI library
+- **Redux Toolkit** - State management
+- **React Router 6** - Navigation
+- **Tailwind CSS** - Styling
+- **Framer Motion** - Animations
+- **Xterm.js** - Terminal emulator
+- **Ace Editor** - Code editor
+- **Socket.IO Client** - Real-time communication
+- **Axios** - HTTP client
 
-- ⚛️ React.js
-- 🎨 Tailwind CSS
-- 🎬 Framer Motion
-- 📊 Redux Toolkit
-- 🔄 React Router 6
-</td>
-<td width="33%">
-<h3 align="center">⚙️ Backend</h3>
+### Backend
+- **Node.js & Express** - Server framework
+- **MongoDB & Mongoose** - Database
+- **Dockerode** - Docker API integration
+- **Socket.IO** - WebSocket server
+- **JWT** - Authentication
+- **Redis (ioredis)** - Caching layer
+- **Bcrypt** - Password hashing
+- **Nodemailer** - Email service
+- **Swagger** - API documentation
+- **Morgan** - Request logging
 
-- 🟢 Node.js
-- 🚂 Express.js
-- 🐳 Docker API
-- 🔑 JWT Auth
-- 📦 Socket.IO
-- 🚀 Redis Cache
-</td>
-<td width="33%">
-<h3 align="center">🔧 DevOps</h3>
+### DevOps & Infrastructure
+- **Docker** - Containerization
+- **Redis Stack** - Caching and data structures
+- **PM2** - Process management
+- **GitHub Actions** - CI/CD (optional)
 
-- 📦 Docker
-- 🔄 GitHub Actions
-- 🚀 PM2
-- 📊 Prometheus
-- 🔍 ELK Stack
-</td>
-</tr>
-</table>
-
-## 🗄️ Redis Cache Setup
-
-```bash
-# Start Redis Stack (includes Redis + RedisInsight)
-docker run -d --name redis-stack -p 6380:6379 -p 8001:8001 redis/redis-stack:latest
-
-# If container stops, restart it
-docker start redis-stack
-
-# To view Redis logs
-docker logs redis-stack
-
-# Access RedisInsight dashboard
-# Open http://localhost:8001 in your browser
-```
-
-## 🌟 Features
-
-<table>
-<tr>
-<td width="50%">
-
-### 🔥 Core Features
-
-| Feature | Description |
-|---------|-------------|
-| 🔐 Authentication | Secure OAuth & JWT based auth |
-| 🐳 Containers | Instant container deployment |
-| 📝 Templates | Pre-configured environments |
-| 📊 Monitoring | Real-time resource tracking |
-
-</td>
-<td width="50%">
-
-### ✨ Advanced Features
-
-| Feature | Description |
-|---------|-------------|
-| 🤝 Collaboration | Real-time pair programming |
-| 🎯 Custom Templates | Save & share environments |
-| 🔄 Auto Scaling | Dynamic resource allocation |
-| 🔍 Search | Full-text code search |
-
-</td>
-</tr>
-</table>
-
-## 🐛 Known Issues & Roadmap
-
-<table>
-<tr>
-<td width="50%">
-
-### 🚧 Current Issues
-
-- ⚠️ Template selection UX
-- ⚠️ Container log consistency
-- ⚠️ UI responsiveness
-- ⚠️ Login page validation
-
-</td>
-<td width="50%">
-
-### 🎯 Coming Soon
-
-- 📱 Mobile responsive design
-- 🌐 Multi-region support
-- 🔒 2FA authentication
-- 🤖 AI code completion
-
-</td>
-</tr>
-</table>
-
-## 🔧 Development Setup
-
-<table>
-<tr>
-<td width="60%">
-
-### 📝 Essential Steps
-
-1. 🐳 Start Docker daemon
-2. 🔌 Check ports 5173 & 3000
-3. 🔒 Configure environment
-4. 📦 Install dependencies
-5. 🚀 Run development servers
-
-</td>
-<td width="40%">
-
-### 🔍 Verification
-
-```bash
-# Check Docker
-docker --version
-
-# Verify ports
-netstat -tuln
-
-# Test setup
-npm test
-```
-
-</td>
-</tr>
-</table>
+---
 
 ## 📂 Project Structure
 
-<pre>
-📦 <b>Main-Progress/</b>
-├── <span title="Frontend"><b>🖥️ frontend/</b></span>
-│   ├── <b>📂 public/</b>           <i>// Static assets</i>
-│   ├── <b>📂 src/</b>
-│   │   ├── <b>🖼️ assets/</b>      <i>// Images and static assets</i>
-│   │   ├── <b>🧩 components/</b>  <i>// Reusable UI components</i>
-│   │   ├── <b>📄 pages/</b>       <i>// Route pages</i>
-│   │   ├── <b>🗃️ store/</b>       <i>// Redux store setup</i>
-│   │   ├── <b>🛠️ utils/</b>       <i>// Utility functions</i>
-│   │   ├── <b>📚 lib/</b>         <i>// Library/helper code</i>
-│   │   ├── <b>🧪 newComp/</b>     <i>// Experimental components</i>
-│   │   ├── <b>📄 App.jsx</b>, ... <i>// Main app files</i>
-│   ├── <b>📄 package.json</b>     <i>// Frontend dependencies</i>
-│   └── ...
+```
+Main-Progress/
 │
-├── <span title="Backend"><b>🗄️ backend/</b></span>
-│   ├── <b>📂 controllers/</b>     <i>// Route controllers</i>
-│   ├── <b>📂 models/</b>          <i>// Data models</i>
-│   ├── <b>📂 routes/</b>          <i>// API routes</i>
-│   ├── <b>📂 middlewares/</b>     <i>// Express middlewares</i>
-│   ├── <b>📂 util/</b>            <i>// Utility modules</i>
-│   ├── <b>📂 public/</b>          <i>// Static/public files</i>
-│   ├── <b>📄 app.js</b>           <i>// Main server entry</i>
-│   ├── <b>📄 swagger.js</b>       <i>// Swagger/OpenAPI setup</i>
-│   ├── <b>📄 redis-server.js</b>  <i>// Redis integration</i>
-│   ├── <b>📄 .env</b>             <i>// Backend environment</i>
-│   └── <b>📄 package.json</b>     <i>// Backend dependencies</i>
+├── frontend/                    # React frontend application
+│   ├── src/
+│   │   ├── components/         # Reusable UI components
+│   │   ├── pages/              # Page components
+│   │   │   ├── admin/         # Admin dashboard pages
+│   │   │   ├── dashboard/     # User dashboard pages
+│   │   │   └── dev/           # Developer tools pages
+│   │   ├── store/             # Redux store configuration
+│   │   ├── utils/             # Utility functions
+│   │   └── App.jsx            # Main app component
+│   └── package.json
 │
-├── <span title="Dockerized Language Environments"><b>🐳 dockerBackend/</b></span>
-│   ├── <b>📂 GCC/</b>             <i>// GCC C/C++ env</i>
-│   ├── <b>📂 Node/</b>            <i>// Node.js env</i>
-│   ├── <b>📂 Python/</b>          <i>// Python env</i>
-│   ├── <b>📂 Ubutnu/</b>          <i>// Ubuntu base env</i>
-│   └── <b>📂 tesing/</b>          <i>// Testing env</i>
+├── backend/                     # Express backend server
+│   ├── controllers/            # Route controllers
+│   ├── models/                 # MongoDB models
+│   │   ├── user.js            # User model
+│   │   ├── containers.js      # Container model
+│   │   ├── template.js        # Template model
+│   │   ├── notification.js    # Notification model
+│   │   └── bugReport.js       # Bug report model
+│   ├── routes/                 # API routes
+│   │   ├── auth.js            # Authentication routes
+│   │   ├── container.js       # Container management
+│   │   ├── user.js            # User operations
+│   │   ├── admin.js           # Admin operations
+│   │   └── dev.js             # Developer operations
+│   ├── middlewares/            # Express middlewares
+│   │   └── auth.js            # Auth middleware (isAuth, isAdmin, isDev)
+│   ├── util/                   # Utility modules
+│   ├── app.js                  # Main server file
+│   ├── swagger.js              # API documentation setup
+│   └── redis-server.js         # Redis configuration
 │
-├── <b>📝 .gitignore</b>           <i>// Git ignore rules</i>
-├── <b>📄 LICENSE</b>              <i>// License info</i>
-├── <b>📄 package.json</b>         <i>// Root dependencies/meta</i>
-├── <b>📄 package-lock.json</b>    <i>// Root lockfile</i>
-└── <b>📄 README.md</b>            <i>// Project documentation</i>
-</pre>
+└── dockerBackend/               # Docker environment configurations
+    ├── GCC/                    # C/C++ development environment
+    ├── Node/                   # Node.js environment
+    ├── Python/                 # Python environment
+    ├── Ubuntu/                 # Base Ubuntu environment
+    └── testing/                # Testing environment
+```
 
-> <b>Tip:</b> Each main folder contains its own <code>package.json</code> and configuration files as needed. See individual folders for more details.
+---
+
+## 📚 API Documentation
+
+Once the backend is running, access the interactive API documentation at:
+
+**http://localhost:3000/api-docs**
+
+### Key API Endpoints
+
+#### Authentication
+- `POST /auth/signup` - Create new account
+- `POST /auth/signin` - Login
+- `POST /auth/send-otp` - Request password reset OTP
+- `POST /auth/changepass` - Reset password
+
+#### Container Management
+- `GET /container/all` - List user's containers
+- `POST /container/create` - Create new container
+- `DELETE /container/:id` - Delete container
+- `GET /container/:id/logs` - Get container logs
+
+#### User Operations
+- `GET /getuser` - Get current user profile
+- `PUT /user/profile` - Update profile
+- `POST /user/addpublic` - Share project publicly
+- `POST /user/addbugreport` - Submit bug report
+- `POST /user/addcontactus` - Contact form submission
+
+#### Admin Operations (Admin only)
+- `GET /admin/users` - List all users
+- `POST /admin/roleChange` - Change user role
+- `POST /admin/addTemplate` - Add new template
+- `GET /admin/bugreports` - View bug reports
+- `GET /admin/analytics` - System analytics
+
+#### Developer Operations (Dev/Admin only)
+- `POST /dev/addNewTemplate` - Create custom template
+- `PUT /dev/updateTemplate` - Update template
+- `POST /dev/notification` - Send notifications
+- `GET /dev/bugreports` - View bug reports
+
+---
+
+## 👥 User Roles
+
+### 🔵 User (Default)
+- Create and manage personal containers
+- Use pre-approved templates
+- Access personal analytics
+- Submit bug reports and feedback
+
+### 🟢 Developer
+- All User permissions
+- Create and manage custom templates
+- Send notifications to users
+- View and manage bug reports
+- Access developer tools
+
+### 🔴 Admin
+- All Developer permissions
+- Manage user accounts and roles
+- Approve/reject templates
+- Access system-wide analytics
+- Manage all bug reports and contact submissions
+- View container history across all users
+
+---
+
+## 🔧 Configuration & Customization
+
+### Adding New Language Environments
+
+1. Create a new directory in `dockerBackend/` (e.g., `dockerBackend/Go/`)
+2. Add a `Dockerfile` with your environment setup
+3. Create a template entry in the database via admin panel
+4. Users can now select this template when creating containers
+
+### Customizing Templates
+
+Templates are stored in MongoDB and can be managed through:
+- Admin panel UI (`/admin/templates`)
+- Developer panel (`/dev` routes)
+- Direct database manipulation
+
+---
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Docker containers not starting:**
+```bash
+# Check Docker is running
+docker ps
+
+# Check Docker permissions
+sudo usermod -aG docker $USER
+```
+
+**Redis connection errors:**
+```bash
+# Restart Redis container
+docker restart redis-stack
+
+# Check Redis is accessible
+docker logs redis-stack
+```
+
+**Port already in use:**
+```bash
+# Find process using port 3000
+lsof -i :3000
+
+# Kill the process
+kill -9 <PID>
+```
+
+**MongoDB connection failed:**
+```bash
+# Ensure MongoDB is running
+sudo systemctl status mongod
+
+# Start MongoDB
+sudo systemctl start mongod
+```
+
+---
+
+## 🎯 Roadmap
+
+### Current Features ✅
+- ✅ User authentication and authorization
+- ✅ Container creation and management
+- ✅ Real-time terminal access
+- ✅ Template system
+- ✅ Admin dashboard
+- ✅ Analytics and monitoring
+- ✅ Bug reporting system
+- ✅ Notification system
+
+### Upcoming Features 🚀
+- 📱 Mobile responsive design
+- 🤝 Real-time collaboration (multiple users in same container)
+- 🔒 Two-factor authentication (2FA)
+- 🌐 Multi-region deployment support
+- 🤖 AI-powered code completion
+- 📦 Container snapshots and restore
+- 🔄 Git integration
+- 📊 Advanced analytics dashboard
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how you can help:
+
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Commit your changes**: `git commit -m 'Add amazing feature'`
+4. **Push to the branch**: `git push origin feature/amazing-feature`
+5. **Open a Pull Request**
+
+### Development Guidelines
+- Follow existing code style
+- Write meaningful commit messages
+- Add comments for complex logic
+- Test your changes thoroughly
+- Update documentation as needed
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- **Docker** for containerization technology
+- **Xterm.js** for the terminal emulator
+- **Socket.IO** for real-time communication
+- **React** and the amazing ecosystem
+- All contributors and users of Terminas
 
 ---
 
@@ -347,9 +533,10 @@ npm test
 
 ### 🌟 Support Terminas
 
-[![Star on GitHub](https://img.shields.io/github/stars/VublleCodeHub8/Main-Progress.svg?style=social)](https://github.com/VublleCodeHub8/Main-Progress/stargazers)
-[![Follow on Twitter](https://img.shields.io/twitter/follow/terminas?style=social)](https://twitter.com/terminas)
+If you find this project helpful, please consider giving it a ⭐️
 
-<sub>Made with ❤️ by Terminas Team</sub>
+[![Star on GitHub](https://img.shields.io/github/stars/VublleCodeHub8/Main-Progress.svg?style=social)](https://github.com/VublleCodeHub8/Main-Progress/stargazers)
+
+**Made with ❤️ for developers, by developers**
 
 </div>
